@@ -1,0 +1,912 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+  <link rel="preconnect" href="https://rsms.me/">
+  <link rel="stylesheet" href="https://rsms.me/inter/inter.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+  <script src="./image-slot.js"></script>
+  <style>
+    *{box-sizing:border-box;}
+    html,body{margin:0;padding:0;}
+    body{background:#fff;}
+    a{text-decoration:none;color:inherit;}
+    ::selection{background:#DCEFE6;color:#006A4E;}
+  </style>
+</helmet>
+
+<div style="font-family:'Inter',system-ui,sans-serif;color:#0A0A0A;background:#fff;min-height:100vh;-webkit-font-smoothing:antialiased;">
+
+  <!-- ============ UTILITY BAR ============ -->
+  <div style="background:#0A3D2C;color:#fff;">
+    <div style="max-width:1240px;margin:0 auto;padding:0 40px;height:36px;display:flex;align-items:center;justify-content:space-between;">
+      <div style="display:flex;align-items:center;gap:8px;font:500 11.5px/1 'Inter';color:rgba(255,255,255,.6);letter-spacing:.03em;">
+        <span style="width:6px;height:6px;border-radius:50%;background:#F42A41;display:inline-block;"></span>
+        <span>{{ L.utilGov }}</span>
+      </div>
+      <div style="display:flex;align-items:center;gap:20px;">
+        <a style="font:500 12px/1 'Inter';color:rgba(255,255,255,.78);cursor:pointer;" style-hover="color:#fff;">{{ L.utilRti }}</a>
+        <a style="font:500 12px/1 'Inter';color:rgba(255,255,255,.78);cursor:pointer;" style-hover="color:#fff;">{{ L.utilSitemap }}</a>
+        <a style="font:500 12px/1 'Inter';color:rgba(255,255,255,.78);cursor:pointer;" style-hover="color:#fff;">{{ L.utilFeedback }}</a>
+        <div style="width:1px;height:16px;background:rgba(255,255,255,.18);"></div>
+        <div style="display:flex;align-items:center;border:1px solid rgba(255,255,255,.28);border-radius:999px;overflow:hidden;">
+          <button onClick="{{ setEn }}" style="{{ enBtnStyle }}">English</button>
+          <button onClick="{{ setBn }}" style="{{ bnBtnStyle }}">বাংলা</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============ MASTHEAD ============ -->
+  <div style="background:#006A4E;color:#fff;border-bottom:3px solid #F42A41;">
+    <div style="max-width:1240px;margin:0 auto;padding:0 40px;height:92px;display:flex;align-items:center;justify-content:space-between;gap:32px;">
+      <div onClick="{{ setHome }}" style="display:flex;align-items:center;gap:16px;cursor:pointer;">
+        <div style="width:54px;height:54px;border-radius:50%;background:#fff;border:2px solid rgba(255,255,255,.55);display:flex;align-items:center;justify-content:center;flex:none;box-shadow:0 2px 8px rgba(0,0,0,.12);">
+          <span style="color:#006A4E;display:inline-flex;">{{ crestIcon }}</span>
+        </div>
+        <div>
+          <div style="font:700 22px/1.05 'Inter';letter-spacing:-0.01em;color:#fff;">{{ L.bankName }}</div>
+          <div style="font:500 11px/1.2 'Inter';letter-spacing:0.12em;text-transform:uppercase;color:rgba(255,255,255,.82);margin-top:4px;">{{ L.centralBank }}</div>
+        </div>
+      </div>
+      <div style="display:flex;align-items:center;gap:12px;background:rgba(255,255,255,.16);border:1px solid rgba(255,255,255,.4);border-radius:999px;padding:9px 18px;width:300px;max-width:34vw;">
+        <span style="color:rgba(255,255,255,.85);display:inline-flex;flex:none;">{{ searchIcon }}</span>
+        <input placeholder="{{ L.searchPh }}" style="background:transparent;border:none;outline:none;color:#fff;font:400 14px 'Inter';width:100%;" />
+      </div>
+    </div>
+  </div>
+
+  <!-- ============ PRIMARY NAV ============ -->
+  <nav style="background:#fff;border-bottom:1px solid #E0E4E8;position:sticky;top:0;z-index:50;box-shadow:0 1px 2px rgba(10,10,10,.03);">
+    <div style="max-width:1240px;margin:0 auto;padding:0 40px;display:flex;align-items:stretch;gap:2px;">
+      <sc-for list="{{ nav }}" as="item" hint-placeholder-count="8">
+        <button onClick="{{ item.onClick }}" style="background:none;border:none;cursor:pointer;font-family:'Inter',sans-serif;font-size:14px;font-weight:600;padding:15px 14px;color:{{ item.color }};border-bottom:3px solid {{ item.underline }};margin-bottom:-1px;transition:color .15s ease;" style-hover="color:#006A4E;">{{ item.label }}</button>
+      </sc-for>
+    </div>
+  </nav>
+
+  <!-- ============ NOTICE TICKER ============ -->
+  <div style="background:#FFF8E1;border-bottom:1px solid #F2E2A8;">
+    <div style="max-width:1240px;margin:0 auto;padding:9px 40px;display:flex;align-items:center;gap:16px;">
+      <span style="background:#F42A41;color:#fff;font:600 10px/1 'Inter';letter-spacing:0.07em;text-transform:uppercase;padding:5px 10px;border-radius:999px;flex:none;">{{ L.noticeTag }}</span>
+      <span style="font:500 13px/1.4 'Inter';color:#7A5A00;flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">{{ L.notice }}</span>
+      <a style="font:600 12.5px/1 'Inter';color:#006A4E;display:inline-flex;align-items:center;gap:5px;white-space:nowrap;flex:none;cursor:pointer;" style-hover="color:#F42A41;">{{ L.viewAll }}<span style="display:inline-flex;">{{ chevIcon }}</span></a>
+    </div>
+  </div>
+
+  <!-- ============================================================ HOME VIEW ============================================================ -->
+  <sc-if value="{{ isHome }}" hint-placeholder-val="{{ true }}">
+  <main style="background:#F4F6F8;">
+    <div style="max-width:1240px;margin:0 auto;padding:20px 40px 0;">
+
+      <!-- ---- MARKET DATA ROW (4 cards) ---- -->
+      <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:16px;margin-bottom:24px;align-items:stretch;">
+        <sc-for list="{{ marketCards }}" as="m" hint-placeholder-count="3">
+          <div style="background:#fff;border:1px solid #E0E4E8;border-top:3px solid #006A4E;border-radius:12px;padding:18px 20px;display:flex;flex-direction:column;">
+            <div style="font:600 11px/1.3 'Inter';letter-spacing:0.05em;text-transform:uppercase;color:#4A4A4A;">{{ m.label }}</div>
+            <div style="font:400 11.5px/1.3 'JetBrains Mono';color:#9aa39e;margin:5px 0 12px;">{{ m.date }}</div>
+            <sc-if value="{{ m.single }}" hint-placeholder-val="{{ true }}">
+              <div style="font:700 28px/1 'JetBrains Mono';color:#006A4E;font-variant-numeric:tabular-nums slashed-zero;">{{ m.value }}</div>
+            </sc-if>
+            <sc-if value="{{ m.dual }}" hint-placeholder-val="{{ true }}">
+              <div style="display:flex;gap:20px;border-top:1px solid #EDF0F3;padding-top:12px;">
+                <div>
+                  <div style="font:500 10px/1 'Inter';text-transform:uppercase;letter-spacing:.04em;color:#9aa39e;margin-bottom:5px;">{{ m.aLabel }}</div>
+                  <div style="font:700 20px/1 'JetBrains Mono';color:#006A4E;font-variant-numeric:tabular-nums;">{{ m.aVal }}</div>
+                </div>
+                <div>
+                  <div style="font:500 10px/1 'Inter';text-transform:uppercase;letter-spacing:.04em;color:#9aa39e;margin-bottom:5px;">{{ m.bLabel }}</div>
+                  <div style="font:700 20px/1 'JetBrains Mono';color:#006A4E;font-variant-numeric:tabular-nums;">{{ m.bVal }}</div>
+                </div>
+              </div>
+            </sc-if>
+            <a style="font:600 12.5px/1 'Inter';color:#006A4E;display:inline-flex;align-items:center;gap:5px;margin-top:auto;padding-top:14px;cursor:pointer;" style-hover="color:#F42A41;">{{ m.link }}<span style="display:inline-flex;">{{ arrowIcon }}</span></a>
+          </div>
+        </sc-for>
+
+        <!-- upcoming auctions card -->
+        <div style="background:#fff;border:1px solid #E0E4E8;border-top:3px solid #006A4E;border-radius:12px;padding:18px 20px;display:flex;flex-direction:column;">
+          <div style="font:600 11px/1.3 'Inter';letter-spacing:0.05em;text-transform:uppercase;color:#4A4A4A;">{{ L.auctionTitle }}</div>
+          <div style="font:400 11.5px/1.3 'JetBrains Mono';color:#9aa39e;margin:5px 0 12px;">{{ L.auctionNote }}</div>
+          <div style="display:flex;gap:8px;">
+            <sc-for list="{{ auctions }}" as="a" hint-placeholder-count="2">
+              <div style="flex:1;background:#E4F1EC;border:1px solid #C5E0D6;border-radius:8px;padding:9px 6px;text-align:center;">
+                <div style="font:700 9px/1 'Inter';letter-spacing:.06em;text-transform:uppercase;color:#006A4E;">{{ a.type }}</div>
+                <div style="font:800 22px/1.1 'JetBrains Mono';color:#0A3D2C;margin:4px 0 1px;">{{ a.day }}</div>
+                <div style="font:400 10px/1 'JetBrains Mono';color:#4A4A4A;">{{ a.month }}</div>
+              </div>
+            </sc-for>
+          </div>
+          <a style="font:600 12.5px/1 'Inter';color:#006A4E;display:inline-flex;align-items:center;gap:5px;margin-top:auto;padding-top:14px;cursor:pointer;" style-hover="color:#F42A41;">{{ L.auctionCal }}<span style="display:inline-flex;">{{ arrowIcon }}</span></a>
+        </div>
+      </div>
+
+      <!-- ---- NEWS + RATE PANELS ---- -->
+      <div style="display:grid;grid-template-columns:minmax(0,2fr) minmax(0,1fr);gap:16px;margin-bottom:16px;align-items:start;">
+
+        <!-- news -->
+        <div style="background:#fff;border:1px solid #E0E4E8;border-radius:12px;overflow:hidden;">
+          <div style="background:#006A4E;color:#fff;padding:13px 20px;display:flex;align-items:center;justify-content:space-between;">
+            <div style="font:600 13px/1 'Inter';letter-spacing:0.06em;text-transform:uppercase;">{{ L.newsTitle }}</div>
+            <a style="font:500 12px/1 'Inter';color:rgba(255,255,255,.85);display:inline-flex;align-items:center;gap:5px;cursor:pointer;" style-hover="color:#fff;">{{ L.viewAll }}<span style="display:inline-flex;">{{ chevIcon }}</span></a>
+          </div>
+          <div>
+            <sc-for list="{{ news }}" as="n" hint-placeholder-count="10">
+              <a style="display:flex;align-items:flex-start;gap:11px;padding:12px 20px;border-bottom:1px solid #EDF0F3;cursor:pointer;transition:background .12s;" style-hover="background:#F7FAF8;">
+                <span style="width:5px;height:5px;border-radius:50%;background:#006A4E;flex:none;margin-top:7px;"></span>
+                <span style="font:400 13.5px/1.45 'Inter';color:#1a1a1a;">{{ n.text }}<sc-if value="{{ n.isNew }}" hint-placeholder-val="{{ true }}"><span style="background:#F42A41;color:#fff;font:700 9px/1 'Inter';letter-spacing:.04em;padding:2px 5px;border-radius:3px;margin-left:7px;vertical-align:middle;">{{ L.newBadge }}</span></sc-if></span>
+              </a>
+            </sc-for>
+          </div>
+        </div>
+
+        <!-- rate panels -->
+        <div style="display:flex;flex-direction:column;gap:20px;">
+
+          <!-- policy rates -->
+          <div style="background:#fff;border:1px solid #E0E4E8;border-radius:12px;overflow:hidden;">
+            <div style="background:#0A3D2C;color:#fff;padding:11px 16px;font:600 12px/1 'Inter';letter-spacing:0.05em;text-transform:uppercase;display:flex;align-items:center;gap:8px;">
+              <span style="display:inline-flex;opacity:.9;">{{ trendIcon }}</span>{{ L.policyRatesTitle }}
+            </div>
+            <div style="padding:6px 16px 14px;">
+              <sc-for list="{{ policyRates }}" as="p" hint-placeholder-count="4">
+                <div style="display:flex;align-items:center;justify-content:space-between;padding:9px 0;border-bottom:1px solid #EDF0F3;">
+                  <span style="font:400 13px/1.3 'Inter';color:#4A4A4A;">{{ p.label }}</span>
+                  <span style="font:700 14px/1 'JetBrains Mono';color:#006A4E;font-variant-numeric:tabular-nums;">{{ p.val }}</span>
+                </div>
+              </sc-for>
+              <div style="font:400 10.5px/1 'JetBrains Mono';color:#9aa39e;text-align:right;margin-top:10px;">{{ L.lastUpd }} 15 Feb 2026</div>
+            </div>
+          </div>
+
+          <!-- reserve ratios -->
+          <div style="background:#fff;border:1px solid #E0E4E8;border-radius:12px;overflow:hidden;">
+            <div style="background:#0A3D2C;color:#fff;padding:11px 16px;font:600 12px/1 'Inter';letter-spacing:0.05em;text-transform:uppercase;display:flex;align-items:center;gap:8px;">
+              <span style="display:inline-flex;opacity:.9;">{{ bankIcon }}</span>{{ L.reserveTitle }}
+            </div>
+            <div style="padding:10px 16px 14px;">
+              <div style="display:grid;grid-template-columns:1fr 52px 52px;padding:6px 0;border-bottom:1px solid #E0E4E8;">
+                <span style="font:600 10px/1 'Inter';letter-spacing:.05em;text-transform:uppercase;color:#4A4A4A;">{{ L.category }}</span>
+                <span style="font:600 10px/1 'Inter';letter-spacing:.05em;text-transform:uppercase;color:#4A4A4A;text-align:right;">SLR</span>
+                <span style="font:600 10px/1 'Inter';letter-spacing:.05em;text-transform:uppercase;color:#4A4A4A;text-align:right;">CRR</span>
+              </div>
+              <sc-for list="{{ reserves }}" as="rv" hint-placeholder-count="4">
+                <div style="display:grid;grid-template-columns:1fr 52px 52px;padding:8px 0;border-bottom:1px solid #EDF0F3;align-items:center;">
+                  <span style="font:400 12.5px/1.3 'Inter';color:#1a1a1a;">{{ rv.seg }}</span>
+                  <span style="font:600 12.5px/1 'JetBrains Mono';color:#006A4E;text-align:right;font-variant-numeric:tabular-nums;">{{ rv.slr }}</span>
+                  <span style="font:600 12.5px/1 'JetBrains Mono';color:#006A4E;text-align:right;font-variant-numeric:tabular-nums;">{{ rv.crr }}</span>
+                </div>
+              </sc-for>
+              <div style="font:400 10.5px/1 'JetBrains Mono';color:#9aa39e;text-align:right;margin-top:10px;">{{ L.lastUpd }} 09 May 2024</div>
+            </div>
+          </div>
+
+        </div>
+      </div>
+    </div>
+
+    <!-- ---- EXPLORE DIRECTORY ---- -->
+    <section>
+      <div style="max-width:1240px;margin:0 auto;padding:24px 40px 16px;">
+        <div style="display:flex;align-items:center;gap:11px;margin-bottom:4px;">
+          <span style="width:22px;height:3px;background:#006A4E;border-radius:2px;"></span>
+          <span style="font:600 11px/1.2 'Inter';letter-spacing:0.1em;text-transform:uppercase;color:#4A4A4A;">{{ L.exploreEyebrow }}</span>
+        </div>
+        <h2 style="font:700 18px/1.2 'Inter';letter-spacing:-0.01em;color:#006A4E;margin:0 0 16px;">{{ L.exploreTitle }}</h2>
+        <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:18px;">
+          <sc-for list="{{ modules }}" as="module" hint-placeholder-count="8">
+            <div onClick="{{ module.onClick }}" style="background:#fff;border:1px solid #E0E4E8;border-radius:14px;padding:20px;display:flex;flex-direction:column;gap:13px;cursor:pointer;transition:box-shadow .18s ease,border-color .18s ease;" style-hover="border-color:#006A4E;box-shadow:0 6px 18px rgba(0,106,78,.08);">
+              <div style="display:flex;align-items:center;justify-content:space-between;">
+                <span style="display:inline-flex;align-items:center;justify-content:center;width:40px;height:40px;border-radius:11px;background:#E4F1EC;color:#006A4E;">{{ module.icon }}</span>
+                <span style="color:#006A4E;display:inline-flex;opacity:.8;">{{ arrowIcon }}</span>
+              </div>
+              <h3 style="font:600 15px/1.25 'Inter';color:#006A4E;margin:0;">{{ module.title }}</h3>
+              <ul style="list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:7px;">
+                <sc-for list="{{ module.links }}" as="link" hint-placeholder-count="4">
+                  <li style="font:400 12.5px/1.4 'Inter';color:#4A4A4A;display:flex;align-items:flex-start;gap:8px;">
+                    <span style="width:3px;height:3px;border-radius:50%;background:#006A4E;flex:none;margin-top:7px;"></span>{{ link }}
+                  </li>
+                </sc-for>
+              </ul>
+            </div>
+          </sc-for>
+        </div>
+
+        <!-- more chips -->
+        <div style="margin-top:14px;display:flex;align-items:center;gap:10px;flex-wrap:wrap;">
+          <span style="font:600 11px/1 'Inter';letter-spacing:0.08em;text-transform:uppercase;color:#9aa39e;">{{ L.moreLabel }}</span>
+          <sc-for list="{{ moreLinks }}" as="ml" hint-placeholder-count="8">
+            <a style="font:500 12.5px/1 'Inter';color:#006A4E;border:1px solid #C5E0D6;background:#F7FAF8;border-radius:999px;padding:7px 14px;cursor:pointer;display:inline-flex;align-items:center;gap:6px;transition:background .15s,border-color .15s;" style-hover="background:#E4F1EC;border-color:#006A4E;">{{ ml }}</a>
+          </sc-for>
+        </div>
+      </div>
+    </section>
+
+    <!-- ---- CIPC BANNER ---- -->
+    <section>
+      <div style="max-width:1240px;margin:0 auto;padding:16px 40px;">
+        <div style="background:#006A4E;border-radius:14px;padding:22px 28px;display:flex;align-items:center;justify-content:space-between;gap:24px;flex-wrap:wrap;color:#fff;">
+          <div style="display:flex;align-items:center;gap:16px;">
+            <span style="display:inline-flex;align-items:center;justify-content:center;width:48px;height:48px;border-radius:50%;background:#F42A41;color:#fff;flex:none;">{{ phoneIcon }}</span>
+            <div>
+              <div style="font:600 16px/1.25 'Inter';color:#fff;">{{ L.cipcTitle }}</div>
+              <div style="font:400 12.5px/1.4 'Inter';color:rgba(255,255,255,.75);margin-top:3px;">{{ L.cipcSub }}</div>
+            </div>
+          </div>
+          <div style="display:flex;align-items:center;gap:18px;flex-wrap:wrap;">
+            <div style="display:flex;align-items:baseline;gap:10px;">
+              <span style="font:400 12px/1 'Inter';color:rgba(255,255,255,.7);">{{ L.cipcLine }}</span>
+              <span style="font:700 30px/1 'JetBrains Mono';color:#fff;">16236</span>
+            </div>
+            <button style="background:#fff;color:#006A4E;border:none;border-radius:8px;padding:10px 18px;font:600 13px 'Inter';cursor:pointer;transition:background .15s;" style-hover="background:#DCEFE6;">{{ L.cipcBtn }}</button>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ---- CITIZEN SERVICES ---- -->
+    <section>
+      <div style="max-width:1240px;margin:0 auto;padding:16px 40px;">
+        <div style="display:flex;align-items:center;gap:11px;margin-bottom:4px;">
+          <span style="width:22px;height:3px;background:#006A4E;border-radius:2px;"></span>
+          <span style="font:600 11px/1.2 'Inter';letter-spacing:0.1em;text-transform:uppercase;color:#4A4A4A;">{{ L.svcEyebrow }}</span>
+        </div>
+        <h2 style="font:700 18px/1.2 'Inter';letter-spacing:-0.01em;color:#006A4E;margin:0 0 14px;">{{ L.svcTitle }}</h2>
+        <div style="display:grid;grid-template-columns:repeat(5,1fr);gap:16px;">
+          <sc-for list="{{ services }}" as="svc" hint-placeholder-count="5">
+            <div onClick="{{ svc.onClick }}" style="background:#fff;border:1px solid #E0E4E8;border-radius:12px;padding:18px;display:flex;flex-direction:column;gap:11px;cursor:pointer;transition:border-color .18s,box-shadow .18s;" style-hover="border-color:#006A4E;box-shadow:0 6px 16px rgba(0,106,78,.08);">
+              <span style="display:inline-flex;align-items:center;justify-content:center;width:38px;height:38px;border-radius:10px;background:#DCEFE6;color:#006A4E;">{{ svc.icon }}</span>
+              <div style="font:600 14px/1.3 'Inter';color:#006A4E;">{{ svc.title }}</div>
+              <div style="font:400 12px/1.5 'Inter';color:#4A4A4A;">{{ svc.desc }}</div>
+            </div>
+          </sc-for>
+        </div>
+      </div>
+    </section>
+
+    <!-- ---- GOVERNOR (compact) ---- -->
+    <section>
+      <div style="max-width:1240px;margin:0 auto;padding:16px 40px 0;">
+        <div style="background:#fff;border:1px solid #E0E4E8;border-radius:14px;padding:28px;display:grid;grid-template-columns:160px 1fr;gap:32px;align-items:center;">
+        <image-slot id="bb-governor" style="width:100%;aspect-ratio:4/5;display:block;border-radius:14px;" shape="rounded" radius="14" placeholder="{{ L.govPhoto }}"></image-slot>
+        <div>
+          <div style="display:flex;align-items:center;gap:11px;margin-bottom:12px;">
+            <span style="width:26px;height:3px;background:#006A4E;border-radius:2px;"></span>
+            <span style="font:600 11px/1.2 'Inter';letter-spacing:0.1em;text-transform:uppercase;color:#4A4A4A;">{{ L.govEyebrow }}</span>
+          </div>
+          <p style="font:400 17px/1.55 'Inter';letter-spacing:-0.005em;color:#1a1a1a;margin:0 0 18px;max-width:72ch;">{{ L.govMsg }}</p>
+          <div style="display:flex;align-items:center;gap:16px;flex-wrap:wrap;">
+            <div>
+              <div style="font:600 15px/1.3 'Inter';color:#006A4E;">{{ L.govName }}</div>
+              <div style="font:400 13px/1.4 'Inter';color:#4A4A4A;">{{ L.govRole }}</div>
+            </div>
+            <button style="display:inline-flex;align-items:center;gap:8px;background:transparent;color:#006A4E;border:1.5px solid #006A4E;border-radius:8px;padding:9px 16px;font:600 13px 'Inter';cursor:pointer;transition:background .16s,color .16s;" style-hover="background:#006A4E;color:#fff;">{{ L.govBtn }}<span style="display:inline-flex;">{{ arrowIcon }}</span></button>
+          </div>
+        </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ---- HOTLINES ---- -->
+    <section>
+      <div style="max-width:1240px;margin:0 auto;padding:16px 40px 28px;">
+        <div style="display:flex;align-items:center;gap:11px;margin-bottom:10px;">
+          <span style="width:22px;height:3px;background:#F42A41;border-radius:2px;"></span>
+          <span style="font:600 11px/1.2 'Inter';letter-spacing:0.1em;text-transform:uppercase;color:#4A4A4A;">{{ L.hotlineEyebrow }}</span>
+        </div>
+        <div style="display:flex;gap:14px;flex-wrap:wrap;">
+          <sc-for list="{{ hotlines }}" as="h" hint-placeholder-count="5">
+            <div style="background:#fff;border:1px solid #E0E4E8;border-radius:10px;padding:13px 18px;display:flex;align-items:center;gap:13px;flex:1;min-width:170px;">
+              <span style="font:700 22px/1 'JetBrains Mono';color:#F42A41;">{{ h.num }}</span>
+              <span style="font:500 12.5px/1.3 'Inter';color:#4A4A4A;">{{ h.label }}</span>
+            </div>
+          </sc-for>
+        </div>
+      </div>
+    </section>
+
+  </main>
+  </sc-if>
+
+  <!-- ============================================================ INNER PAGE VIEW (mp / fin / pub / svc) ============================================================ -->
+  <sc-if value="{{ isInner }}" hint-placeholder-val="{{ true }}">
+  <main style="background:#fff;">
+
+    <!-- ---- INNER HEADER ---- -->
+    <section style="background:#E4F1EC;border-bottom:1px solid #C5E0D6;">
+      <div style="max-width:1240px;margin:0 auto;padding:24px 40px 40px;">
+        <div style="display:flex;align-items:center;gap:8px;font:500 12.5px/1 'Inter';color:#4A4A4A;margin-bottom:22px;">
+          <span onClick="{{ setHome }}" style="cursor:pointer;color:#006A4E;">{{ L.crumbHome }}</span>
+          <span style="color:#6BA892;display:inline-flex;">{{ chevIcon }}</span>
+          <span>{{ page.title }}</span>
+        </div>
+        <div style="display:flex;align-items:center;gap:11px;margin-bottom:12px;">
+          <span style="width:26px;height:3px;background:#006A4E;border-radius:2px;"></span>
+          <span style="font:600 11px/1.2 'Inter';letter-spacing:0.1em;text-transform:uppercase;color:#4A4A4A;">{{ page.eyebrow }}</span>
+        </div>
+        <h1 style="font:700 26px/1.15 'Inter';letter-spacing:-0.015em;color:#006A4E;margin:0 0 14px;">{{ page.title }}</h1>
+        <p style="font:400 15px/1.6 'Inter';color:#4A4A4A;margin:0;max-width:80ch;">{{ page.lead }}</p>
+      </div>
+    </section>
+
+    <!-- ---- INNER BODY ---- -->
+    <section>
+      <div style="max-width:1240px;margin:0 auto;padding:40px 40px 64px;display:grid;grid-template-columns:minmax(0,1fr) 320px;gap:44px;align-items:start;">
+
+        <!-- main column -->
+        <div style="display:flex;flex-direction:column;gap:36px;">
+
+          <!-- highlight -->
+          <sc-if value="{{ page.hasHighlight }}" hint-placeholder-val="{{ true }}">
+          <div style="border:1px solid #E0E4E8;border-radius:14px;padding:24px;display:flex;gap:20px;align-items:flex-start;background:#F7FAF8;">
+            <span style="display:inline-flex;align-items:center;justify-content:center;width:48px;height:48px;border-radius:12px;background:#E4F1EC;color:#006A4E;flex:none;">{{ fileIcon }}</span>
+            <div>
+              <span style="display:inline-block;font:600 10px/1 'Inter';letter-spacing:0.06em;text-transform:uppercase;color:#fff;background:#F42A41;padding:4px 9px;border-radius:999px;margin-bottom:11px;">{{ page.highlight.tag }}</span>
+              <h3 style="font:600 18px/1.3 'Inter';color:#006A4E;margin:0 0 8px;">{{ page.highlight.title }}</h3>
+              <p style="font:400 14px/1.6 'Inter';color:#4A4A4A;margin:0 0 18px;max-width:60ch;">{{ page.highlight.desc }}</p>
+              <div style="display:flex;gap:10px;flex-wrap:wrap;">
+                <button style="display:inline-flex;align-items:center;gap:8px;background:#006A4E;color:#fff;border:none;border-radius:8px;padding:10px 18px;font:600 13px 'Inter';cursor:pointer;transition:background .16s;" style-hover="background:#00543E;">{{ page.highlight.primary }}<span style="display:inline-flex;">{{ arrowIcon }}</span></button>
+                <button style="display:inline-flex;align-items:center;gap:8px;background:transparent;color:#006A4E;border:1.5px solid #006A4E;border-radius:8px;padding:10px 18px;font:600 13px 'Inter';cursor:pointer;transition:background .16s,color .16s;" style-hover="background:#E4F1EC;">{{ page.highlight.secondary }}</button>
+              </div>
+            </div>
+          </div>
+          </sc-if>
+
+          <!-- groups -->
+          <sc-for list="{{ page.groups }}" as="g" hint-placeholder-count="3">
+            <div>
+              <h3 style="font:600 16px/1.3 'Inter';color:#006A4E;margin:0 0 14px;">{{ g.title }}</h3>
+              <div style="border:1px solid #E0E4E8;border-radius:12px;overflow:hidden;">
+                <sc-for list="{{ g.items }}" as="it" hint-placeholder-count="4">
+                  <a style="display:flex;align-items:center;justify-content:space-between;padding:14px 18px;border-bottom:1px solid #EDF0F3;cursor:pointer;transition:background .14s;" style-hover="background:#F7FAF8;">
+                    <span style="font:500 14px/1.4 'Inter';color:#1a1a1a;">{{ it }}</span>
+                    <span style="color:#006A4E;display:inline-flex;opacity:.75;">{{ chevIcon }}</span>
+                  </a>
+                </sc-for>
+              </div>
+            </div>
+          </sc-for>
+
+          <!-- tables -->
+          <sc-for list="{{ page.tables }}" as="tb" hint-placeholder-count="2">
+            <div>
+              <div style="display:flex;align-items:baseline;justify-content:space-between;gap:14px;margin-bottom:14px;flex-wrap:wrap;">
+                <h3 style="font:600 16px/1.3 'Inter';color:#006A4E;margin:0;">{{ tb.title }}</h3>
+                <span style="font:400 12px/1 'JetBrains Mono';color:#9aa39e;">{{ tb.note }}</span>
+              </div>
+              <div style="border:1px solid #E0E4E8;border-radius:12px;overflow:hidden;">
+                <div style="display:flex;padding:11px 18px;background:#F4F6F8;border-bottom:1px solid #E0E4E8;">
+                  <span style="flex:1;font:600 11px/1 'Inter';letter-spacing:.05em;text-transform:uppercase;color:#4A4A4A;">{{ tb.head.seg }}</span>
+                  <sc-for list="{{ tb.head.vals }}" as="hv" hint-placeholder-count="2">
+                    <span style="width:88px;font:600 11px/1 'Inter';letter-spacing:.05em;text-transform:uppercase;color:#4A4A4A;text-align:right;">{{ hv }}</span>
+                  </sc-for>
+                </div>
+                <sc-for list="{{ tb.rows }}" as="row" hint-placeholder-count="4">
+                  <div style="display:flex;padding:12px 18px;border-bottom:1px solid #EDF0F3;align-items:center;">
+                    <span style="flex:1;font:400 13.5px/1.3 'Inter';color:#1a1a1a;">{{ row.seg }}</span>
+                    <sc-for list="{{ row.vals }}" as="cv" hint-placeholder-count="2">
+                      <span style="width:88px;font:600 13.5px/1 'JetBrains Mono';color:#006A4E;text-align:right;font-variant-numeric:tabular-nums;">{{ cv }}</span>
+                    </sc-for>
+                  </div>
+                </sc-for>
+              </div>
+            </div>
+          </sc-for>
+
+        </div>
+
+        <!-- sidebar -->
+        <aside style="display:flex;flex-direction:column;gap:18px;position:sticky;top:80px;">
+          <div style="background:#006A4E;border-radius:14px;padding:22px;color:#fff;">
+            <div style="font:600 11px/1 'Inter';letter-spacing:0.08em;text-transform:uppercase;color:#5FBE9E;margin-bottom:14px;">{{ L.sideRatesTitle }}</div>
+            <sc-for list="{{ sideRates }}" as="s" hint-placeholder-count="4">
+              <div style="display:flex;align-items:center;justify-content:space-between;padding:10px 0;border-bottom:1px solid rgba(255,255,255,.13);">
+                <span style="font:400 13px/1.3 'Inter';color:rgba(255,255,255,.78);">{{ s.label }}</span>
+                <span style="font:700 14px/1 'JetBrains Mono';color:#fff;font-variant-numeric:tabular-nums;">{{ s.val }}</span>
+              </div>
+            </sc-for>
+          </div>
+          <div style="border:1px solid #E0E4E8;border-radius:14px;padding:22px;">
+            <div style="font:600 11px/1 'Inter';letter-spacing:0.08em;text-transform:uppercase;color:#4A4A4A;margin-bottom:12px;">{{ L.relatedTitle }}</div>
+            <div style="display:flex;flex-direction:column;">
+              <sc-for list="{{ page.related }}" as="rl" hint-placeholder-count="4">
+                <a style="display:flex;align-items:center;justify-content:space-between;padding:11px 0;border-bottom:1px solid #EDF0F3;font:500 13.5px/1.4 'Inter';color:#006A4E;cursor:pointer;" style-hover="color:#F42A41;">{{ rl }}<span style="display:inline-flex;opacity:.7;">{{ chevIcon }}</span></a>
+              </sc-for>
+            </div>
+          </div>
+        </aside>
+
+      </div>
+    </section>
+
+  </main>
+  </sc-if>
+
+  <!-- ============ FOOTER ============ -->
+  <footer style="background:#0A3D2C;color:#fff;border-top:3px solid #F42A41;">
+    <div style="max-width:1240px;margin:0 auto;padding:48px 40px 0;">
+      <div style="display:grid;grid-template-columns:1.6fr 1fr 1fr 1fr;gap:40px;padding-bottom:40px;border-bottom:1px solid rgba(255,255,255,.12);">
+        <div>
+          <div style="display:flex;align-items:center;gap:12px;margin-bottom:16px;">
+            <div style="width:42px;height:42px;border-radius:50%;background:#006A4E;display:flex;align-items:center;justify-content:center;flex:none;">
+              <span style="color:#fff;display:inline-flex;transform:scale(.7);">{{ crestIcon }}</span>
+            </div>
+            <div>
+              <div style="font:700 16px/1.1 'Inter';color:#fff;">{{ L.bankName }}</div>
+              <div style="font:500 10px/1.2 'Inter';letter-spacing:0.1em;text-transform:uppercase;color:rgba(255,255,255,.55);margin-top:3px;">{{ L.centralBank }}</div>
+            </div>
+          </div>
+          <div style="font:600 11px/1 'Inter';letter-spacing:0.08em;text-transform:uppercase;color:#5FBE9E;margin-bottom:11px;">{{ L.footerContact }}</div>
+          <div style="font:400 13px/1.7 'Inter';color:rgba(255,255,255,.7);">{{ L.address }}</div>
+          <div style="font:400 13px/1.7 'Inter';color:rgba(255,255,255,.7);">{{ L.phone }}</div>
+          <div style="font:400 13px/1.7 'Inter';color:rgba(255,255,255,.7);">{{ L.email }}</div>
+          <div style="display:flex;gap:9px;margin-top:16px;">
+            <span style="width:32px;height:32px;border-radius:50%;border:1px solid rgba(255,255,255,.2);display:flex;align-items:center;justify-content:center;color:rgba(255,255,255,.7);cursor:pointer;transition:border-color .16s,color .16s;" style-hover="border-color:#006A4E;color:#fff;">{{ fbIcon }}</span>
+            <span style="width:32px;height:32px;border-radius:50%;border:1px solid rgba(255,255,255,.2);display:flex;align-items:center;justify-content:center;color:rgba(255,255,255,.7);cursor:pointer;transition:border-color .16s,color .16s;" style-hover="border-color:#006A4E;color:#fff;">{{ xIcon }}</span>
+            <span style="width:32px;height:32px;border-radius:50%;border:1px solid rgba(255,255,255,.2);display:flex;align-items:center;justify-content:center;color:rgba(255,255,255,.7);cursor:pointer;transition:border-color .16s,color .16s;" style-hover="border-color:#006A4E;color:#fff;">{{ ytIcon }}</span>
+          </div>
+        </div>
+        <div>
+          <div style="font:600 11px/1 'Inter';letter-spacing:0.08em;text-transform:uppercase;color:#5FBE9E;margin-bottom:14px;">{{ L.footerLinks }}</div>
+          <div style="display:flex;flex-direction:column;gap:10px;">
+            <sc-for list="{{ usefulLinks }}" as="ln" hint-placeholder-count="6">
+              <a style="font:400 13px/1.4 'Inter';color:rgba(255,255,255,.7);cursor:pointer;" style-hover="color:#fff;">{{ ln }}</a>
+            </sc-for>
+          </div>
+        </div>
+        <div>
+          <div style="font:600 11px/1 'Inter';letter-spacing:0.08em;text-transform:uppercase;color:#5FBE9E;margin-bottom:14px;">{{ L.footerAbout }}</div>
+          <div style="display:flex;flex-direction:column;gap:10px;">
+            <sc-for list="{{ aboutLinks }}" as="al" hint-placeholder-count="6">
+              <a style="font:400 13px/1.4 'Inter';color:rgba(255,255,255,.7);cursor:pointer;" style-hover="color:#fff;">{{ al }}</a>
+            </sc-for>
+          </div>
+        </div>
+        <div>
+          <div style="font:600 11px/1 'Inter';letter-spacing:0.08em;text-transform:uppercase;color:#5FBE9E;margin-bottom:14px;">{{ L.footerHotline }}</div>
+          <div style="display:flex;flex-direction:column;gap:11px;">
+            <sc-for list="{{ hotlines }}" as="fh" hint-placeholder-count="5">
+              <div style="display:flex;align-items:center;gap:10px;">
+                <span style="font:700 15px/1 'JetBrains Mono';color:#fff;min-width:40px;">{{ fh.num }}</span>
+                <span style="font:400 12px/1.3 'Inter';color:rgba(255,255,255,.6);">{{ fh.label }}</span>
+              </div>
+            </sc-for>
+          </div>
+        </div>
+      </div>
+      <div style="display:flex;align-items:center;justify-content:space-between;gap:24px;padding:20px 0;flex-wrap:wrap;">
+        <span style="font:400 12px/1.4 'Inter';color:rgba(255,255,255,.5);">{{ L.copy }}</span>
+        <div style="display:flex;gap:22px;">
+          <a onClick="{{ setHome }}" style="font:500 12px/1 'Inter';color:rgba(255,255,255,.7);cursor:pointer;" style-hover="color:#fff;">{{ L.fHome }}</a>
+          <a style="font:500 12px/1 'Inter';color:rgba(255,255,255,.7);cursor:pointer;" style-hover="color:#fff;">{{ L.fSitemap }}</a>
+          <a style="font:500 12px/1 'Inter';color:rgba(255,255,255,.7);cursor:pointer;" style-hover="color:#fff;">{{ L.fFeedback }}</a>
+        </div>
+      </div>
+      <div style="padding:0 0 28px;">
+        <p style="font:400 11.5px/1.6 'Inter';color:rgba(255,255,255,.38);margin:0;max-width:120ch;"><span style="color:rgba(255,255,255,.6);font-weight:600;">{{ L.disclaimerLabel }}</span> {{ L.disclaimer }}</p>
+      </div>
+    </div>
+  </footer>
+
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;$preview&quot;:{&quot;width&quot;:1240,&quot;height&quot;:1600}}">
+class Component extends DCLogic {
+  state = { view: 'home', lang: 'en' };
+
+  go = (v) => () => { this.setState({ view: v }); if (typeof window !== 'undefined') window.scrollTo(0, 0); };
+  setHome = this.go('home');
+  setMP   = this.go('mp');
+  setFin  = this.go('fin');
+  setPub  = this.go('pub');
+  setSvc  = this.go('svc');
+  setEn   = () => this.setState({ lang: 'en' });
+  setBn   = () => this.setState({ lang: 'bn' });
+  noop    = () => {};
+
+  renderVals() {
+    const lang = this.state.lang;
+    const view = this.state.view;
+
+    const ICONS = {
+      landmark: '<line x1="3" x2="21" y1="22" y2="22"/><line x1="6" x2="6" y1="18" y2="11"/><line x1="10" x2="10" y1="18" y2="11"/><line x1="14" x2="14" y1="18" y2="11"/><line x1="18" x2="18" y1="18" y2="11"/><polygon points="12 2 20 7 4 7"/>',
+      shield: '<path d="M20 13c0 5-3.5 7.5-7.66 8.95a1 1 0 0 1-.67-.01C7.5 20.5 4 18 4 13V6a1 1 0 0 1 1-1c2 0 4.5-1.2 6.24-2.72a1.17 1.17 0 0 1 1.52 0C14.51 3.81 17 5 19 5a1 1 0 0 1 1 1Z"/><path d="m9 12 2 2 4-4"/>',
+      globe: '<circle cx="12" cy="12" r="10"/><path d="M12 2a14.5 14.5 0 0 0 0 20 14.5 14.5 0 0 0 0-20"/><path d="M2 12h20"/>',
+      coins: '<circle cx="8" cy="8" r="6"/><path d="M18.09 10.37A6 6 0 1 1 10.34 18"/><path d="M7 6h1v4"/><path d="m16.71 13.88.7.71-2.82 2.82"/>',
+      card: '<rect width="20" height="14" x="2" y="5" rx="2"/><line x1="2" x2="22" y1="10" y2="10"/>',
+      trend: '<polyline points="22 7 13.5 15.5 8.5 10.5 2 17"/><polyline points="16 7 22 7 22 13"/>',
+      book: '<path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/>',
+      note: '<rect width="20" height="12" x="2" y="6" rx="2"/><circle cx="12" cy="12" r="2"/><path d="M6 12h.01M18 12h.01"/>',
+      bank: '<rect width="16" height="16" x="4" y="4" rx="1"/><path d="M4 9h16M9 4v16M15 4v16"/>',
+      cal: '<rect width="18" height="18" x="3" y="4" rx="2"/><path d="M3 10h18M8 2v4M16 2v4"/>',
+      arrow: '<path d="M5 12h14"/><path d="m12 5 7 7-7 7"/>',
+      chev: '<path d="m9 18 6-6-6-6"/>',
+      search: '<circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/>',
+      phone: '<path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/>',
+      file: '<path d="M15 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7Z"/><path d="M14 2v4a2 2 0 0 0 2 2h4"/><path d="M16 13H8"/><path d="M16 17H8"/>',
+      fb: '<path d="M18 2h-3a5 5 0 0 0-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 0 1 1-1h3z"/>',
+      x: '<path d="M18 4 4 20M6 4l14 16" stroke-width="2"/>',
+      yt: '<rect x="2" y="5" width="20" height="14" rx="4"/><polygon points="10 9 15 12 10 15"/>'
+    };
+    const svg = (p, sz) => React.createElement('svg', { width: sz || 22, height: sz || 22, viewBox: '0 0 24 24', fill: 'none', stroke: 'currentColor', strokeWidth: 1.75, strokeLinecap: 'round', strokeLinejoin: 'round', dangerouslySetInnerHTML: { __html: p } });
+
+    const T = {
+      en: {
+        utilGov: 'An autonomous institution of the Government of Bangladesh',
+        utilRti: 'RTI', utilSitemap: 'Sitemap', utilFeedback: 'Feedback',
+        bankName: 'Bangladesh Bank',
+        centralBank: 'Central Bank of Bangladesh',
+        searchPh: 'Search the site',
+        nav: { home: 'Home', about: 'About Us', mp: 'Monetary Policy', fin: 'Financial System', fx: 'FX Market', gsec: 'G-Sec Market', pay: 'Payments', pub: 'Publications' },
+        noticeTag: 'Notice',
+        notice: 'Soliciting stakeholders’ feedback for H1FY27 Monetary Policy · 123rd Prizebond draw results available · Financial Stability Report 2025 published',
+        viewAll: 'View all',
+        newBadge: 'New',
+        newsTitle: 'Recent news & circulars',
+        news: [
+          { text: 'Circular for Director (Contractual) of Security Management Department (SMD)', isNew: false },
+          { text: 'Re-circular: Chief Legal Affairs Officer (Contractual) — TOR', isNew: true },
+          { text: 'Stakeholder feedback for H1FY27 Monetary Policy', isNew: true },
+          { text: 'Vacancy: Director General (Contractual), Institute of Bankers, Bangladesh (IBB)', isNew: false },
+          { text: 'FEPD-1 Circular No. 14: Non-Resident Convertible Taka Accounts (NRCTA)', isNew: false },
+          { text: 'BRPD-1 Circular Letter No. 20: Prudential Regulations for Consumer Financing', isNew: false },
+          { text: 'FEPD-1 Circular Letter No. 09: Remittance of consular fees', isNew: false },
+          { text: 'Financial Stability Report 2025 — Published', isNew: true },
+          { text: 'Bangladesh Bank Quarterly, October–December 2025, Vol. XXIII No. 2', isNew: false },
+          { text: 'Call for Research Papers — BBTA Journal: Thoughts on Banking and Finance', isNew: false }
+        ],
+        marketCards: [
+          { label: 'FX Spot Rate (USD/BDT)', date: '23 June 2026 · Till 05:00 PM', single: true, value: '123.1005', link: 'View all rates' },
+          { label: 'Call Money Rate', date: '23 June 2026 · Weighted Average', single: true, value: '9.84%', link: 'View details' },
+          { label: 'Money Market Reference Rate (MMRR)', date: '23 June 2026', dual: true, aLabel: 'DOMMR (O/N)', aVal: '9.85%', bLabel: 'BOFR (O/N)', bVal: '9.84%', link: 'View all' }
+        ],
+        policyRatesTitle: 'Policy rates',
+        policyRates: [
+          { label: 'Repo Rate (Policy)', val: '10.00%' },
+          { label: 'SLF Rate', val: '11.50%' },
+          { label: 'SDF Rate', val: '7.50%' },
+          { label: 'Bank Rate', val: '4.00%' }
+        ],
+        reserveTitle: 'Reserve ratios', category: 'Category',
+        reserves: [
+          { seg: 'Traditional Banking', slr: '13%', crr: '4.0%' },
+          { seg: 'Islamic Banking', slr: '5.5%', crr: '4.0%' },
+          { seg: 'Deposit Taker FIs', slr: '5%', crr: '1.5%' },
+          { seg: 'Non-Deposit Taker FIs', slr: '2.5%', crr: '—' }
+        ],
+        auctionTitle: 'Upcoming auctions', auctionCal: 'Full auction calendar', lastUpd: 'Last updated:', auctionNote: 'Next settlement · June 2026',
+        auctions: [ { type: 'Bond', day: '23', month: 'June 2026' }, { type: 'Bill', day: '28', month: 'June 2026' } ],
+        exploreEyebrow: 'Directory',
+        exploreTitle: 'Explore Bangladesh Bank',
+        moreLabel: 'More:',
+        moreLinks: ['Laws & Regulations', 'Media & Press Releases', 'Citizen Charter', 'National Integrity Strategy', 'Innovation Corner', 'National ICT Policy', 'Recent Uploads', 'Currency Museum'],
+        modules: [
+          { title: 'Monetary Policy', links: ['Monetary Policy Statement', 'MPC resolutions', 'Repo information', 'BB Bill auction'] },
+          { title: 'Financial System', links: ['Banks & financial institutions', 'Regulations & guidelines', 'Financial stability', 'Macroprudential supervision'] },
+          { title: 'FX Market', links: ['Reference exchange rate', 'Foreign reserves', 'Remittance facilities', 'NRB bonds'] },
+          { title: 'G-Sec Market', links: ['Government securities', 'T-bill & bond auction', 'YTM curve', 'BD Govt Sukuk (BGIS)'] },
+          { title: 'Payment Systems', links: ['Payment systems report', 'Platforms & trends', 'National payment data', 'Digital payments'] },
+          { title: 'Economic Data', links: ['Remittance inflow', 'BOP, export & import', 'NSDP', 'Recent uploads'] },
+          { title: 'Publications', links: ['Annual report', 'Circulars & press releases', 'Economic bulletins', 'Research & working papers'] },
+          { title: 'Investment Facility', links: ['Sanchayapatra', 'Prizebond', 'Incentives & facilities', 'Investor information'] }
+        ],
+        svcEyebrow: 'For citizens',
+        svcTitle: 'Services & protection',
+        cipcTitle: 'Customers’ Interest Protection Centre (CIPC)',
+        cipcSub: 'bb.cipc@bb.org.bd · Submit a complaint about a bank or FI online',
+        cipcLine: 'Call', cipcBtn: 'Submit complaint',
+        services: [
+          { title: 'E-Services', desc: 'Online services for banks, FIs and citizens' },
+          { title: 'BB Forms', desc: 'Downloadable forms and applications' },
+          { title: 'Claim your money', desc: 'Search and claim unclaimed deposits' },
+          { title: 'Customer complaints', desc: 'Lodge and track a complaint' },
+          { title: 'e-Tender & careers', desc: 'Procurement notices and BB recruitment' }
+        ],
+        govEyebrow: 'Honorable Governor',
+        govMsg: 'Bangladesh Bank works to maintain price stability and a sound, inclusive financial system. We remain committed to transparent policy, prudent supervision and the long-term confidence of the people we serve.',
+        govName: 'Md Mostaqur Rahman, FCMA',
+        govRole: 'Governor, Bangladesh Bank',
+        govPhoto: 'Official portrait',
+        govBtn: 'Read full message',
+        hotlineEyebrow: 'National emergency hotlines',
+        hotlines: [
+          { num: '333', label: 'Government information' },
+          { num: '999', label: 'National emergency service' },
+          { num: '109', label: 'Women & children helpline' },
+          { num: '106', label: 'Anti-corruption (ACC)' },
+          { num: '1090', label: 'Disaster early warning' }
+        ],
+        footerContact: 'Contact', footerLinks: 'Useful links', footerAbout: 'About', footerHotline: 'Hotlines',
+        address: 'Bangladesh Bank, Motijheel, Dhaka-1000', phone: '+880-2-55665001-6', email: 'webmaster@bb.org.bd',
+        usefulLinks: ['Foreign Investment & Financing Portal', 'Payment systems', 'Regulations & guidelines', 'Currency museum & banknotes', 'SAARCFINANCE', 'National ICT policy'],
+        aboutLinks: ['About Bangladesh Bank', 'Governors of BB', 'Organogram', 'Career', 'Right to Information (RTI)', 'Tenders'],
+        copy: '© 2026 Bangladesh Bank · Central Bank of Bangladesh',
+        fHome: 'Home', fSitemap: 'Sitemap', fFeedback: 'Feedback',
+        disclaimerLabel: 'Disclaimer.',
+        disclaimer: 'While every effort is made to ensure the accuracy of the information on this website, Bangladesh Bank assumes no responsibility for any error, omission or loss arising from its use.',
+        crumbHome: 'Home',
+        sideRatesTitle: 'Key rates today', relatedTitle: 'Related',
+        indLabels: ['Policy Rate (Repo)', 'USD / BDT Reference', 'Call Money (Weighted)', 'Bank Rate'],
+        pages: {
+          mp: {
+            eyebrow: 'Monetary policy', title: 'Monetary Policy',
+            lead: 'Bangladesh Bank formulates and implements monetary policy to maintain price stability while supporting sustainable growth and employment. Policy decisions, statements and the policy rate corridor are published here.',
+            hasHighlight: true,
+            highlight: { tag: 'Latest', title: 'Monetary Policy Statement (January–June 2026)', desc: 'The half-yearly statement sets out the monetary policy stance, the inflation outlook and the operating framework.', primary: 'Read statement', secondary: 'Download PDF' },
+            groups: [
+              { title: 'MPC resolutions', items: ['MPC resolution — 24th meeting (Feb 2026)', 'MPC resolution — 23rd meeting (Dec 2025)', 'MPC resolution — 22nd meeting (Oct 2025)'] },
+              { title: 'Repo & auctions', items: ['Repo information', 'BB Bill auction', 'Primary auction — T-bill & bond', 'Reverse repo / SDF operations'] }
+            ],
+            tables: [
+              { title: 'Policy rate corridor', note: 'Last updated 15 Feb 2026', head: { seg: 'Instrument', vals: ['Rate'] }, rows: [ { seg: 'Policy Rate (Repo)', vals: ['10.00%'] }, { seg: 'Standing Lending Facility (SLF)', vals: ['11.50%'] }, { seg: 'Standing Deposit Facility (SDF)', vals: ['7.50%'] }, { seg: 'Bank Rate', vals: ['4.00%'] } ] },
+              { title: 'Reserve ratios', note: 'Last updated 09 May 2024', head: { seg: 'Segment', vals: ['SLR', 'CRR'] }, rows: [ { seg: 'Traditional banking', vals: ['13%', '4.0%'] }, { seg: 'Islamic banking', vals: ['5.5%', '4.0%'] }, { seg: 'Deposit-taking FIs', vals: ['5%', '1.5%'] }, { seg: 'Non-deposit FIs', vals: ['2.5%', '—'] } ] }
+            ],
+            related: ['Monetary Policy Department', 'Circulars & circular letters', 'Repo & liquidity operations', 'BB Bill auction calendar']
+          },
+          fin: {
+            eyebrow: 'Financial system', title: 'Financial System & Stability',
+            lead: 'Bangladesh Bank licenses, regulates and supervises banks and financial institutions, and safeguards the stability of the financial system through prudential regulation and macroprudential oversight.',
+            hasHighlight: true,
+            highlight: { tag: 'Published', title: 'Financial Stability Report 2025', desc: 'A comprehensive assessment of risks and resilience across the banking system, financial institutions and markets.', primary: 'Read report', secondary: 'Download PDF' },
+            groups: [
+              { title: 'Banks & financial institutions', items: ['Scheduled banks', 'Non-bank financial institutions', 'Licensing & approvals', 'Microfinance & MFS providers'] },
+              { title: 'Regulations & guidelines', items: ['Prudential regulations', 'BRPD circulars', 'Risk management guidelines', 'Basel III implementation'] },
+              { title: 'Supervision', items: ['Macroprudential supervision', 'Stress testing framework', 'Early warning system', 'Resolution framework'] }
+            ],
+            tables: [
+              { title: 'Reserve ratios', note: 'Last updated 09 May 2024', head: { seg: 'Segment', vals: ['SLR', 'CRR'] }, rows: [ { seg: 'Traditional banking', vals: ['13%', '4.0%'] }, { seg: 'Islamic banking', vals: ['5.5%', '4.0%'] }, { seg: 'Deposit-taking FIs', vals: ['5%', '1.5%'] }, { seg: 'Non-deposit FIs', vals: ['2.5%', '—'] } ] }
+            ],
+            related: ['Department of Banking Inspection', 'Deposit Insurance Scheme', 'Integrated Supervision System', 'Financial sector assessment']
+          },
+          pub: {
+            eyebrow: 'Publications', title: 'Reports & Publications',
+            lead: 'Flagship reports, statistical bulletins, circulars and research from Bangladesh Bank — the authoritative record of policy, markets and the economy.',
+            hasHighlight: true,
+            highlight: { tag: 'Flagship', title: 'Annual Report 2024–25', desc: 'The Bank’s principal report on monetary management, financial sector developments and institutional activities.', primary: 'Read report', secondary: 'Download PDF' },
+            groups: [
+              { title: 'Flagship reports', items: ['Annual Report 2024–25', 'Financial Stability Report 2025', 'Monetary Policy Statement H1 2026', 'Bangladesh Bank Quarterly'] },
+              { title: 'Bulletins & data', items: ['Economic bulletins', 'Monthly economic indicators', 'Major economic indicators', 'Selected indicators'] },
+              { title: 'Circulars & research', items: ['Circulars & circular letters', 'Press releases', 'Research & working papers', 'BBTA Journal'] }
+            ],
+            tables: [],
+            related: ['Research Department', 'Statistics Department', 'Library & archives', 'Open data portal']
+          },
+          svc: {
+            eyebrow: 'For citizens', title: 'Services & Protection',
+            lead: 'Online services, downloadable forms and grievance redress for citizens, banks and financial institutions — including the Customers’ Interest Protection Centre.',
+            hasHighlight: true,
+            highlight: { tag: 'Hotline 16236', title: 'Customers’ Interest Protection Centre (CIPC)', desc: 'Have a complaint about a bank or financial institution? Submit it online or call the toll-free hotline 16236.', primary: 'Submit complaint', secondary: 'Track complaint' },
+            groups: [
+              { title: 'Online services', items: ['E-Services portal', 'Online complaint submission', 'BB forms & applications', 'Claim your unclaimed money'] },
+              { title: 'Procurement & careers', items: ['e-Tender notices', 'BB recruitment (e-Recruitment)', 'Vendor registration', 'Internship programme'] },
+              { title: 'Information', items: ['Citizen charter', 'Right to Information (RTI)', 'FAQs', 'Contact directory'] }
+            ],
+            tables: [],
+            related: ['Customers’ Interest Protection Centre', 'Foreign Exchange Investor Helpdesk', 'Help & support', 'Branch & office locator']
+          }
+        }
+      },
+      bn: {
+        utilGov: 'গণপ্রজাতন্ত্রী বাংলাদেশ সরকারের একটি স্বায়ত্তশাসিত প্রতিষ্ঠান',
+        utilRti: 'তথ্য অধিকার', utilSitemap: 'সাইটম্যাপ', utilFeedback: 'মতামত',
+        bankName: 'বাংলাদেশ ব্যাংক',
+        centralBank: 'বাংলাদেশের কেন্দ্রীয় ব্যাংক',
+        searchPh: 'সাইটে অনুসন্ধান করুন',
+        nav: { home: 'মূলপাতা', about: 'পরিচিতি', mp: 'মুদ্রানীতি', fin: 'আর্থিক ব্যবস্থা', fx: 'বৈদেশিক মুদ্রা', gsec: 'সরকারি সিকিউরিটিজ', pay: 'পেমেন্ট', pub: 'প্রকাশনা' },
+        noticeTag: 'নোটিশ',
+        notice: 'H1FY27 মুদ্রানীতির জন্য অংশীজনের মতামত আহ্বান · ১২৩তম প্রাইজবন্ড ড্র ফলাফল প্রকাশিত · আর্থিক স্থিতিশীলতা প্রতিবেদন ২০২৫ প্রকাশিত',
+        viewAll: 'সব দেখুন',
+        newBadge: 'নতুন',
+        newsTitle: 'সাম্প্রতিক সংবাদ ও সার্কুলার',
+        news: [
+          { text: 'সিকিউরিটি ম্যানেজমেন্ট বিভাগের পরিচালক (চুক্তিভিত্তিক) সংক্রান্ত সার্কুলার', isNew: false },
+          { text: 'রি-সার্কুলার: চিফ লিগ্যাল অ্যাফেয়ার্স অফিসার (চুক্তিভিত্তিক) — টিওআর', isNew: true },
+          { text: 'H1FY27 মুদ্রানীতির জন্য অংশীজনের মতামত', isNew: true },
+          { text: 'শূন্যপদ: মহাপরিচালক (চুক্তিভিত্তিক), ইনস্টিটিউট অব ব্যাংকার্স, বাংলাদেশ (আইবিবি)', isNew: false },
+          { text: 'FEPD-1 সার্কুলার নং ১৪: নন-রেসিডেন্ট কনভার্টিবল টাকা অ্যাকাউন্ট (NRCTA)', isNew: false },
+          { text: 'BRPD-1 সার্কুলার লেটার নং ২০: ভোক্তা অর্থায়নের প্রুডেনশিয়াল রেগুলেশন', isNew: false },
+          { text: 'FEPD-1 সার্কুলার লেটার নং ০৯: কনস্যুলার ফি রেমিট্যান্স', isNew: false },
+          { text: 'আর্থিক স্থিতিশীলতা প্রতিবেদন ২০২৫ — প্রকাশিত', isNew: true },
+          { text: 'বাংলাদেশ ব্যাংক কোয়ার্টারলি, অক্টোবর–ডিসেম্বর ২০২৫, ভলিউম XXIII নং ২', isNew: false },
+          { text: 'গবেষণা পেপার আহ্বান — বিবিটিএ জার্নাল: থটস অন ব্যাংকিং অ্যান্ড ফাইন্যান্স', isNew: false }
+        ],
+        marketCards: [
+          { label: 'এফএক্স স্পট রেট (USD/BDT)', date: '২৩ জুন ২০২৬ · বিকাল ০৫:০০ পর্যন্ত', single: true, value: '123.1005', link: 'সকল হার দেখুন' },
+          { label: 'কল মানি রেট', date: '২৩ জুন ২০২৬ · ভারিত গড়', single: true, value: '9.84%', link: 'বিস্তারিত দেখুন' },
+          { label: 'মানি মার্কেট রেফারেন্স রেট (MMRR)', date: '২৩ জুন ২০২৬', dual: true, aLabel: 'DOMMR (O/N)', aVal: '9.85%', bLabel: 'BOFR (O/N)', bVal: '9.84%', link: 'সব দেখুন' }
+        ],
+        policyRatesTitle: 'নীতি সুদহার',
+        policyRates: [
+          { label: 'রেপো রেট (নীতি)', val: '10.00%' },
+          { label: 'এসএলএফ রেট', val: '11.50%' },
+          { label: 'এসডিএফ রেট', val: '7.50%' },
+          { label: 'ব্যাংক রেট', val: '4.00%' }
+        ],
+        reserveTitle: 'রিজার্ভ অনুপাত', category: 'খাত',
+        reserves: [
+          { seg: 'প্রচলিত ব্যাংকিং', slr: '13%', crr: '4.0%' },
+          { seg: 'ইসলামি ব্যাংকিং', slr: '5.5%', crr: '4.0%' },
+          { seg: 'আমানতগ্রহণকারী এফআই', slr: '5%', crr: '1.5%' },
+          { seg: 'অ-আমানত এফআই', slr: '2.5%', crr: '—' }
+        ],
+        auctionTitle: 'আসন্ন নিলাম', auctionCal: 'সম্পূর্ণ নিলাম ক্যালেন্ডার', lastUpd: 'সর্বশেষ হালনাগাদ:', auctionNote: 'পরবর্তী নিষ্পত্তি · জুন ২০২৬',
+        auctions: [ { type: 'বন্ড', day: '২৩', month: 'জুন ২০২৬' }, { type: 'বিল', day: '২৮', month: 'জুন ২০২৬' } ],
+        exploreEyebrow: 'ডিরেক্টরি',
+        exploreTitle: 'বাংলাদেশ ব্যাংক অন্বেষণ করুন',
+        moreLabel: 'আরও:',
+        moreLinks: ['আইন ও বিধি', 'মিডিয়া ও প্রেস রিলিজ', 'সিটিজেন চার্টার', 'জাতীয় শুদ্ধাচার কৌশল', 'ইনোভেশন কর্নার', 'জাতীয় আইসিটি নীতি', 'সাম্প্রতিক আপলোড', 'মুদ্রা জাদুঘর'],
+        modules: [
+          { title: 'মুদ্রানীতি', links: ['মুদ্রানীতি বিবৃতি', 'এমপিসি রেজোলিউশন', 'রেপো তথ্য', 'বিবি বিল নিলাম'] },
+          { title: 'আর্থিক ব্যবস্থা', links: ['ব্যাংক ও আর্থিক প্রতিষ্ঠান', 'বিধি ও নির্দেশিকা', 'আর্থিক স্থিতিশীলতা', 'সতর্কতামূলক তত্ত্বাবধান'] },
+          { title: 'বৈদেশিক মুদ্রা বাজার', links: ['রেফারেন্স বিনিময় হার', 'বৈদেশিক রিজার্ভ', 'রেমিট্যান্স সুবিধা', 'এনআরবি বন্ড'] },
+          { title: 'সরকারি সিকিউরিটিজ বাজার', links: ['সরকারি সিকিউরিটিজ', 'টি-বিল ও বন্ড নিলাম', 'ওয়াইটিএম কার্ভ', 'বিডি সরকারি সুকুক (BGIS)'] },
+          { title: 'পেমেন্ট সিস্টেম', links: ['পেমেন্ট সিস্টেম রিপোর্ট', 'প্ল্যাটফর্ম ও প্রবণতা', 'জাতীয় পেমেন্ট ডেটা', 'ডিজিটাল পেমেন্ট'] },
+          { title: 'অর্থনৈতিক উপাত্ত', links: ['রেমিট্যান্স প্রবাহ', 'বিওপি, রপ্তানি ও আমদানি', 'এনএসডিপি', 'সাম্প্রতিক আপলোড'] },
+          { title: 'প্রকাশনা', links: ['বার্ষিক প্রতিবেদন', 'সার্কুলার ও প্রেস রিলিজ', 'অর্থনৈতিক বুলেটিন', 'গবেষণা ও ওয়ার্কিং পেপার'] },
+          { title: 'বিনিয়োগ সুবিধা', links: ['সঞ্চয়পত্র', 'প্রাইজবন্ড', 'প্রণোদনা ও সুবিধা', 'বিনিয়োগকারী তথ্য'] }
+        ],
+        svcEyebrow: 'নাগরিকদের জন্য',
+        svcTitle: 'সেবা ও সুরক্ষা',
+        cipcTitle: 'গ্রাহক স্বার্থ সংরক্ষণ কেন্দ্র (CIPC)',
+        cipcSub: 'bb.cipc@bb.org.bd · ব্যাংক বা এফআই সম্পর্কে অনলাইনে অভিযোগ দাখিল করুন',
+        cipcLine: 'কল করুন', cipcBtn: 'অভিযোগ দাখিল',
+        services: [
+          { title: 'ই-সেবা', desc: 'ব্যাংক, এফআই ও নাগরিকদের জন্য অনলাইন সেবা' },
+          { title: 'বিবি ফরম', desc: 'ডাউনলোডযোগ্য ফরম ও আবেদন' },
+          { title: 'আপনার অর্থ দাবি করুন', desc: 'অদাবিকৃত আমানত খুঁজুন ও দাবি করুন' },
+          { title: 'গ্রাহক অভিযোগ', desc: 'অভিযোগ দাখিল ও অনুসরণ করুন' },
+          { title: 'ই-টেন্ডার ও নিয়োগ', desc: 'ক্রয় বিজ্ঞপ্তি ও বিবি নিয়োগ' }
+        ],
+        govEyebrow: 'মাননীয় গভর্নর',
+        govMsg: 'বাংলাদেশ ব্যাংক মূল্য স্থিতিশীলতা এবং একটি সুদৃঢ় ও অন্তর্ভুক্তিমূলক আর্থিক ব্যবস্থা বজায় রাখতে কাজ করে। স্বচ্ছ নীতি, বিচক্ষণ তত্ত্বাবধান এবং জনগণের দীর্ঘমেয়াদি আস্থার প্রতি আমরা অঙ্গীকারবদ্ধ।',
+        govName: 'মো. মোস্তাকুর রহমান, এফসিএমএ',
+        govRole: 'গভর্নর, বাংলাদেশ ব্যাংক',
+        govPhoto: 'সরকারি প্রতিকৃতি',
+        govBtn: 'সম্পূর্ণ বাণী পড়ুন',
+        hotlineEyebrow: 'জাতীয় জরুরি হটলাইন',
+        hotlines: [
+          { num: '333', label: 'সরকারি তথ্য' },
+          { num: '999', label: 'জাতীয় জরুরি সেবা' },
+          { num: '109', label: 'নারী ও শিশু হেল্পলাইন' },
+          { num: '106', label: 'দুর্নীতি দমন (দুদক)' },
+          { num: '1090', label: 'দুর্যোগের আগাম বার্তা' }
+        ],
+        footerContact: 'যোগাযোগ', footerLinks: 'প্রয়োজনীয় লিংক', footerAbout: 'পরিচিতি', footerHotline: 'হটলাইন',
+        address: 'বাংলাদেশ ব্যাংক, মতিঝিল, ঢাকা-১০০০', phone: '+৮৮০-২-৫৫৬৬৫০০১-৬', email: 'webmaster@bb.org.bd',
+        usefulLinks: ['বৈদেশিক বিনিয়োগ ও অর্থায়ন পোর্টাল', 'পেমেন্ট সিস্টেম', 'বিধি ও নির্দেশিকা', 'মুদ্রা জাদুঘর ও ব্যাংকনোট', 'সার্কফাইন্যান্স', 'জাতীয় আইসিটি নীতি'],
+        aboutLinks: ['বাংলাদেশ ব্যাংক পরিচিতি', 'গভর্নরবৃন্দ', 'সাংগঠনিক কাঠামো', 'ক্যারিয়ার', 'তথ্য অধিকার (আরটিআই)', 'দরপত্র'],
+        copy: '© ২০২৬ বাংলাদেশ ব্যাংক · বাংলাদেশের কেন্দ্রীয় ব্যাংক',
+        fHome: 'মূলপাতা', fSitemap: 'সাইটম্যাপ', fFeedback: 'মতামত',
+        disclaimerLabel: 'দাবিত্যাগ।',
+        disclaimer: 'এই ওয়েবসাইটের তথ্য নির্ভুল রাখতে সর্বাত্মক চেষ্টা করা হলেও, এর ব্যবহারজনিত কোনো ত্রুটি, বিচ্যুতি বা ক্ষতির জন্য বাংলাদেশ ব্যাংক দায়ী থাকবে না।',
+        crumbHome: 'মূলপাতা',
+        sideRatesTitle: 'আজকের মূল সুদহার', relatedTitle: 'সম্পর্কিত',
+        indLabels: ['নীতি সুদহার (রেপো)', 'ইউএসডি / বিডিটি রেফারেন্স', 'কল মানি (গড়)', 'ব্যাংক রেট'],
+        pages: {
+          mp: {
+            eyebrow: 'মুদ্রানীতি', title: 'মুদ্রানীতি',
+            lead: 'বাংলাদেশ ব্যাংক মূল্য স্থিতিশীলতা বজায় রেখে টেকসই প্রবৃদ্ধি ও কর্মসংস্থানে সহায়তার লক্ষ্যে মুদ্রানীতি প্রণয়ন ও বাস্তবায়ন করে। নীতিগত সিদ্ধান্ত, বিবৃতি ও নীতি সুদহারের করিডোর এখানে প্রকাশিত হয়।',
+            hasHighlight: true,
+            highlight: { tag: 'সর্বশেষ', title: 'মুদ্রানীতি বিবৃতি (জানুয়ারি–জুন ২০২৬)', desc: 'অর্ধবার্ষিক বিবৃতিতে মুদ্রানীতির অবস্থান, মূল্যস্ফীতির প্রক্ষেপণ ও পরিচালন কাঠামো তুলে ধরা হয়েছে।', primary: 'বিবৃতি পড়ুন', secondary: 'পিডিএফ ডাউনলোড' },
+            groups: [
+              { title: 'এমপিসি রেজোলিউশন', items: ['এমপিসি রেজোলিউশন — ২৪তম সভা (ফেব্রু ২০২৬)', 'এমপিসি রেজোলিউশন — ২৩তম সভা (ডিসে ২০২৫)', 'এমপিসি রেজোলিউশন — ২২তম সভা (অক্টো ২০২৫)'] },
+              { title: 'রেপো ও নিলাম', items: ['রেপো তথ্য', 'বিবি বিল নিলাম', 'প্রাইমারি নিলাম — টি-বিল ও বন্ড', 'রিভার্স রেপো / এসডিএফ'] }
+            ],
+            tables: [
+              { title: 'নীতি সুদহার করিডোর', note: 'সর্বশেষ হালনাগাদ ১৫ ফেব্রু ২০২৬', head: { seg: 'উপকরণ', vals: ['হার'] }, rows: [ { seg: 'নীতি সুদহার (রেপো)', vals: ['10.00%'] }, { seg: 'স্ট্যান্ডিং লেন্ডিং ফ্যাসিলিটি (SLF)', vals: ['11.50%'] }, { seg: 'স্ট্যান্ডিং ডিপোজিট ফ্যাসিলিটি (SDF)', vals: ['7.50%'] }, { seg: 'ব্যাংক রেট', vals: ['4.00%'] } ] },
+              { title: 'রিজার্ভ অনুপাত', note: 'সর্বশেষ হালনাগাদ ০৯ মে ২০২৪', head: { seg: 'খাত', vals: ['SLR', 'CRR'] }, rows: [ { seg: 'প্রচলিত ব্যাংকিং', vals: ['13%', '4.0%'] }, { seg: 'ইসলামি ব্যাংকিং', vals: ['5.5%', '4.0%'] }, { seg: 'আমানতগ্রহণকারী এফআই', vals: ['5%', '1.5%'] }, { seg: 'অ-আমানত এফআই', vals: ['2.5%', '—'] } ] }
+            ],
+            related: ['মুদ্রানীতি বিভাগ', 'সার্কুলার ও সার্কুলার লেটার', 'রেপো ও তারল্য কার্যক্রম', 'বিবি বিল নিলাম ক্যালেন্ডার']
+          },
+          fin: {
+            eyebrow: 'আর্থিক ব্যবস্থা', title: 'আর্থিক ব্যবস্থা ও স্থিতিশীলতা',
+            lead: 'বাংলাদেশ ব্যাংক ব্যাংক ও আর্থিক প্রতিষ্ঠানকে লাইসেন্স প্রদান, নিয়ন্ত্রণ ও তত্ত্বাবধান করে এবং প্রুডেনশিয়াল ও সামষ্টিক তত্ত্বাবধানের মাধ্যমে আর্থিক ব্যবস্থার স্থিতিশীলতা রক্ষা করে।',
+            hasHighlight: true,
+            highlight: { tag: 'প্রকাশিত', title: 'আর্থিক স্থিতিশীলতা প্রতিবেদন ২০২৫', desc: 'ব্যাংকিং ব্যবস্থা, আর্থিক প্রতিষ্ঠান ও বাজারের ঝুঁকি ও সহনশীলতার একটি সার্বিক মূল্যায়ন।', primary: 'প্রতিবেদন পড়ুন', secondary: 'পিডিএফ ডাউনলোড' },
+            groups: [
+              { title: 'ব্যাংক ও আর্থিক প্রতিষ্ঠান', items: ['তফসিলি ব্যাংক', 'নন-ব্যাংক আর্থিক প্রতিষ্ঠান', 'লাইসেন্স ও অনুমোদন', 'মাইক্রোফাইন্যান্স ও এমএফএস'] },
+              { title: 'বিধি ও নির্দেশিকা', items: ['প্রুডেনশিয়াল রেগুলেশন', 'বিআরপিডি সার্কুলার', 'ঝুঁকি ব্যবস্থাপনা নির্দেশিকা', 'বাসেল III বাস্তবায়ন'] },
+              { title: 'তত্ত্বাবধান', items: ['সামষ্টিক তত্ত্বাবধান', 'স্ট্রেস টেস্টিং কাঠামো', 'আগাম সতর্কীকরণ ব্যবস্থা', 'রেজোলিউশন কাঠামো'] }
+            ],
+            tables: [
+              { title: 'রিজার্ভ অনুপাত', note: 'সর্বশেষ হালনাগাদ ০৯ মে ২০২৪', head: { seg: 'খাত', vals: ['SLR', 'CRR'] }, rows: [ { seg: 'প্রচলিত ব্যাংকিং', vals: ['13%', '4.0%'] }, { seg: 'ইসলামি ব্যাংকিং', vals: ['5.5%', '4.0%'] }, { seg: 'আমানতগ্রহণকারী এফআই', vals: ['5%', '1.5%'] }, { seg: 'অ-আমানত এফআই', vals: ['2.5%', '—'] } ] }
+            ],
+            related: ['ব্যাংক পরিদর্শন বিভাগ', 'আমানত বীমা স্কিম', 'ইন্টিগ্রেটেড সুপারভিশন সিস্টেম', 'আর্থিক খাত মূল্যায়ন']
+          },
+          pub: {
+            eyebrow: 'প্রকাশনা', title: 'প্রতিবেদন ও প্রকাশনা',
+            lead: 'বাংলাদেশ ব্যাংকের প্রধান প্রতিবেদন, পরিসংখ্যানগত বুলেটিন, সার্কুলার ও গবেষণা — নীতি, বাজার ও অর্থনীতির নির্ভরযোগ্য তথ্যভাণ্ডার।',
+            hasHighlight: true,
+            highlight: { tag: 'ফ্ল্যাগশিপ', title: 'বার্ষিক প্রতিবেদন ২০২৪–২৫', desc: 'মুদ্রা ব্যবস্থাপনা, আর্থিক খাতের উন্নয়ন ও প্রাতিষ্ঠানিক কার্যক্রমের উপর ব্যাংকের প্রধান প্রতিবেদন।', primary: 'প্রতিবেদন পড়ুন', secondary: 'পিডিএফ ডাউনলোড' },
+            groups: [
+              { title: 'প্রধান প্রতিবেদন', items: ['বার্ষিক প্রতিবেদন ২০২৪–২৫', 'আর্থিক স্থিতিশীলতা প্রতিবেদন ২০২৫', 'মুদ্রানীতি বিবৃতি H1 ২০২৬', 'বাংলাদেশ ব্যাংক কোয়ার্টারলি'] },
+              { title: 'বুলেটিন ও উপাত্ত', items: ['অর্থনৈতিক বুলেটিন', 'মাসিক অর্থনৈতিক সূচক', 'প্রধান অর্থনৈতিক সূচক', 'নির্বাচিত সূচক'] },
+              { title: 'সার্কুলার ও গবেষণা', items: ['সার্কুলার ও সার্কুলার লেটার', 'প্রেস রিলিজ', 'গবেষণা ও ওয়ার্কিং পেপার', 'বিবিটিএ জার্নাল'] }
+            ],
+            tables: [],
+            related: ['গবেষণা বিভাগ', 'পরিসংখ্যান বিভাগ', 'লাইব্রেরি ও আর্কাইভ', 'ওপেন ডেটা পোর্টাল']
+          },
+          svc: {
+            eyebrow: 'নাগরিকদের জন্য', title: 'সেবা ও সুরক্ষা',
+            lead: 'নাগরিক, ব্যাংক ও আর্থিক প্রতিষ্ঠানের জন্য অনলাইন সেবা, ডাউনলোডযোগ্য ফরম ও অভিযোগ নিষ্পত্তি — গ্রাহক স্বার্থ সংরক্ষণ কেন্দ্রসহ।',
+            hasHighlight: true,
+            highlight: { tag: 'হটলাইন ১৬২৩৬', title: 'গ্রাহক স্বার্থ সংরক্ষণ কেন্দ্র (CIPC)', desc: 'ব্যাংক বা আর্থিক প্রতিষ্ঠান সম্পর্কে অভিযোগ আছে? অনলাইনে দাখিল করুন অথবা টোল-ফ্রি ১৬২৩৬ নম্বরে কল করুন।', primary: 'অভিযোগ দাখিল', secondary: 'অভিযোগ ট্র্যাক' },
+            groups: [
+              { title: 'অনলাইন সেবা', items: ['ই-সেবা পোর্টাল', 'অনলাইন অভিযোগ দাখিল', 'বিবি ফরম ও আবেদন', 'অদাবিকৃত অর্থ দাবি করুন'] },
+              { title: 'ক্রয় ও নিয়োগ', items: ['ই-টেন্ডার বিজ্ঞপ্তি', 'বিবি নিয়োগ (ই-রিক্রুটমেন্ট)', 'ভেন্ডর নিবন্ধন', 'ইন্টার্নশিপ কর্মসূচি'] },
+              { title: 'তথ্য', items: ['সিটিজেন চার্টার', 'তথ্য অধিকার (আরটিআই)', 'সচরাচর জিজ্ঞাসা', 'যোগাযোগ ডিরেক্টরি'] }
+            ],
+            tables: [],
+            related: ['গ্রাহক স্বার্থ সংরক্ষণ কেন্দ্র', 'বৈদেশিক মুদ্রা বিনিয়োগ হেল্পডেস্ক', 'সহায়তা', 'শাখা ও কার্যালয় লোকেটর']
+          }
+        }
+      }
+    };
+
+    const L = T[lang];
+
+    // nav
+    const navDef = [['home', this.setHome], ['about', this.noop], ['mp', this.setMP], ['fin', this.setFin], ['fx', this.noop], ['gsec', this.noop], ['pay', this.noop], ['pub', this.setPub]];
+    const activeKey = view === 'home' ? 'home' : view === 'mp' ? 'mp' : view === 'fin' ? 'fin' : view === 'pub' ? 'pub' : view === 'svc' ? null : null;
+    const nav = navDef.map(([k, fn]) => {
+      const active = k === activeKey;
+      return { label: L.nav[k], onClick: fn, color: active ? '#006A4E' : '#3a4a5e', underline: active ? '#006A4E' : 'transparent' };
+    });
+
+    // lang toggle styles
+    const onSt = 'background:#fff;color:#0A3D2C;border:none;cursor:pointer;font-family:Inter,sans-serif;font-size:11.5px;font-weight:600;padding:6px 13px;';
+    const offSt = 'background:transparent;color:rgba(255,255,255,.8);border:none;cursor:pointer;font-family:Inter,sans-serif;font-size:11.5px;font-weight:600;padding:6px 13px;';
+
+    // home market cards
+    const marketCards = L.marketCards;
+
+    // modules
+    const modIcons = [ICONS.landmark, ICONS.shield, ICONS.globe, ICONS.coins, ICONS.card, ICONS.trend, ICONS.book, ICONS.note];
+    const modClicks = [this.setMP, this.setFin, this.noop, this.noop, this.noop, this.noop, this.setPub, this.noop];
+    const modules = L.modules.map((m, i) => ({ title: m.title, links: m.links, icon: svg(modIcons[i], 20), onClick: modClicks[i] }));
+
+    // services
+    const svcIcons = [ICONS.globe, ICONS.file, ICONS.note, ICONS.shield, ICONS.book];
+    const services = L.services.map((s, i) => ({ ...s, icon: svg(svcIcons[i], 20), onClick: this.setSvc }));
+
+    // inner page selection
+    const innerViews = ['mp', 'fin', 'pub', 'svc'];
+    const isInner = innerViews.indexOf(view) !== -1;
+    const page = isInner ? L.pages[view] : L.pages.mp;
+
+    // sidebar key rates (inner)
+    const sideRates = [
+      { label: L.indLabels[0], val: '10.00%' },
+      { label: L.indLabels[2], val: '9.84%' },
+      { label: L.indLabels[1], val: '123.10' },
+      { label: L.indLabels[3], val: '4.00%' }
+    ];
+
+    return {
+      L, lang, nav,
+      isHome: view === 'home', isInner, page,
+      setHome: this.setHome, setMP: this.setMP, setFin: this.setFin, setPub: this.setPub, setSvc: this.setSvc,
+      setEn: this.setEn, setBn: this.setBn,
+      enBtnStyle: lang === 'en' ? onSt : offSt,
+      bnBtnStyle: lang === 'bn' ? onSt : offSt,
+      marketCards, news: L.news, policyRates: L.policyRates, reserves: L.reserves, auctions: L.auctions,
+      modules, moreLinks: L.moreLinks, services, hotlines: L.hotlines,
+      usefulLinks: L.usefulLinks, aboutLinks: L.aboutLinks, sideRates,
+      crestIcon: svg(ICONS.landmark, 28), searchIcon: svg(ICONS.search, 17), arrowIcon: svg(ICONS.arrow, 16),
+      chevIcon: svg(ICONS.chev, 15), phoneIcon: svg(ICONS.phone, 22), fileIcon: svg(ICONS.file, 24),
+      trendIcon: svg(ICONS.trend, 15), bankIcon: svg(ICONS.bank, 15), calIcon: svg(ICONS.cal, 15),
+      fbIcon: svg(ICONS.fb, 16), xIcon: svg(ICONS.x, 16), ytIcon: svg(ICONS.yt, 16)
+    };
+  }
+}
+</script>
+</body>
+</html>
