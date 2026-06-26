@@ -1,0 +1,7 @@
+19-nsdp.png                  {"t":"","h1":0,"tbl":0,"words":29,"capt":true}
+20-circular.png              {"t":"","h1":0,"tbl":0,"words":29,"capt":true}
+21-publication.png           {"t":"","h1":0,"tbl":0,"words":29,"capt":true}
+22-services.png              {"t":"","h1":0,"tbl":0,"words":29,"capt":true}
+23-sitemap.png               {"t":"","h1":0,"tbl":0,"words":29,"capt":true}
+24-currency.png              {"t":"","h1":0,"tbl":0,"words":29,"capt":true}
+25-sanchayapatra.png         {"t":"","h1":0,"tbl":0,"words":29,"capt":true}

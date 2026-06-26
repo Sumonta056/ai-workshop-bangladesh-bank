@@ -1,0 +1,73 @@
+services:
+  postgres:
+    image: postgres:15-alpine
+    container_name: workshop-postgres
+    environment:
+      POSTGRES_USER: workshop
+      POSTGRES_PASSWORD: workshop123
+      POSTGRES_DB: taskmanager_db
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U workshop"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - workshop-network
+
+  redis:
+    image: redis:7-alpine
+    container_name: workshop-redis
+    command: redis-server --requirepass workshop123
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "--raw", "incr", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - workshop-network
+
+  adminer:
+    image: adminer:latest
+    container_name: workshop-adminer
+    ports:
+      - "8080:8080"
+    volumes:
+      - adminer_data:/var/lib/adminer
+    depends_on:
+      postgres:
+        condition: service_healthy
+    networks:
+      - workshop-network
+
+  redis-commander:
+    image: rediscommander/redis-commander:latest
+    container_name: workshop-redis-commander
+    environment:
+      REDIS_HOSTS: local:workshop-redis:6379:0:workshop123
+    ports:
+      - "8081:8081"
+    depends_on:
+      redis:
+        condition: service_healthy
+    networks:
+      - workshop-network
+
+volumes:
+  postgres_data:
+    driver: local
+  redis_data:
+    driver: local
+  adminer_data:
+    driver: local
+
+networks:
+  workshop-network:
+    driver: bridge

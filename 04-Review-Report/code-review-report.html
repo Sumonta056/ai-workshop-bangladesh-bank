@@ -1,0 +1,425 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Code Review · Bangladesh Bank Nuxt Refactor</title>
+<style>
+  :root{
+    --green:#006A4E; --green-dark:#0A3D2C; --green-darker:#00543E;
+    --red:#F42A41; --green-soft:#E4F1EC; --green-border:#C5E0D6;
+    --page:#F4F6F8; --border:#E0E4E8; --border-soft:#EDF0F3;
+    --ink:#0A0A0A; --ink-1:#1a1a1a; --ink-2:#4A4A4A; --ink-muted:#8a938e;
+    --high:#D7263D; --high-bg:#FDECEE; --high-border:#F4C2C9;
+    --med:#C77700; --med-bg:#FFF6E6; --med-border:#F2DBA8;
+    --low:#2E7D6B; --low-bg:#E8F3EF; --low-border:#C5E0D6;
+    --mono:'JetBrains Mono',ui-monospace,SFMono-Regular,Menlo,monospace;
+    --sans:'Inter',system-ui,-apple-system,sans-serif;
+    --max:1080px;
+  }
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;}
+  body{font-family:var(--sans);color:var(--ink-1);background:var(--page);-webkit-font-smoothing:antialiased;line-height:1.5;}
+  a{color:var(--green);text-decoration:none;}
+
+  /* Masthead */
+  .top{background:var(--green);color:#fff;border-bottom:3px solid var(--red);}
+  .top-in{max-width:var(--max);margin:0 auto;padding:26px 32px;display:flex;align-items:center;gap:18px;flex-wrap:wrap;}
+  .crest{width:48px;height:48px;border-radius:50%;background:#fff;color:var(--green);display:flex;align-items:center;justify-content:center;flex:none;font-weight:800;font-size:20px;box-shadow:0 2px 8px rgba(0,0,0,.15);}
+  .top h1{margin:0;font-size:21px;font-weight:700;letter-spacing:-.01em;}
+  .top .sub{font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:rgba(255,255,255,.8);margin-top:3px;}
+  .badge-ssr{margin-left:auto;font:600 11px/1 var(--mono);background:rgba(255,255,255,.14);border:1px solid rgba(255,255,255,.35);padding:7px 12px;border-radius:999px;}
+
+  .wrap{max-width:var(--max);margin:0 auto;padding:28px 32px 80px;}
+
+  /* Score / summary */
+  .summary{display:grid;grid-template-columns:1.3fr 1fr 1fr 1fr;gap:14px;margin-bottom:26px;}
+  .card{background:#fff;border:1px solid var(--border);border-radius:14px;padding:20px;}
+  .score{display:flex;align-items:center;gap:18px;}
+  .ring{--p:74;width:74px;height:74px;border-radius:50%;flex:none;
+    background:conic-gradient(var(--green) calc(var(--p)*1%),var(--border) 0);
+    display:flex;align-items:center;justify-content:center;}
+  .ring i{width:56px;height:56px;border-radius:50%;background:#fff;display:flex;align-items:center;justify-content:center;font:800 19px/1 var(--mono);color:var(--green);font-style:normal;}
+  .score .lbl{font-size:12px;color:var(--ink-2);text-transform:uppercase;letter-spacing:.06em;font-weight:600;}
+  .score .meta{font-size:13px;color:var(--ink-2);margin-top:5px;}
+  .stat{text-align:left;}
+  .stat .n{font:800 30px/1 var(--mono);}
+  .stat .t{font-size:11px;text-transform:uppercase;letter-spacing:.07em;font-weight:600;color:var(--ink-2);margin-top:8px;}
+  .stat.high .n{color:var(--high);} .stat.med .n{color:var(--med);} .stat.low .n{color:var(--low);}
+  .dot{width:9px;height:9px;border-radius:50%;display:inline-block;margin-right:6px;vertical-align:middle;}
+  .dot.high{background:var(--high);} .dot.med{background:var(--med);} .dot.low{background:var(--low);}
+
+  .lead{background:#fff;border:1px solid var(--border);border-left:4px solid var(--green);border-radius:12px;padding:18px 22px;margin-bottom:26px;}
+  .lead h2{margin:0 0 8px;font-size:15px;color:var(--green);}
+  .lead p{margin:0;font-size:13.5px;color:var(--ink-2);line-height:1.65;}
+  .lead .good{margin-top:10px;font-size:13px;color:var(--ink-2);}
+  .lead .good b{color:var(--green);}
+
+  /* Toolbar */
+  .toolbar{display:flex;gap:10px;align-items:center;flex-wrap:wrap;position:sticky;top:0;z-index:20;
+    background:var(--page);padding:14px 0;margin-bottom:6px;border-bottom:1px solid var(--border);}
+  .tabs{display:flex;gap:6px;flex-wrap:wrap;}
+  .tab{cursor:pointer;border:1px solid var(--border);background:#fff;border-radius:999px;padding:8px 15px;font:600 13px var(--sans);color:var(--ink-2);transition:.15s;display:inline-flex;align-items:center;gap:7px;}
+  .tab:hover{border-color:var(--green);color:var(--green);}
+  .tab.on{background:var(--green);color:#fff;border-color:var(--green);}
+  .tab.on .dot{filter:brightness(2.4);}
+  .tab .c{font:700 11px var(--mono);opacity:.8;}
+  .search-box{margin-left:auto;display:flex;align-items:center;gap:8px;background:#fff;border:1px solid var(--border);border-radius:999px;padding:8px 14px;}
+  .search-box input{border:none;outline:none;font:14px var(--sans);width:180px;background:transparent;}
+  .ctl{cursor:pointer;border:1px solid var(--border);background:#fff;border-radius:8px;padding:8px 12px;font:600 12px var(--sans);color:var(--ink-2);}
+  .ctl:hover{border-color:var(--green);color:var(--green);}
+
+  /* Issue cards */
+  .group-h{font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:.09em;color:var(--ink-muted);margin:26px 0 12px;}
+  .issue{background:#fff;border:1px solid var(--border);border-radius:12px;margin-bottom:12px;overflow:hidden;transition:.15s;}
+  .issue:hover{box-shadow:0 4px 16px rgba(0,0,0,.05);}
+  .issue.sev-high{border-left:4px solid var(--high);}
+  .issue.sev-med{border-left:4px solid var(--med);}
+  .issue.sev-low{border-left:4px solid var(--low);}
+  .ih{display:flex;align-items:flex-start;gap:14px;padding:16px 20px;cursor:pointer;user-select:none;}
+  .sev{font:700 10px/1 var(--mono);text-transform:uppercase;letter-spacing:.05em;padding:5px 9px;border-radius:6px;flex:none;margin-top:2px;}
+  .sev.high{background:var(--high-bg);color:var(--high);border:1px solid var(--high-border);}
+  .sev.med{background:var(--med-bg);color:var(--med);border:1px solid var(--med-border);}
+  .sev.low{background:var(--low-bg);color:var(--low);border:1px solid var(--low-border);}
+  .ih .tt{flex:1;min-width:0;}
+  .ih .id{font:700 11px var(--mono);color:var(--ink-muted);}
+  .ih .ti{font-size:15px;font-weight:600;color:var(--ink-1);margin-top:3px;}
+  .ih .loc{font:12px var(--mono);color:var(--green);margin-top:5px;word-break:break-all;}
+  .ih .tags{margin-top:8px;display:flex;gap:6px;flex-wrap:wrap;}
+  .chip{font:600 10px/1 var(--sans);text-transform:uppercase;letter-spacing:.04em;padding:4px 8px;border-radius:999px;background:var(--green-soft);color:var(--green);border:1px solid var(--green-border);}
+  .prio{font:700 10px/1 var(--mono);padding:4px 8px;border-radius:999px;border:1px solid var(--border);color:var(--ink-2);}
+  .prio.p1{background:var(--high-bg);color:var(--high);border-color:var(--high-border);}
+  .prio.p2{background:var(--med-bg);color:var(--med);border-color:var(--med-border);}
+  .prio.p3{background:var(--low-bg);color:var(--low);border-color:var(--low-border);}
+  .caret{flex:none;color:var(--ink-muted);transition:transform .2s;margin-top:4px;font-size:13px;}
+  .issue.open .caret{transform:rotate(90deg);}
+  .body{display:none;padding:0 20px 20px 20px;border-top:1px solid var(--border-soft);}
+  .issue.open .body{display:block;}
+  .body section{margin-top:16px;}
+  .body h4{margin:0 0 6px;font-size:11px;text-transform:uppercase;letter-spacing:.07em;color:var(--ink-muted);font-weight:700;}
+  .body p{margin:0;font-size:13.5px;color:var(--ink-2);line-height:1.65;}
+  .note{background:var(--green-soft);border:1px solid var(--green-border);border-radius:9px;padding:11px 14px;font-size:13px;color:var(--green-dark);line-height:1.6;}
+  .note b{color:var(--green-darker);}
+  pre{background:#0c1f18;color:#d7efe5;border-radius:9px;padding:13px 15px;overflow:auto;font:12.5px/1.55 var(--mono);margin:8px 0 0;}
+  pre .c{color:#6f9b8b;} pre .k{color:#7fd1ae;} pre .a{color:#f0a8b0;}
+  .empty{display:none;text-align:center;padding:50px;color:var(--ink-muted);font-size:14px;}
+  .foot{margin-top:40px;padding-top:20px;border-top:1px solid var(--border);font-size:12px;color:var(--ink-muted);text-align:center;line-height:1.7;}
+  @media(max-width:760px){.summary{grid-template-columns:1fr 1fr;}.search-box{margin-left:0;width:100%;}.search-box input{flex:1;width:auto;}}
+  @media print{.toolbar,.ctl,.search-box{display:none!important;}.issue .body{display:block!important;}.issue{break-inside:avoid;}}
+</style>
+</head>
+<body>
+  <header class="top">
+    <div class="top-in">
+      <div class="crest">BB</div>
+      <div>
+        <h1>Code Review Report</h1>
+        <div class="sub">Bangladesh Bank · Nuxt 4 Static Refactor</div>
+      </div>
+      <span class="badge-ssr">SENIOR REVIEW · HIGH DEPTH</span>
+    </div>
+  </header>
+
+  <div class="wrap">
+
+    <!-- Summary -->
+    <div class="summary">
+      <div class="card score">
+        <div class="ring" style="--p:78"><i>7.8</i></div>
+        <div>
+          <div class="lbl">Health Score</div>
+          <div class="meta">Strong architecture.<br/>No critical/blocking defects.</div>
+        </div>
+      </div>
+      <div class="card stat high"><div class="n">3</div><div class="t"><span class="dot high"></span>High</div></div>
+      <div class="card stat med"><div class="n">6</div><div class="t"><span class="dot med"></span>Medium</div></div>
+      <div class="card stat low"><div class="n">6</div><div class="t"><span class="dot low"></span>Low</div></div>
+    </div>
+
+    <!-- Executive summary -->
+    <div class="lead">
+      <h2>Executive Summary</h2>
+      <p>
+        The codebase is a faithful, well-engineered port of a single-file HTML design into a modular Nuxt 4
+        static site. Component decomposition is clean (34 single-responsibility <code>.vue</code> files, none oversized),
+        styling is centralised through design tokens, content is fully typed and bilingual via a lightweight
+        <code>useLocale()</code> composable, and the routing maps the original SPA views to real pages. There are
+        <b>no critical, security-blocking, or data-integrity defects.</b>
+      </p>
+      <div class="good">
+        <b>Strengths:</b> token-driven theming · typed i18n with a single <code>LocaleContent</code> contract preventing en/bn drift ·
+        scoped CSS replacing the original inline-style soup · sensible composables (<code>useLocale</code>, <code>useNav</code>) ·
+        data-driven single <code>InnerPage.vue</code> for four views · descriptive, intent-revealing comments.
+      </div>
+      <p style="margin-top:10px">
+        Findings concentrate on <b>accessibility, SEO, and content-layer consistency</b> — all of which can be addressed
+        <b>without changing a single pixel</b>, so they respect the project's pixel-identical constraint. For a public,
+        bilingual government banking site these are the items that matter most before launch.
+      </p>
+    </div>
+
+    <!-- Toolbar -->
+    <div class="toolbar">
+      <div class="tabs">
+        <button class="tab on" data-f="all">All <span class="c">15</span></button>
+        <button class="tab" data-f="high"><span class="dot high"></span>High <span class="c">3</span></button>
+        <button class="tab" data-f="med"><span class="dot med"></span>Medium <span class="c">6</span></button>
+        <button class="tab" data-f="low"><span class="dot low"></span>Low <span class="c">6</span></button>
+      </div>
+      <button class="ctl" id="toggleAll">Expand all</button>
+      <div class="search-box">
+        <span style="color:var(--ink-muted)">⌕</span>
+        <input id="q" type="text" placeholder="Filter issues…" />
+      </div>
+    </div>
+
+    <div id="list"></div>
+    <div class="empty" id="empty">No issues match your filter.</div>
+
+    <div class="foot">
+      Generated as part of a senior-level structural review · Scope: <code>03-Bangladesh-Bank-New-Website/app</code> ·
+      15 findings · 0 blocking · Click any card to expand details &amp; notes.<br/>
+      This report is advisory. No source files were modified.
+    </div>
+  </div>
+
+<script>
+const ISSUES = [
+  /* ---------------- HIGH ---------------- */
+  {
+    id:"H-01", sev:"high", prio:"P1",
+    title:"Document <html lang> never updates when the language toggle flips to Bangla",
+    loc:"nuxt.config.ts (htmlAttrs.lang:'en') · app/composables/useLocale.ts",
+    tags:["Accessibility","SEO","i18n","Correctness"],
+    desc:"The locale toggle re-renders all content in Bangla via useState, but the document language is hardcoded to <code>lang=\"en\"</code> in nuxt.config and is never updated. Screen readers continue announcing Bangla text with an English speech engine, and search engines mislabel the page language.",
+    impact:"On a bilingual government site this is the single highest-value accessibility defect: assistive tech mispronounces the entire Bangla experience, and WCAG 3.1.1/3.1.2 (Language of Page/Parts) fail. Also degrades hreflang/SEO signals.",
+    fix:"Drive the html lang attribute from the active locale, e.g. in useLocale or app.vue:",
+    code:"<span class=\"c\">// in a component or plugin that has access to the locale</span>\n<span class=\"k\">useHead</span>({ htmlAttrs: { lang: <span class=\"k\">computed</span>(() => lang.value) } })",
+    note:"Invisible to the design — zero pixels change. This is the clearest, cheapest high-impact win in the codebase."
+  },
+  {
+    id:"H-02", sev:"high", prio:"P1",
+    title:"Interactive elements are non-semantic / not keyboard accessible",
+    loc:"Masthead.vue (.brand div @click), NewsPanel/Sidebar/InnerHeader/SiteFooter (<a> without href), social spans",
+    tags:["Accessibility","Semantics","Keyboard"],
+    desc:"Many clickable affordances are <code>&lt;div @click&gt;</code> or <code>&lt;a class=\"link\"&gt;</code> with no <code>href</code>, no <code>role</code>, no <code>tabindex</code>, and no <code>keydown</code> handler. Examples: the masthead brand (navigates home), 'View all' links, related links, breadcrumb home, footer links, and the social icons. They are unreachable by keyboard and invisible to screen readers as actionable.",
+    impact:"Keyboard-only and screen-reader users cannot navigate via these controls. For a government site this commonly breaches mandated accessibility (WCAG 2.1.1 Keyboard, 4.1.2 Name/Role/Value).",
+    fix:"Use real semantics: anchors that navigate should be <code>&lt;NuxtLink to=\"…\"&gt;</code> (renders a real href, focusable, SEO-crawlable). For genuine actions keep <code>&lt;button&gt;</code>. The primary nav already does this correctly — extend the pattern.",
+    code:"<span class=\"c\">// Masthead brand — instead of <div @click></span>\n<span class=\"a\">&lt;NuxtLink to=\"/\" class=\"brand\"&gt;</span> … <span class=\"a\">&lt;/NuxtLink&gt;</span>\n<span class=\"c\">// 'View all' / related links → NuxtLink with a real target</span>",
+    note:"The nav buttons are already accessible. The gap is purely in the link/div affordances. None of this alters layout if you keep the same classes."
+  },
+  {
+    id:"H-03", sev:"high", prio:"P1",
+    title:"No SEO foundation: home page has no <title>, no meta descriptions, OG, canonical or sitemap",
+    loc:"app/app.vue · app/pages/index.vue · nuxt.config.ts",
+    tags:["SEO","Discoverability"],
+    desc:"Only the inner pages set a title (via InnerPage's useHead). The home page sets none, so it falls back to an empty/default title. There are no per-route meta descriptions, no Open Graph / Twitter cards, no canonical URLs, and no generated sitemap/robots — table stakes for a public institutional site that must rank and share well.",
+    impact:"Poor search ranking and broken link previews when the central bank's pages are shared on social/messaging. The homepage — the most-shared URL — is the worst affected.",
+    fix:"Add a default app-level head (title template + description + OG) and a per-page title on index. Consider @nuxtjs/seo or nuxt-simple-sitemap for sitemap/robots/canonical at build time (works with the static preset).",
+    code:"<span class=\"c\">// app.vue or nuxt.config app.head</span>\n<span class=\"k\">useHead</span>({ titleTemplate: (t) => t ? `${t} · Bangladesh Bank` : 'Bangladesh Bank — Central Bank of Bangladesh' })",
+    note:"Static-site friendly — all of this resolves at generate time. No visual impact."
+  },
+
+  /* ---------------- MEDIUM ---------------- */
+  {
+    id:"M-01", sev:"med", prio:"P2",
+    title:"Content hardcoded inside components, bypassing the i18n/data layer",
+    loc:"Sidebar.vue (rate values '10.00%'…), PolicyRates.vue ('15 Feb 2026'), ReserveRatios.vue ('09 May 2024'), CipcBanner.vue ('16236')",
+    tags:["Consistency","i18n","Maintainability"],
+    desc:"The project's whole design is that content lives in en.ts/bn.ts behind the typed LocaleContent contract. Yet several components embed literal values directly: the sidebar key-rate numbers, the 'Last updated' dates, and the CIPC phone number. These never translate and drift from the single source of truth.",
+    impact:"Bangla view shows English-formatted dates/numbers inconsistently; updating a rate means hunting through components instead of editing the dictionary. Erodes the architecture's core guarantee.",
+    fix:"Move these literals into the locale dictionaries (or a dedicated data module) so they flow through L like everything else.",
+    note:"Not a bug today, but it quietly undermines the i18n contract that the rest of the codebase enforces so well."
+  },
+  {
+    id:"M-02", sev:"med", prio:"P2",
+    title:"v-html used to inject SVG icon markup",
+    loc:"app/components/base/BaseIcon.vue (v-html=\"path\")",
+    tags:["Security pattern","XSS-surface"],
+    desc:"BaseIcon renders icon bodies with <code>v-html</code>. Today the source is a frozen <code>as const</code> map in icons.ts (developer-controlled, no user input), so there is <b>no live XSS risk</b>. The flag is about the pattern: v-html is the standard injection vector, and a future refactor that lets any dynamic value reach this prop would open a hole on a banking site.",
+    impact:"Currently benign. Becomes a real vulnerability the moment icon paths become data-driven or user-influenced.",
+    fix:"Prefer a static component approach — e.g. render the known SVG children per icon name, or a small set of explicit <code>&lt;component&gt;</code> mappings — so untrusted strings can never be interpolated as HTML. If keeping v-html, add a comment asserting the input invariant and a lint guard.",
+    note:"Medium confidence on severity — safe now, flagged because the input contract is the only thing keeping it safe."
+  },
+  {
+    id:"M-03", sev:"med", prio:"P2",
+    title:"No custom error / 404 page",
+    loc:"app/ (missing error.vue)",
+    tags:["UX","Robustness"],
+    desc:"There is no <code>app/error.vue</code>. Any unknown route or generate-time error renders Nuxt's default error screen — off-brand and jarring for an institutional site, with no path back into the localized layout.",
+    impact:"Users hitting a stale/mistyped link get a generic, unstyled error with no navigation back, breaking trust on a .gov-class property.",
+    fix:"Add app/error.vue that reuses the masthead/footer and offers a localized 'return home' link.",
+    note:"Quick to add and keeps the branded shell intact even on failure."
+  },
+  {
+    id:"M-04", sev:"med", prio:"P2",
+    title:"Vue Devtools left enabled; no production guard",
+    loc:"nuxt.config.ts (devtools: { enabled: true })",
+    tags:["Build","Config"],
+    desc:"<code>devtools: { enabled: true }</code> is set unconditionally. While Nuxt typically strips devtools from production builds, relying on default behavior for a public banking site is worth tightening explicitly.",
+    impact:"Low real-world risk, but an explicit prod guard removes any chance of shipping the devtools client and signals intent.",
+    fix:"Gate on environment, e.g. <code>devtools: { enabled: process.env.NODE_ENV !== 'production' }</code>, or rely on the default and document the decision.",
+    note:"Minor hardening; mostly hygiene."
+  },
+  {
+    id:"M-05", sev:"med", prio:"P3",
+    title:"Search input is decorative: no <label>, no form, no handler",
+    loc:"app/components/layout/Masthead.vue (search-input)",
+    tags:["Accessibility","UX"],
+    desc:"The masthead search is a bare <code>&lt;input&gt;</code> with a placeholder only — no associated <code>&lt;label&gt;</code>, not wrapped in a <code>&lt;form&gt;</code>, and no submit behavior. Acceptable given the static, backend-less scope, but it reads as functional and isn't.",
+    impact:"Screen readers announce an unlabeled textbox; users may type and press Enter expecting results. Placeholder-as-label fails WCAG 1.3.1 / 3.3.2.",
+    fix:"Add a visually-hidden <code>&lt;label&gt;</code> (or aria-label), wrap in a form, and either disable or wire it to a results page when search lands.",
+    note:"Honest scoping is fine — but at minimum give it an accessible name."
+  },
+  {
+    id:"M-06", sev:"med", prio:"P3",
+    title:"No tests and no test tooling",
+    loc:"project root (no vitest/@nuxt/test-utils, no test files)",
+    tags:["Testing","Maintainability"],
+    desc:"There is no test setup at all. For a static content port this is defensible, but a couple of cheap guards would lock in the architecture's promises — e.g. that en.ts and bn.ts satisfy the same shape and that nav/route maps stay in sync.",
+    impact:"Refactors can silently break the en/bn structural parity or the positional icon/route zip arrays (ExploreDirectory, CitizenServices) with nothing to catch it.",
+    fix:"Add @nuxt/test-utils + vitest with a tiny suite: a type/shape assertion that bn matches LocaleContent, and a check that moduleMeta/serviceIcons lengths equal their L.* arrays.",
+    note:"Even 3–4 tests would meaningfully protect the i18n contract and the positional-array assumptions."
+  },
+
+  /* ---------------- LOW ---------------- */
+  {
+    id:"L-01", sev:"low", prio:"P3",
+    title:"Array index used as :key across many v-for lists",
+    loc:"NewsPanel, DataTable, LinkGroup, Sidebar, ExploreDirectory, InnerPage, et al.",
+    tags:["Vue idiom"],
+    desc:"Lists key on the loop index (<code>:key=\"i\"</code>). For these static, never-reordered lists it's harmless, but it's an anti-pattern Vue lint rules flag and would cause subtle bugs if any list ever becomes dynamic/reorderable.",
+    impact:"None today; a latent footgun for future dynamic lists.",
+    fix:"Key on a stable field where one exists (e.g. label/title/num); some components already do this (HotlineStrip keys on h.num).",
+    note:"Cosmetic/idiomatic — safe to defer, easy to standardize."
+  },
+  {
+    id:"L-02", sev:"low", prio:"P3",
+    title:"README is the default Nuxt starter, not project docs",
+    loc:"README.md",
+    tags:["Docs"],
+    desc:"README.md is the boilerplate 'Nuxt Minimal Starter' text. The real project context lives only in CLAUDE.md. A newcomer reading README learns nothing about the pixel-identical port, the i18n model, or the static-generate workflow.",
+    impact:"Onboarding friction; the genuinely useful constraints in CLAUDE.md aren't where most devs look first.",
+    fix:"Replace README with a short project overview (purpose, architecture, generate command, the design-fidelity rule).",
+    note:"CLAUDE.md is excellent — just surface a digest of it in README."
+  },
+  {
+    id:"L-03", sev:"low", prio:"P3",
+    title:"Type names collide with component names",
+    loc:"app/i18n/types.ts (MarketCard, ModuleCard, ServiceCard, DataTable, LinkGroup)",
+    tags:["Naming","DX"],
+    desc:"Several interfaces share names with components (MarketCard.vue vs interface MarketCard, etc.). It compiles fine, but reading 'MarketCard' is ambiguous between 'the data shape' and 'the component'.",
+    impact:"Mild cognitive overhead and import ambiguity during navigation/refactors.",
+    fix:"Suffix the data shapes (e.g. <code>MarketCardData</code> / <code>ModuleCardData</code>) to disambiguate intent.",
+    note:"Pure readability; no functional effect."
+  },
+  {
+    id:"L-04", sev:"low", prio:"P3",
+    title:"MarketCard shape uses optional flags instead of a discriminated union",
+    loc:"app/i18n/types.ts (MarketCard: single?/dual?/value?/aLabel?…)",
+    tags:["Type-safety"],
+    desc:"The MarketCard interface models two variants (single value vs dual value) as a bag of optional fields plus boolean flags. The type permits invalid states (e.g. single:true with dual fields set, or neither set).",
+    impact:"Weaker compile-time guarantees; the component must trust runtime data shape.",
+    fix:"Model as a discriminated union: <code>{ kind:'single'; value } | { kind:'dual'; aLabel; aVal; bLabel; bVal }</code> sharing common fields.",
+    note:"Small win in type rigor; the current rendering logic already branches cleanly on single/dual."
+  },
+  {
+    id:"L-05", sev:"low", prio:"P3",
+    title:"Two third-party font origins, render-blocking",
+    loc:"nuxt.config.ts app.head.link (rsms.me Inter + Google Fonts JetBrains Mono)",
+    tags:["Performance","Privacy"],
+    desc:"Fonts load from two external origins as render-blocking stylesheets. Preconnect hints are present (good), but cross-origin font CDNs add latency and a privacy/availability dependency — notable for a government site where self-hosting is often preferred.",
+    impact:"Minor LCP/CLS exposure and a third-party dependency; possible data-residency considerations for a .gov property.",
+    fix:"Consider self-hosting via @nuxt/fonts or fontsource (bundles at build, served from your origin) with appropriate font-display.",
+    note:"Optimization, not a defect. Self-hosting also removes the external point of failure."
+  },
+  {
+    id:"L-06", sev:"low", prio:"P3",
+    title:"The '.inner' max-width container pattern is duplicated across many components",
+    loc:"ExploreDirectory, CitizenServices, CipcBanner, GovernorSection, HotlineStrip, InnerHeader, etc.",
+    tags:["DRY","Refactor"],
+    desc:"The same <code>max-width:var(--bb-max); margin:0 auto; padding:0 var(--bb-gutter)</code> band container is re-declared in ~8 components' scoped styles. base.css already defines a <code>.bb-container</code> utility that goes largely unused.",
+    impact:"Repetition; a future gutter/max-width change touches many files instead of one.",
+    fix:"Reuse the existing <code>.bb-container</code> helper (or a tiny <Band> wrapper component) where the padding values match exactly.",
+    note:"Low priority — scoped styles keep it safe; this is consolidation, not correctness. Verify pixel parity per component before merging since paddings vary slightly."
+  }
+];
+
+const list = document.getElementById('list');
+const SEVNAME = {high:'High Priority', med:'Medium Priority', low:'Low Priority'};
+const ORDER = ['high','med','low'];
+
+function render(items){
+  list.innerHTML='';
+  let any=false;
+  ORDER.forEach(sev=>{
+    const group = items.filter(i=>i.sev===sev);
+    if(!group.length) return;
+    any=true;
+    const h=document.createElement('div');
+    h.className='group-h';
+    h.innerHTML=`<span class="dot ${sev}"></span>${SEVNAME[sev]} — ${group.length}`;
+    list.appendChild(h);
+    group.forEach(i=>list.appendChild(card(i)));
+  });
+  document.getElementById('empty').style.display = any ? 'none':'block';
+}
+
+function card(i){
+  const el=document.createElement('div');
+  el.className=`issue sev-${i.sev}`;
+  const tags=i.tags.map(t=>`<span class="chip">${t}</span>`).join('');
+  const sevTxt={high:'High',med:'Medium',low:'Low'}[i.sev];
+  const code = i.code ? `<section><h4>Suggested fix</h4><pre>${i.code}</pre></section>` : '';
+  const fix = i.fix ? `<section><h4>Recommendation</h4><p>${i.fix}</p></section>` : '';
+  el.innerHTML=`
+    <div class="ih">
+      <span class="sev ${i.sev}">${sevTxt}</span>
+      <div class="tt">
+        <span class="id">${i.id}</span>
+        <div class="ti">${i.title}</div>
+        <div class="loc">${i.loc}</div>
+        <div class="tags"><span class="prio ${i.prio.toLowerCase()}">${i.prio}</span>${tags}</div>
+      </div>
+      <span class="caret">▶</span>
+    </div>
+    <div class="body">
+      <section><h4>Analysis</h4><p>${i.desc}</p></section>
+      <section><h4>Impact</h4><p>${i.impact}</p></section>
+      ${fix}${code}
+      <section><h4>Note</h4><div class="note">${i.note}</div></section>
+    </div>`;
+  el.querySelector('.ih').addEventListener('click',()=>el.classList.toggle('open'));
+  return el;
+}
+
+let curFilter='all', curQ='';
+function apply(){
+  let items=ISSUES.slice();
+  if(curFilter!=='all') items=items.filter(i=>i.sev===curFilter);
+  if(curQ){
+    const q=curQ.toLowerCase();
+    items=items.filter(i=>(i.title+i.loc+i.desc+i.tags.join(' ')+i.id).toLowerCase().includes(q));
+  }
+  render(items);
+}
+
+document.querySelectorAll('.tab').forEach(t=>t.addEventListener('click',()=>{
+  document.querySelectorAll('.tab').forEach(x=>x.classList.remove('on'));
+  t.classList.add('on');
+  curFilter=t.dataset.f; apply();
+}));
+document.getElementById('q').addEventListener('input',e=>{curQ=e.target.value;apply();});
+
+const toggleBtn=document.getElementById('toggleAll');
+let expanded=false;
+toggleBtn.addEventListener('click',()=>{
+  expanded=!expanded;
+  document.querySelectorAll('.issue').forEach(c=>c.classList.toggle('open',expanded));
+  toggleBtn.textContent=expanded?'Collapse all':'Expand all';
+});
+
+apply();
+</script>
+</body>
+</html>

@@ -1,0 +1,41 @@
+/* Design tokens — exact values lifted from the original Bangladesh Bank design.
+   Repeated palette, fonts and shadows live here so components stay DRY. */
+:root {
+  /* Brand */
+  --bb-green: #006A4E;        /* primary green */
+  --bb-green-dark: #0A3D2C;   /* deep green (utility bar, footer) */
+  --bb-green-darker: #00543E; /* hover on primary buttons */
+  --bb-red: #F42A41;          /* accent red */
+
+  /* Greens / tints */
+  --bb-green-soft: #E4F1EC;   /* soft green panel */
+  --bb-green-border: #C5E0D6; /* soft green border */
+  --bb-green-pale: #DCEFE6;   /* selection / pale fill */
+  --bb-green-300: #5FBE9E;    /* footer eyebrow text */
+  --bb-green-200: #6BA892;    /* breadcrumb chevron */
+  --bb-green-hover: #F7FAF8;  /* row hover bg */
+
+  /* Surfaces / neutrals */
+  --bb-page: #F4F6F8;         /* page background */
+  --bb-white: #fff;
+  --bb-border: #E0E4E8;       /* card / divider border */
+  --bb-border-soft: #EDF0F3;  /* light row divider */
+  --bb-ink: #0A0A0A;          /* base text */
+  --bb-ink-1: #1a1a1a;
+  --bb-ink-2: #4A4A4A;
+  --bb-ink-muted: #9aa39e;    /* mono muted */
+  --bb-ink-nav: #3a4a5e;      /* inactive nav */
+
+  /* Notice ticker */
+  --bb-notice-bg: #FFF8E1;
+  --bb-notice-border: #F2E2A8;
+  --bb-notice-ink: #7A5A00;
+
+  /* Fonts */
+  --bb-font: 'Inter', system-ui, sans-serif;
+  --bb-mono: 'JetBrains Mono', monospace;
+
+  /* Layout */
+  --bb-max: 1240px;
+  --bb-gutter: 40px;
+}

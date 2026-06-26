@@ -1,0 +1,22 @@
+/* Global reset — ported verbatim from the original <style> block. */
+* { box-sizing: border-box; }
+html, body { margin: 0; padding: 0; }
+body { background: #fff; }
+a { text-decoration: none; color: inherit; }
+::selection { background: #DCEFE6; color: #006A4E; }
+
+/* Root app shell (was the outermost <div> wrapper in the original). */
+.bb-app {
+  font-family: var(--bb-font);
+  color: var(--bb-ink);
+  background: var(--bb-white);
+  min-height: 100vh;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* Shared content width container used by every band. */
+.bb-container {
+  max-width: var(--bb-max);
+  margin: 0 auto;
+  padding: 0 var(--bb-gutter);
+}

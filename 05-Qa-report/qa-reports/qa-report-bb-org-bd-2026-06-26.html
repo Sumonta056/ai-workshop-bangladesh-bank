@@ -1,0 +1,321 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>QA Report — Bangladesh Bank Website | 2026-06-26</title>
+<style>
+  :root{
+    --bg:#0f1419; --panel:#171e26; --panel2:#1e2731; --line:#2a3540;
+    --txt:#e6edf3; --muted:#8b98a5; --accent:#00a86b; --accent2:#0d8f5e;
+    --crit:#e5484d; --high:#f76808; --med:#ffb224; --low:#3b9eff; --pass:#30a46c;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+    background:var(--bg);color:var(--txt);line-height:1.5;padding:0 0 60px}
+  .wrap{max-width:1180px;margin:0 auto;padding:0 20px}
+  header.top{background:linear-gradient(135deg,#0c5a3f,#00a86b);padding:34px 0 30px;border-bottom:1px solid var(--line)}
+  header.top .wrap{display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:20px}
+  header.top h1{font-size:26px;font-weight:700;letter-spacing:-.3px}
+  header.top .sub{color:#d6f5e8;font-size:14px;margin-top:6px}
+  header.top a{color:#fff;text-decoration:underline;text-underline-offset:2px}
+  .score-badge{display:flex;align-items:center;gap:16px;background:rgba(0,0,0,.22);
+    padding:14px 22px;border-radius:14px;border:1px solid rgba(255,255,255,.18)}
+  .gauge{position:relative;width:84px;height:84px;border-radius:50%;
+    background:conic-gradient(#fff 0 84%,rgba(255,255,255,.22) 84% 100%);
+    display:flex;align-items:center;justify-content:center}
+  .gauge::after{content:"";position:absolute;inset:8px;border-radius:50%;background:#0c5a3f}
+  .gauge span{position:relative;z-index:1;font-size:24px;font-weight:800;color:#fff}
+  .score-badge .label{font-size:12px;color:#d6f5e8;text-transform:uppercase;letter-spacing:1px}
+  .score-badge .verdict{font-size:17px;font-weight:700;margin-top:2px}
+
+  section{margin-top:30px}
+  h2{font-size:15px;text-transform:uppercase;letter-spacing:1.2px;color:var(--muted);
+    margin-bottom:14px;font-weight:700}
+
+  .cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:14px}
+  .card{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:18px}
+  .card .n{font-size:30px;font-weight:800;line-height:1}
+  .card .t{color:var(--muted);font-size:12.5px;margin-top:8px;text-transform:uppercase;letter-spacing:.6px}
+  .card.crit .n{color:var(--crit)} .card.high .n{color:var(--high)}
+  .card.med .n{color:var(--med)} .card.low .n{color:var(--low)} .card.pass .n{color:var(--pass)}
+
+  .meta-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:12px}
+  .meta{background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:12px 16px}
+  .meta .k{color:var(--muted);font-size:11px;text-transform:uppercase;letter-spacing:.8px}
+  .meta .v{font-size:14px;margin-top:4px;font-weight:600;word-break:break-word}
+
+  .barwrap{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:18px}
+  .bar{display:grid;grid-template-columns:140px 1fr 46px;align-items:center;gap:12px;margin:9px 0}
+  .bar .cat{font-size:13px;color:var(--muted)}
+  .bar .track{height:9px;background:var(--panel2);border-radius:6px;overflow:hidden}
+  .bar .fill{height:100%;border-radius:6px;background:linear-gradient(90deg,var(--accent2),var(--accent))}
+  .bar .val{font-size:13px;font-weight:700;text-align:right}
+
+  .controls{display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin-bottom:14px}
+  .controls input{flex:1;min-width:200px;background:var(--panel);border:1px solid var(--line);
+    color:var(--txt);padding:10px 14px;border-radius:9px;font-size:14px}
+  .chip{background:var(--panel);border:1px solid var(--line);color:var(--muted);
+    padding:7px 14px;border-radius:20px;font-size:13px;cursor:pointer;user-select:none;transition:.15s}
+  .chip:hover{border-color:var(--accent)}
+  .chip.active{background:var(--accent);border-color:var(--accent);color:#042b1d;font-weight:700}
+
+  table{width:100%;border-collapse:collapse;background:var(--panel);border-radius:12px;overflow:hidden;
+    border:1px solid var(--line)}
+  thead th{text-align:left;padding:13px 14px;font-size:11.5px;text-transform:uppercase;letter-spacing:.7px;
+    color:var(--muted);background:var(--panel2);cursor:pointer;white-space:nowrap}
+  thead th:hover{color:var(--txt)}
+  tbody td{padding:13px 14px;border-top:1px solid var(--line);font-size:14px;vertical-align:top}
+  tbody tr{cursor:pointer;transition:.12s}
+  tbody tr:hover{background:var(--panel2)}
+  .id{font-family:ui-monospace,Menlo,monospace;color:var(--muted);font-size:12.5px;white-space:nowrap}
+  .pill{display:inline-block;padding:3px 10px;border-radius:20px;font-size:11.5px;font-weight:700;white-space:nowrap}
+  .sev-Critical{background:rgba(229,72,77,.16);color:#ff7a7d;border:1px solid rgba(229,72,77,.4)}
+  .sev-High{background:rgba(247,104,8,.16);color:#ff9248;border:1px solid rgba(247,104,8,.4)}
+  .sev-Medium{background:rgba(255,178,36,.16);color:#ffcb5e;border:1px solid rgba(255,178,36,.4)}
+  .sev-Low{background:rgba(59,158,255,.16);color:#7bbdff;border:1px solid rgba(59,158,255,.4)}
+  .sev-Pass{background:rgba(48,164,108,.16);color:#5fd39b;border:1px solid rgba(48,164,108,.4)}
+  .tag{display:inline-block;background:var(--panel2);border:1px solid var(--line);color:var(--muted);
+    padding:2px 9px;border-radius:6px;font-size:11.5px}
+  .detail{display:none;background:#10171f}
+  .detail td{padding:0}
+  .detail .inner{padding:18px 20px;border-top:2px solid var(--accent)}
+  .detail h4{font-size:13px;color:var(--accent);text-transform:uppercase;letter-spacing:.6px;margin:14px 0 6px}
+  .detail h4:first-child{margin-top:0}
+  .detail p{font-size:14px;color:var(--txt);max-width:80ch}
+  .detail code{background:#0a0f14;border:1px solid var(--line);padding:1px 6px;border-radius:5px;
+    font-family:ui-monospace,Menlo,monospace;font-size:12.5px;color:#9fe9c6;word-break:break-all}
+  .detail img{max-width:420px;width:100%;border:1px solid var(--line);border-radius:8px;margin-top:8px;cursor:zoom-in}
+  .empty{text-align:center;color:var(--muted);padding:30px}
+  footer{margin-top:40px;color:var(--muted);font-size:12.5px;text-align:center;border-top:1px solid var(--line);padding-top:20px}
+  /* lightbox */
+  #lb{display:none;position:fixed;inset:0;background:rgba(0,0,0,.9);z-index:50;align-items:center;justify-content:center;padding:30px;cursor:zoom-out}
+  #lb img{max-width:95%;max-height:95%;border-radius:8px}
+  .legend{font-size:12.5px;color:var(--muted);margin-top:8px}
+  .pass-row td{opacity:.92}
+</style>
+</head>
+<body>
+<header class="top">
+  <div class="wrap">
+    <div>
+      <h1>QA Report — Bangladesh Bank Website</h1>
+      <div class="sub">Target: <a href="https://www.bb.org.bd/en/index.php" target="_blank" rel="noopener">www.bb.org.bd/en/index.php</a> · 2026-06-26 · Standard tier · Report-only</div>
+    </div>
+    <div class="score-badge">
+      <div class="gauge"><span>84</span></div>
+      <div>
+        <div class="label">Health Score</div>
+        <div class="verdict">PASS w/ Concerns</div>
+      </div>
+    </div>
+  </div>
+</header>
+
+<div class="wrap">
+
+  <section>
+    <h2>Summary</h2>
+    <div class="cards">
+      <div class="card crit"><div class="n">0</div><div class="t">Critical</div></div>
+      <div class="card high"><div class="n">3</div><div class="t">High</div></div>
+      <div class="card med"><div class="n">8</div><div class="t">Medium</div></div>
+      <div class="card low"><div class="n">4</div><div class="t">Low</div></div>
+      <div class="card pass"><div class="n">15</div><div class="t">Checks Passed</div></div>
+    </div>
+  </section>
+
+  <section>
+    <h2>Run Metadata</h2>
+    <div class="meta-grid">
+      <div class="meta"><div class="k">Pages Exercised</div><div class="v">18+ (Home, About, Monetary, Financial, FX, EconData, Search, 404)</div></div>
+      <div class="meta"><div class="k">Stack Detected</div><div class="v">PHP (index.php routing) + F5/TSPD bot defense</div></div>
+      <div class="meta"><div class="k">Load Time</div><div class="v">~1.4s · TTFB 119ms</div></div>
+      <div class="meta"><div class="k">Console (site-origin)</div><div class="v">0 errors</div></div>
+      <div class="meta"><div class="k">Responsive</div><div class="v">No overflow @375px · mobile sidenav present</div></div>
+      <div class="meta"><div class="k">Total Findings</div><div class="v">15 (0 Critical / 3 High / 8 Medium / 4 Low)</div></div>
+    </div>
+  </section>
+
+  <section>
+    <h2>Category Scores</h2>
+    <div class="barwrap" id="bars"></div>
+  </section>
+
+  <section>
+    <h2>Findings &amp; Checks <span style="color:var(--muted);font-weight:400;text-transform:none;letter-spacing:0">— click any row for details</span></h2>
+    <div class="controls">
+      <input id="q" type="text" placeholder="Search findings… (e.g. lang, header, 404, link)">
+      <span class="chip active" data-f="all">All</span>
+      <span class="chip" data-f="High">High</span>
+      <span class="chip" data-f="Medium">Medium</span>
+      <span class="chip" data-f="Low">Low</span>
+      <span class="chip" data-f="Pass">Passed</span>
+      <span class="chip" data-f="Security">🔒 Security</span>
+      <span class="chip" data-f="Accessibility">♿ A11y</span>
+    </div>
+    <table>
+      <thead><tr>
+        <th data-s="id">ID</th>
+        <th data-s="severity">Severity</th>
+        <th data-s="category">Category</th>
+        <th data-s="title">Finding</th>
+        <th data-s="priority">Priority</th>
+        <th data-s="security">Security</th>
+      </tr></thead>
+      <tbody id="rows"></tbody>
+    </table>
+    <div class="empty" id="noresults" style="display:none">No matching findings.</div>
+    <div class="legend">🔒 = security-relevant · Priority reflects fix urgency · Rows expand for evidence &amp; remediation.</div>
+  </section>
+
+  <footer>
+    Generated by gstack /qa · headless Chromium · non-destructive report-only testing of a third-party production site.<br>
+    Screenshots stored in <code style="all:unset;font-family:monospace">screenshots/</code> next to this file.
+  </footer>
+</div>
+
+<div id="lb"><img src="" alt="screenshot"></div>
+
+<script>
+const F = [
+  {id:"F-01",severity:"High",category:"Security",sec:true,priority:"High",title:"No HTTP→HTTPS redirect (port 80 times out)",
+   desc:"<code>http://www.bb.org.bd/</code> and the http homepage do not respond — the connection hangs and times out (curl: <code>Connection timed out after 20s</code>, <code>http_code=000</code>). No 301/302 upgrade. Anyone using an <code>http://</code> link hits a dead page.",
+   fix:"Add a permanent 301 redirect from port 80 to HTTPS, then add HSTS (F-02).",img:""},
+  {id:"F-05",severity:"High",category:"Accessibility",sec:false,priority:"High",title:"<html> has no lang attribute (sitewide)",
+   desc:"<code>document.documentElement.lang</code> is empty on the homepage and all interior pages. Screen readers cannot determine the page language — critical for a bilingual EN/BN site.",
+   fix:"Set <code>&lt;html lang=\"en\"&gt;</code> (and <code>lang=\"bn\"</code> on the Bangla site).",img:""},
+  {id:"F-06",severity:"High",category:"Accessibility",sec:false,priority:"High",title:"34 empty / duplicate anchor links on homepage",
+   desc:"34 <code>&lt;a&gt;</code> elements contain only whitespace (no text, no image, no aria-label). Many duplicate the adjacent real link (e.g., two anchors to <code>/econdata/exchangerate</code>, one empty). They are keyboard-focusable dead stops and announced as a bare \"link\" by screen readers.",
+   fix:"Remove empty anchors or give them accessible text; de-duplicate the wrapping/inner link pattern.",img:""},
+  {id:"F-02",severity:"Medium",category:"Security",sec:true,priority:"Medium",title:"Missing HSTS (Strict-Transport-Security) header",
+   desc:"No <code>Strict-Transport-Security</code> header. Combined with F-01, there is no protection against SSL-strip / downgrade attacks for a financial institution.",
+   fix:"<code>Strict-Transport-Security: max-age=31536000; includeSubDomains; preload</code>",img:""},
+  {id:"F-03",severity:"Medium",category:"Security",sec:true,priority:"Medium",title:"Missing Content-Security-Policy",
+   desc:"No CSP header is returned. For a central bank, CSP is an important defense-in-depth layer against XSS and content injection.",
+   fix:"Add a CSP, starting in <code>Content-Security-Policy-Report-Only</code> mode to avoid breakage.",img:""},
+  {id:"F-07",severity:"Medium",category:"Accessibility",sec:false,priority:"Medium",title:"Broken heading structure (4× h1 of numbers / 0 h1 on inner pages)",
+   desc:"Homepage has four <code>&lt;h1&gt;</code> elements, all numeric dashboard values (<code>123.1112</code>, <code>9.74</code>, <code>9.83</code>, <code>9.87</code>). Interior pages (e.g. Exchange Rate) have zero <code>&lt;h1&gt;</code>.",
+   fix:"One descriptive <code>&lt;h1&gt;</code> per page; demote metric numbers to span/p.",img:"screenshots/04-exchangerate.png"},
+  {id:"F-08",severity:"Medium",category:"SEO/UX",sec:false,priority:"Medium",title:"Identical generic <title> on every page",
+   desc:"Every page returns <code>&lt;title&gt;Bangladesh Bank&lt;/title&gt;</code> — homepage, Exchange Rate, Board of Directors, etc. Tabs, bookmarks and search results are indistinguishable.",
+   fix:"Page-specific titles, e.g. <code>Exchange Rate of Taka | Bangladesh Bank</code>.",img:""},
+  {id:"F-09",severity:"Medium",category:"SEO",sec:false,priority:"Medium",title:"No meta description / Open Graph tags",
+   desc:"No <code>&lt;meta name=\"description\"&gt;</code>, no <code>og:*</code> tags. Search snippets are auto-generated; social shares have no preview card.",
+   fix:"Add per-template meta description + Open Graph tags.",img:""},
+  {id:"F-10",severity:"Medium",category:"Security",sec:true,priority:"Medium",title:"target=_blank links without rel=noopener",
+   desc:"10 links open in a new tab without <code>rel=\"noopener noreferrer\"</code> (incl. Facebook, Twitter, YouTube). Reverse-tabnabbing best-practice violation.",
+   fix:"Add <code>rel=\"noopener noreferrer\"</code> to all <code>target=\"_blank\"</code> links.",img:""},
+  {id:"F-11",severity:"Medium",category:"Content",sec:false,priority:"Medium",title:"Broken external link — Google Play app (404)",
+   desc:"The app link <code>play.google.com/store/apps/details?id=bd.org.bb.cms</code> returns <code>404</code> — the listing no longer exists.",
+   fix:"Update or remove the link.",img:""},
+  {id:"F-13",severity:"Medium",category:"UX",sec:false,priority:"Medium",title:"404 page has no header, nav, footer or home link",
+   desc:"The site correctly returns a 404 status with a friendly \"Oops!\" message (good), but the page is a bare card on a blank white background. No site chrome, no branding, no way back — the user is stranded.",
+   fix:"Render the 404 inside the standard layout with a \"Back to Home\" link and search box.",img:"screenshots/06-soft404.png"},
+  {id:"F-04",severity:"Low",category:"Security",sec:true,priority:"Low",title:"Missing Referrer-Policy & Permissions-Policy headers",
+   desc:"No <code>Referrer-Policy</code> or <code>Permissions-Policy</code> headers.",
+   fix:"Add <code>Referrer-Policy: strict-origin-when-cross-origin</code> and a restrictive Permissions-Policy.",img:""},
+  {id:"F-12",severity:"Low",category:"Content",sec:false,priority:"Low",title:"Twitter link returns 404 (verify manually)",
+   desc:"<code>twitter.com/BBGovernor</code> returned 404 and Facebook returned 400 to the crawler. These may be anti-bot false positives — verify in a real browser before acting.",
+   fix:"Confirm in a logged-in browser; update if genuinely dead.",img:""},
+  {id:"F-14",severity:"Low",category:"Privacy",sec:true,priority:"Low",title:"Contact emails/phones exposed in plain text",
+   desc:"Director/officer emails and phone numbers appear in plain HTML, harvestable by spam bots. Normal for a government directory but worth noting.",
+   fix:"Consider obfuscation or a contact form.",img:"screenshots/05-board.png"},
+  {id:"F-15",severity:"Low",category:"Observability",sec:false,priority:"Low",title:"Bot-defense returns 200 to non-browser clients for invalid URLs",
+   desc:"The F5/TSPD layer serves a 200 challenge page to <code>curl</code> for a non-existent URL, while real browsers correctly receive a 404. Can confuse uptime monitors and crawlers.",
+   fix:"Informational — be aware when configuring monitoring.",img:""},
+
+  // PASSED checks
+  {id:"P-01",severity:"Pass",category:"Functional",sec:false,priority:"—",title:"All 18+ tested pages return HTTP 200",desc:"About, Monetary, Financial, FX, EconData, NSDP and more all loaded successfully.",fix:"",img:""},
+  {id:"P-02",severity:"Pass",category:"Functional",sec:false,priority:"—",title:"Search works and returns relevant results",desc:"Tested keyword <code>remittance</code> → categorized, relevant results returned.",fix:"",img:"screenshots/02-search-results.png"},
+  {id:"P-03",severity:"Pass",category:"Functional",sec:false,priority:"—",title:"Language toggle EN ↔ BN works",desc:"<code>/home/switch_lang</code> → 200; Bangla homepage → 200.",fix:"",img:""},
+  {id:"P-04",severity:"Pass",category:"Responsive",sec:false,priority:"—",title:"Responsive layout, no horizontal overflow @375px",desc:"Single-column stacking; dedicated mobile sidenav toggle (<code>sidenav__menu-toggle</code>) present.",fix:"",img:"screenshots/03-home-mobile.png"},
+  {id:"P-05",severity:"Pass",category:"Performance",sec:false,priority:"—",title:"Fast load (~1.4s, TTFB 119ms)",desc:"DNS 12ms · TCP 46ms · TTFB 119ms · DOM ready 1.2s · load 1.4s.",fix:"",img:""},
+  {id:"P-06",severity:"Pass",category:"Console",sec:false,priority:"—",title:"No site-origin JS console errors",desc:"Console noise observed was from the test profile's browser extensions, not site code.",fix:"",img:""},
+  {id:"P-07",severity:"Pass",category:"Security",sec:true,priority:"—",title:"Core security headers present",desc:"<code>X-Frame-Options: SAMEORIGIN</code>, <code>X-Content-Type-Options: nosniff</code>, <code>X-XSS-Protection: 1; mode=block</code>.",fix:"",img:""},
+  {id:"P-08",severity:"Pass",category:"Security",sec:true,priority:"—",title:"Session cookies are HttpOnly + Secure",desc:"Session cookie set with <code>HttpOnly; secure</code> flags.",fix:"",img:""},
+  {id:"P-09",severity:"Pass",category:"Accessibility",sec:false,priority:"—",title:"All images have alt; inputs have accessible names",desc:"0 images missing alt; 0 form inputs without an accessible name; viewport meta present.",fix:"",img:""},
+  {id:"P-10",severity:"Pass",category:"UX",sec:false,priority:"—",title:"Real 404 page with friendly message exists",desc:"Returns a true 404 status and a clear message (layout gap tracked separately in F-13).",fix:"",img:""},
+];
+
+const catScores = [
+  ["Functional",84],["Console",100],["Visual",100],["Performance",100],
+  ["UX",84],["Content",76],["Accessibility",62],["Links",70]
+];
+
+// render bars
+document.getElementById("bars").innerHTML = catScores.map(([c,v])=>`
+  <div class="bar"><div class="cat">${c}</div>
+  <div class="track"><div class="fill" style="width:${v}%"></div></div>
+  <div class="val">${v}</div></div>`).join("");
+
+const rows = document.getElementById("rows");
+const nores = document.getElementById("noresults");
+let activeFilter="all", query="", sortKey=null, sortDir=1;
+
+function sevRank(s){return {Critical:0,High:1,Medium:2,Low:3,Pass:4}[s];}
+
+function matches(f){
+  if(activeFilter!=="all"){
+    if(["High","Medium","Low","Pass"].includes(activeFilter)){ if(f.severity!==activeFilter) return false; }
+    else if(activeFilter==="Security"){ if(!f.sec) return false; }
+    else if(activeFilter==="Accessibility"){ if(f.category!=="Accessibility") return false; }
+  }
+  if(query){
+    const hay=(f.id+f.title+f.category+f.desc+f.severity).toLowerCase();
+    if(!hay.includes(query)) return false;
+  }
+  return true;
+}
+
+function render(){
+  let list = F.filter(matches);
+  if(sortKey){
+    list = [...list].sort((a,b)=>{
+      let x = sortKey==="severity"? sevRank(a.severity): (a[sortKey]||"").toString().toLowerCase();
+      let y = sortKey==="severity"? sevRank(b.severity): (b[sortKey]||"").toString().toLowerCase();
+      return x<y?-sortDir : x>y?sortDir:0;
+    });
+  } else {
+    list = [...list].sort((a,b)=>sevRank(a.severity)-sevRank(b.severity));
+  }
+  nores.style.display = list.length? "none":"block";
+  rows.innerHTML = list.map(f=>`
+    <tr class="${f.severity==='Pass'?'pass-row':''}" onclick="toggle('${f.id}')">
+      <td class="id">${f.id}</td>
+      <td><span class="pill sev-${f.severity}">${f.severity==='Pass'?'✓ Pass':f.severity}</span></td>
+      <td><span class="tag">${f.category}</span></td>
+      <td>${f.title}</td>
+      <td>${f.priority}</td>
+      <td style="text-align:center">${f.sec?'🔒':''}</td>
+    </tr>
+    <tr class="detail" id="d-${f.id}"><td colspan="6"><div class="inner">
+      <h4>Detail</h4><p>${f.desc}</p>
+      ${f.fix?`<h4>Recommendation</h4><p>${f.fix}</p>`:''}
+      ${f.img?`<h4>Evidence</h4><img src="${f.img}" onclick="event.stopPropagation();lightbox('${f.img}')" alt="evidence">`:''}
+    </div></td></tr>`).join("");
+}
+
+function toggle(id){
+  const d=document.getElementById("d-"+id);
+  d.style.display = d.style.display==="table-row"? "none":"table-row";
+}
+function lightbox(src){
+  const lb=document.getElementById("lb");
+  lb.querySelector("img").src=src; lb.style.display="flex";
+}
+document.getElementById("lb").onclick=()=>document.getElementById("lb").style.display="none";
+
+document.querySelectorAll(".chip").forEach(c=>c.onclick=()=>{
+  document.querySelectorAll(".chip").forEach(x=>x.classList.remove("active"));
+  c.classList.add("active"); activeFilter=c.dataset.f; render();
+});
+document.getElementById("q").addEventListener("input",e=>{query=e.target.value.toLowerCase().trim();render();});
+document.querySelectorAll("thead th").forEach(th=>th.onclick=()=>{
+  const k=th.dataset.s; if(sortKey===k) sortDir*=-1; else {sortKey=k;sortDir=1;} render();
+});
+
+render();
+</script>
+</body>
+</html>

@@ -1,0 +1,11 @@
+{
+  "mcpServers": {
+    "memory": {
+      "command": "sh",
+      "args": [
+        "-c",
+        "MEMORY_FILE_PATH=\"$(pwd)/.memory/memory_doctor_patient.jsonl\" npx -y @modelcontextprotocol/server-memory"
+      ]
+    }
+  }
+}
