@@ -1,0 +1,412 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CLAUDE.md in Monolith Projects - Interactive Diagram</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { font-family: 'Segoe UI', system-ui, sans-serif; background: #0f172a; color: #e2e8f0; min-height: 100vh; }
+
+  .header { background: linear-gradient(135deg, #1e3a5f 0%, #2e75b6 100%); padding: 32px 40px; text-align: center; }
+  .header h1 { font-size: 28px; font-weight: 700; margin-bottom: 8px; }
+  .header p { font-size: 15px; opacity: 0.85; }
+
+  .main { display: flex; gap: 0; min-height: calc(100vh - 120px); }
+
+  .tree-panel { width: 420px; min-width: 420px; background: #1e293b; padding: 24px; overflow-y: auto; border-right: 1px solid #334155; }
+  .detail-panel { flex: 1; padding: 32px 40px; overflow-y: auto; }
+
+  .tree-title { font-size: 14px; text-transform: uppercase; letter-spacing: 1.5px; color: #64748b; margin-bottom: 16px; font-weight: 600; }
+
+  .tree-node { cursor: pointer; user-select: none; }
+  .tree-row { display: flex; align-items: center; padding: 6px 8px; border-radius: 6px; transition: background 0.15s; gap: 8px; }
+  .tree-row:hover { background: #334155; }
+  .tree-row.active { background: #1e3a5f; }
+
+  .tree-icon { width: 20px; height: 20px; display: flex; align-items: center; justify-content: center; font-size: 14px; flex-shrink: 0; }
+  .tree-icon.folder { color: #fbbf24; }
+  .tree-icon.file { color: #94a3b8; }
+  .tree-icon.claude { color: #60a5fa; }
+  .tree-icon.doc { color: #a78bfa; }
+
+  .tree-label { font-size: 14px; font-family: 'JetBrains Mono', 'Fira Code', 'Consolas', monospace; }
+  .tree-label.claude-file { color: #60a5fa; font-weight: 600; }
+  .tree-label.doc-file { color: #a78bfa; }
+
+  .tree-children { margin-left: 20px; border-left: 1px solid #334155; }
+  .tree-badge { font-size: 10px; padding: 1px 6px; border-radius: 10px; font-weight: 600; margin-left: auto; flex-shrink: 0; }
+  .badge-root { background: #1e40af; color: #93c5fd; }
+  .badge-module { background: #065f46; color: #6ee7b7; }
+  .badge-ref { background: #581c87; color: #c4b5fd; }
+
+  .toggle-btn { width: 16px; height: 16px; display: flex; align-items: center; justify-content: center; color: #64748b; font-size: 12px; flex-shrink: 0; transition: transform 0.2s; }
+  .toggle-btn.open { transform: rotate(90deg); }
+
+  /* Detail panel */
+  .detail-header { margin-bottom: 24px; }
+  .detail-header h2 { font-size: 22px; font-weight: 700; color: #f1f5f9; margin-bottom: 6px; }
+  .detail-header .path { font-size: 13px; color: #64748b; font-family: monospace; }
+
+  .detail-card { background: #1e293b; border-radius: 12px; padding: 24px; margin-bottom: 20px; border: 1px solid #334155; }
+  .detail-card h3 { font-size: 16px; color: #60a5fa; margin-bottom: 12px; font-weight: 600; }
+  .detail-card p { font-size: 14px; line-height: 1.7; color: #cbd5e1; }
+  .detail-card ul { list-style: none; padding: 0; }
+  .detail-card li { font-size: 14px; line-height: 1.8; color: #cbd5e1; padding-left: 20px; position: relative; }
+  .detail-card li::before { content: ''; position: absolute; left: 0; top: 11px; width: 6px; height: 6px; background: #60a5fa; border-radius: 50%; }
+
+  .code-block { background: #0f172a; border-radius: 8px; padding: 16px; font-family: 'JetBrains Mono', 'Consolas', monospace; font-size: 13px; line-height: 1.6; color: #94a3b8; overflow-x: auto; margin-top: 12px; border: 1px solid #1e293b; white-space: pre; }
+  .code-block .comment { color: #4a5568; }
+  .code-block .key { color: #60a5fa; }
+  .code-block .value { color: #6ee7b7; }
+
+  .tag-row { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 12px; }
+  .tag { font-size: 11px; padding: 3px 10px; border-radius: 12px; font-weight: 600; }
+  .tag-auto { background: #1e3a5f; color: #93c5fd; }
+  .tag-demand { background: #3b0764; color: #c4b5fd; }
+  .tag-lines { background: #065f46; color: #6ee7b7; }
+
+  .legend { display: flex; gap: 20px; flex-wrap: wrap; padding: 16px 24px; background: #1e293b; border-top: 1px solid #334155; }
+  .legend-item { display: flex; align-items: center; gap: 6px; font-size: 12px; color: #94a3b8; }
+  .legend-dot { width: 10px; height: 10px; border-radius: 50%; }
+
+  .pulse { animation: pulse 2s infinite; }
+  @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.5; } }
+
+  .welcome { text-align: center; padding: 80px 40px; }
+  .welcome-icon { font-size: 64px; margin-bottom: 20px; }
+  .welcome h2 { font-size: 22px; color: #f1f5f9; margin-bottom: 12px; }
+  .welcome p { font-size: 15px; color: #64748b; max-width: 500px; margin: 0 auto; line-height: 1.6; }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <h1>CLAUDE.md in Large Monolith Projects</h1>
+  <p>Interactive diagram showing hierarchical placement and loading behavior of CLAUDE.md files</p>
+</div>
+
+<div class="main">
+  <div class="tree-panel">
+    <div class="tree-title">Project Structure</div>
+    <div id="tree"></div>
+  </div>
+  <div class="detail-panel" id="detail">
+    <div class="welcome">
+      <div class="welcome-icon">📂</div>
+      <h2>Click any file to explore</h2>
+      <p>Select a CLAUDE.md file or referenced document in the tree to see its purpose, recommended content, and loading behavior.</p>
+    </div>
+  </div>
+</div>
+
+<div class="legend">
+  <div class="legend-item"><div class="legend-dot" style="background:#60a5fa"></div> CLAUDE.md files</div>
+  <div class="legend-item"><div class="legend-dot" style="background:#a78bfa"></div> Referenced docs</div>
+  <div class="legend-item"><div class="legend-dot" style="background:#fbbf24"></div> Directories</div>
+  <div class="legend-item"><div class="legend-dot" style="background:#1e40af"></div> Auto-loaded (root)</div>
+  <div class="legend-item"><div class="legend-dot" style="background:#065f46"></div> On-demand (subdirectory)</div>
+</div>
+
+<script>
+const treeData = {
+  name: "ecommerce-monolith/", type: "folder", open: true,
+  children: [
+    { name: "CLAUDE.md", type: "claude", badge: "ROOT", badgeClass: "badge-root",
+      detail: {
+        title: "Root CLAUDE.md",
+        path: "/ecommerce-monolith/CLAUDE.md",
+        loading: "Auto-loaded at every session start",
+        lines: "60-100 lines recommended",
+        sections: [
+          { title: "Purpose", text: "This is the primary entry point for Claude. It is loaded automatically at the start of every Claude Code session, regardless of which subdirectory you are working in. Keep it focused on information relevant to 30%+ of engineers." },
+          { title: "Recommended Content", items: [
+            "Project overview: one-liner describing the platform",
+            "Tech stack summary (Next.js, Node.js, PostgreSQL, Redis)",
+            "Global coding standards (TypeScript strict, ESLint config)",
+            "Key commands: dev, test, build, deploy, lint",
+            "Git branching strategy and PR conventions",
+            "References to detailed docs via @imports"
+          ]},
+          { title: "Example", code: `<span class="comment"># E-Commerce Platform (Monolith)</span>
+<span class="key">Full-stack</span> Next.js 14 + Node.js e-commerce platform
+<span class="key">Database:</span> PostgreSQL via Prisma ORM
+<span class="key">Cache:</span> Redis | <span class="key">Search:</span> Elasticsearch
+
+<span class="comment"># Commands</span>
+npm run dev        <span class="comment"># Start all services</span>
+npm run test       <span class="comment"># Run full test suite</span>
+npm run test:unit  <span class="comment"># Unit tests only</span>
+
+<span class="comment"># References</span>
+See <span class="value">@docs/architecture.md</span> for system design
+See <span class="value">@docs/api-patterns.md</span> for API conventions` }
+        ],
+        tags: [{ text: "Auto-loaded", class: "tag-auto" }, { text: "60-100 lines", class: "tag-lines" }]
+      }
+    },
+    { name: "frontend/", type: "folder", open: true, children: [
+      { name: "CLAUDE.md", type: "claude", badge: "MODULE", badgeClass: "badge-module",
+        detail: {
+          title: "Frontend CLAUDE.md",
+          path: "/ecommerce-monolith/frontend/CLAUDE.md",
+          loading: "Loaded on-demand when working in frontend/",
+          lines: "40-80 lines recommended",
+          sections: [
+            { title: "Purpose", text: "Provides frontend-specific context when Claude is working on UI components, pages, or client-side logic. Loaded automatically when Claude accesses files in the frontend/ directory." },
+            { title: "Recommended Content", items: [
+              "Component architecture (atomic design, feature-based)",
+              "State management patterns (Zustand stores, React Query)",
+              "Styling conventions (Tailwind utility classes, no inline styles)",
+              "Testing approach (React Testing Library, MSW for mocking)",
+              "Route structure and page organization",
+              "Accessibility requirements (WCAG 2.1 AA)"
+            ]},
+            { title: "Example", code: `<span class="comment"># Frontend Module</span>
+<span class="key">Framework:</span> Next.js 14 App Router
+<span class="key">Styling:</span> Tailwind CSS (no inline styles)
+<span class="key">State:</span> Zustand for global, React Query for server
+
+<span class="comment"># Component Patterns</span>
+- Use atomic design: atoms/ molecules/ organisms/
+- All components must have .test.tsx files
+- Use <span class="value">forwardRef</span> for reusable form inputs` }
+          ],
+          tags: [{ text: "On-demand", class: "tag-demand" }, { text: "40-80 lines", class: "tag-lines" }]
+        }
+      },
+      { name: "src/", type: "folder", children: [
+        { name: "components/", type: "folder", children: [] },
+        { name: "pages/", type: "folder", children: [] },
+        { name: "hooks/", type: "folder", children: [] },
+        { name: "stores/", type: "folder", children: [] },
+      ]},
+    ]},
+    { name: "backend/", type: "folder", open: true, children: [
+      { name: "CLAUDE.md", type: "claude", badge: "MODULE", badgeClass: "badge-module",
+        detail: {
+          title: "Backend CLAUDE.md",
+          path: "/ecommerce-monolith/backend/CLAUDE.md",
+          loading: "Loaded on-demand when working in backend/",
+          lines: "40-80 lines recommended",
+          sections: [
+            { title: "Purpose", text: "Contains API patterns, database conventions, and backend-specific architectural decisions. Claude loads this when working on controllers, services, or database-related code." },
+            { title: "Recommended Content", items: [
+              "API endpoint patterns and naming conventions",
+              "Database migration workflow (Prisma migrate)",
+              "Authentication/authorization middleware usage",
+              "Error handling patterns and status code conventions",
+              "Logging conventions (structured JSON logs)",
+              "Service layer patterns (thin controllers, fat services)"
+            ]},
+            { title: "Example", code: `<span class="comment"># Backend Module</span>
+<span class="key">Runtime:</span> Node.js 20 + Express
+<span class="key">ORM:</span> Prisma (always run migrations via CI)
+<span class="key">Auth:</span> JWT + refresh tokens
+
+<span class="comment"># API Patterns</span>
+- RESTful routes: /api/v1/{resource}
+- Always use <span class="value">asyncHandler</span> wrapper
+- Return errors as { error: { code, message } }
+- Never expose internal IDs in responses` }
+          ],
+          tags: [{ text: "On-demand", class: "tag-demand" }, { text: "40-80 lines", class: "tag-lines" }]
+        }
+      },
+      { name: "src/", type: "folder", children: [
+        { name: "controllers/", type: "folder", children: [] },
+        { name: "services/", type: "folder", children: [] },
+        { name: "models/", type: "folder", children: [] },
+        { name: "middleware/", type: "folder", children: [] },
+      ]},
+    ]},
+    { name: "shared/", type: "folder", children: [
+      { name: "CLAUDE.md", type: "claude", badge: "MODULE", badgeClass: "badge-module",
+        detail: {
+          title: "Shared Module CLAUDE.md",
+          path: "/ecommerce-monolith/shared/CLAUDE.md",
+          loading: "Loaded on-demand when working in shared/",
+          lines: "20-40 lines recommended",
+          sections: [
+            { title: "Purpose", text: "Documents shared types, utilities, and constants that are used across both frontend and backend. Helps Claude understand cross-cutting concerns." },
+            { title: "Recommended Content", items: [
+              "Shared TypeScript type definitions",
+              "Utility function documentation",
+              "Constants and enum conventions",
+              "Validation schemas (Zod) shared between client and server"
+            ]}
+          ],
+          tags: [{ text: "On-demand", class: "tag-demand" }, { text: "20-40 lines", class: "tag-lines" }]
+        }
+      },
+      { name: "types/", type: "folder", children: [] },
+      { name: "utils/", type: "folder", children: [] },
+    ]},
+    { name: "infrastructure/", type: "folder", children: [
+      { name: "CLAUDE.md", type: "claude", badge: "MODULE", badgeClass: "badge-module",
+        detail: {
+          title: "Infrastructure CLAUDE.md",
+          path: "/ecommerce-monolith/infrastructure/CLAUDE.md",
+          loading: "Loaded on-demand when working in infrastructure/",
+          lines: "30-50 lines recommended",
+          sections: [
+            { title: "Purpose", text: "Covers DevOps concerns, CI/CD pipeline configuration, Docker setup, and deployment procedures. Essential when Claude is helping with infrastructure-as-code changes." },
+            { title: "Recommended Content", items: [
+              "Docker Compose setup and environment variables",
+              "CI/CD pipeline stages and triggers",
+              "Deployment procedures per environment",
+              "Infrastructure-as-code conventions (Terraform)",
+              "Monitoring and alerting setup"
+            ]}
+          ],
+          tags: [{ text: "On-demand", class: "tag-demand" }, { text: "30-50 lines", class: "tag-lines" }]
+        }
+      },
+      { name: "docker/", type: "folder", children: [] },
+      { name: "terraform/", type: "folder", children: [] },
+    ]},
+    { name: "docs/", type: "folder", open: true, children: [
+      { name: "architecture.md", type: "doc", badge: "REF", badgeClass: "badge-ref",
+        detail: {
+          title: "Architecture Reference",
+          path: "/ecommerce-monolith/docs/architecture.md",
+          loading: "Loaded when referenced via @docs/architecture.md",
+          lines: "No limit (loaded on demand)",
+          sections: [
+            { title: "Purpose", text: "Detailed system architecture documentation referenced from the root CLAUDE.md. Contains diagrams, data flow descriptions, and architectural decision records (ADRs)." },
+            { title: "Recommended Content", items: [
+              "High-level architecture diagram description",
+              "Data flow between modules",
+              "Key architectural decisions and rationale",
+              "System boundaries and external integrations",
+              "Performance considerations and bottlenecks"
+            ]}
+          ],
+          tags: [{ text: "Referenced via @import", class: "tag-demand" }]
+        }
+      },
+      { name: "api-patterns.md", type: "doc", badge: "REF", badgeClass: "badge-ref",
+        detail: {
+          title: "API Patterns Reference",
+          path: "/ecommerce-monolith/docs/api-patterns.md",
+          loading: "Loaded when referenced via @docs/api-patterns.md",
+          lines: "No limit (loaded on demand)",
+          sections: [
+            { title: "Purpose", text: "Comprehensive API design guide referenced from backend CLAUDE.md. Contains endpoint patterns, request/response formats, and versioning strategy." },
+            { title: "Recommended Content", items: [
+              "REST API naming conventions",
+              "Request/response envelope format",
+              "Pagination patterns",
+              "Error response structure",
+              "API versioning strategy"
+            ]}
+          ],
+          tags: [{ text: "Referenced via @import", class: "tag-demand" }]
+        }
+      },
+      { name: "testing-strategy.md", type: "doc", badge: "REF", badgeClass: "badge-ref",
+        detail: {
+          title: "Testing Strategy Reference",
+          path: "/ecommerce-monolith/docs/testing-strategy.md",
+          loading: "Loaded when referenced via @docs/testing-strategy.md",
+          sections: [
+            { title: "Purpose", text: "Documents the testing pyramid, tool choices, and patterns for unit, integration, and E2E tests." }
+          ],
+          tags: [{ text: "Referenced via @import", class: "tag-demand" }]
+        }
+      },
+    ]},
+    { name: "package.json", type: "file" },
+    { name: "tsconfig.json", type: "file" },
+  ]
+};
+
+function getIcon(type) {
+  if (type === "claude") return '<span class="tree-icon claude">📘</span>';
+  if (type === "doc") return '<span class="tree-icon doc">📄</span>';
+  if (type === "folder") return '<span class="tree-icon folder">📁</span>';
+  return '<span class="tree-icon file">📝</span>';
+}
+
+function renderTree(node, container, depth = 0) {
+  const el = document.createElement("div");
+  el.className = "tree-node";
+
+  const row = document.createElement("div");
+  row.className = "tree-row";
+
+  let toggleHtml = '';
+  if (node.children && node.children.length > 0) {
+    toggleHtml = `<span class="toggle-btn ${node.open ? 'open' : ''}">▶</span>`;
+  } else {
+    toggleHtml = '<span style="width:16px;display:inline-block"></span>';
+  }
+
+  const labelClass = node.type === "claude" ? "claude-file" : (node.type === "doc" ? "doc-file" : "");
+  const badgeHtml = node.badge ? `<span class="tree-badge ${node.badgeClass}">${node.badge}</span>` : '';
+
+  row.innerHTML = `${toggleHtml}${getIcon(node.type)}<span class="tree-label ${labelClass}">${node.name}</span>${badgeHtml}`;
+  el.appendChild(row);
+
+  if (node.detail) {
+    row.addEventListener("click", (e) => {
+      e.stopPropagation();
+      document.querySelectorAll(".tree-row").forEach(r => r.classList.remove("active"));
+      row.classList.add("active");
+      showDetail(node.detail);
+    });
+  }
+
+  if (node.children && node.children.length > 0) {
+    const childContainer = document.createElement("div");
+    childContainer.className = "tree-children";
+    childContainer.style.display = node.open ? "block" : "none";
+
+    node.children.forEach(child => renderTree(child, childContainer, depth + 1));
+    el.appendChild(childContainer);
+
+    row.addEventListener("click", (e) => {
+      if (!node.detail || e.target.closest('.toggle-btn')) {
+        node.open = !node.open;
+        childContainer.style.display = node.open ? "block" : "none";
+        row.querySelector(".toggle-btn").classList.toggle("open");
+      }
+    });
+  }
+
+  container.appendChild(el);
+}
+
+function showDetail(d) {
+  const panel = document.getElementById("detail");
+  let html = `
+    <div class="detail-header">
+      <h2>${d.title}</h2>
+      <div class="path">${d.path}</div>
+      <div class="tag-row">
+        ${d.tags ? d.tags.map(t => `<span class="tag ${t.class}">${t.text}</span>`).join('') : ''}
+      </div>
+    </div>`;
+
+  if (d.loading) {
+    html += `<div class="detail-card"><h3>Loading Behavior</h3><p>${d.loading}</p></div>`;
+  }
+  if (d.lines) {
+    html += `<div class="detail-card"><h3>Recommended Size</h3><p>${d.lines}</p></div>`;
+  }
+
+  d.sections.forEach(s => {
+    html += `<div class="detail-card"><h3>${s.title}</h3>`;
+    if (s.text) html += `<p>${s.text}</p>`;
+    if (s.items) html += `<ul>${s.items.map(i => `<li>${i}</li>`).join('')}</ul>`;
+    if (s.code) html += `<div class="code-block">${s.code}</div>`;
+    html += `</div>`;
+  });
+
+  panel.innerHTML = html;
+}
+
+renderTree(treeData, document.getElementById("tree"));
+</script>
+</body>
+</html>

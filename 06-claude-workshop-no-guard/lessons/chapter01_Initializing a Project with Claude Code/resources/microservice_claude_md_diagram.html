@@ -1,0 +1,576 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CLAUDE.md in Microservice Projects - Interactive Diagram</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { font-family: 'Segoe UI', system-ui, sans-serif; background: #0f172a; color: #e2e8f0; min-height: 100vh; }
+
+  .header { background: linear-gradient(135deg, #065f46 0%, #059669 100%); padding: 32px 40px; text-align: center; }
+  .header h1 { font-size: 28px; font-weight: 700; margin-bottom: 8px; }
+  .header p { font-size: 15px; opacity: 0.85; }
+
+  .tabs { display: flex; background: #1e293b; border-bottom: 1px solid #334155; padding: 0 24px; }
+  .tab { padding: 12px 24px; font-size: 14px; font-weight: 600; cursor: pointer; color: #64748b; border-bottom: 2px solid transparent; transition: all 0.2s; }
+  .tab:hover { color: #94a3b8; }
+  .tab.active { color: #6ee7b7; border-bottom-color: #6ee7b7; }
+
+  .view { display: none; }
+  .view.active { display: flex; }
+
+  /* Tree View */
+  .main { display: flex; gap: 0; min-height: calc(100vh - 180px); }
+  .tree-panel { width: 440px; min-width: 440px; background: #1e293b; padding: 24px; overflow-y: auto; border-right: 1px solid #334155; }
+  .detail-panel { flex: 1; padding: 32px 40px; overflow-y: auto; }
+
+  .tree-title { font-size: 14px; text-transform: uppercase; letter-spacing: 1.5px; color: #64748b; margin-bottom: 16px; font-weight: 600; }
+  .tree-node { cursor: pointer; user-select: none; }
+  .tree-row { display: flex; align-items: center; padding: 6px 8px; border-radius: 6px; transition: background 0.15s; gap: 8px; }
+  .tree-row:hover { background: #334155; }
+  .tree-row.active { background: #065f46; }
+  .tree-icon { width: 20px; height: 20px; display: flex; align-items: center; justify-content: center; font-size: 14px; flex-shrink: 0; }
+  .tree-label { font-size: 14px; font-family: 'JetBrains Mono', 'Consolas', monospace; }
+  .tree-label.claude-file { color: #6ee7b7; font-weight: 600; }
+  .tree-label.doc-file { color: #a78bfa; }
+  .tree-children { margin-left: 20px; border-left: 1px solid #334155; }
+  .tree-badge { font-size: 10px; padding: 1px 6px; border-radius: 10px; font-weight: 600; margin-left: auto; flex-shrink: 0; }
+  .badge-org { background: #7c2d12; color: #fed7aa; }
+  .badge-service { background: #065f46; color: #6ee7b7; }
+  .badge-shared { background: #1e40af; color: #93c5fd; }
+  .badge-ref { background: #581c87; color: #c4b5fd; }
+  .badge-infra { background: #713f12; color: #fde68a; }
+  .toggle-btn { width: 16px; height: 16px; display: flex; align-items: center; justify-content: center; color: #64748b; font-size: 12px; flex-shrink: 0; transition: transform 0.2s; }
+  .toggle-btn.open { transform: rotate(90deg); }
+
+  .detail-header { margin-bottom: 24px; }
+  .detail-header h2 { font-size: 22px; font-weight: 700; color: #f1f5f9; margin-bottom: 6px; }
+  .detail-header .path { font-size: 13px; color: #64748b; font-family: monospace; }
+  .detail-card { background: #1e293b; border-radius: 12px; padding: 24px; margin-bottom: 20px; border: 1px solid #334155; }
+  .detail-card h3 { font-size: 16px; color: #6ee7b7; margin-bottom: 12px; font-weight: 600; }
+  .detail-card p { font-size: 14px; line-height: 1.7; color: #cbd5e1; }
+  .detail-card ul { list-style: none; padding: 0; }
+  .detail-card li { font-size: 14px; line-height: 1.8; color: #cbd5e1; padding-left: 20px; position: relative; }
+  .detail-card li::before { content: ''; position: absolute; left: 0; top: 11px; width: 6px; height: 6px; background: #6ee7b7; border-radius: 50%; }
+  .code-block { background: #0f172a; border-radius: 8px; padding: 16px; font-family: 'JetBrains Mono', 'Consolas', monospace; font-size: 13px; line-height: 1.6; color: #94a3b8; overflow-x: auto; margin-top: 12px; border: 1px solid #1e293b; white-space: pre; }
+  .code-block .comment { color: #4a5568; }
+  .code-block .key { color: #6ee7b7; }
+  .code-block .value { color: #60a5fa; }
+  .tag-row { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 12px; }
+  .tag { font-size: 11px; padding: 3px 10px; border-radius: 12px; font-weight: 600; }
+  .tag-auto { background: #065f46; color: #6ee7b7; }
+  .tag-demand { background: #3b0764; color: #c4b5fd; }
+  .tag-lines { background: #1e3a5f; color: #93c5fd; }
+
+  /* Network View */
+  .network-view { padding: 40px; display: none; flex-direction: column; align-items: center; }
+  .network-view.active { display: flex; }
+  .network-title { font-size: 18px; color: #6ee7b7; margin-bottom: 24px; font-weight: 600; }
+
+  .service-map { position: relative; width: 900px; height: 560px; }
+  .svc-node { position: absolute; background: #1e293b; border: 2px solid #334155; border-radius: 12px; padding: 16px 20px; cursor: pointer; transition: all 0.2s; text-align: center; min-width: 140px; }
+  .svc-node:hover { border-color: #6ee7b7; transform: translateY(-2px); box-shadow: 0 8px 24px rgba(16,185,129,0.15); }
+  .svc-node.active { border-color: #6ee7b7; background: #064e3b; }
+  .svc-node .svc-icon { font-size: 24px; margin-bottom: 6px; }
+  .svc-node .svc-name { font-size: 13px; font-weight: 600; color: #f1f5f9; }
+  .svc-node .svc-tag { font-size: 10px; color: #6ee7b7; margin-top: 4px; }
+
+  .svc-line { position: absolute; pointer-events: none; }
+
+  .legend { display: flex; gap: 20px; flex-wrap: wrap; padding: 16px 24px; background: #1e293b; border-top: 1px solid #334155; }
+  .legend-item { display: flex; align-items: center; gap: 6px; font-size: 12px; color: #94a3b8; }
+  .legend-dot { width: 10px; height: 10px; border-radius: 50%; }
+
+  .welcome { text-align: center; padding: 80px 40px; }
+  .welcome-icon { font-size: 64px; margin-bottom: 20px; }
+  .welcome h2 { font-size: 22px; color: #f1f5f9; margin-bottom: 12px; }
+  .welcome p { font-size: 15px; color: #64748b; max-width: 500px; margin: 0 auto; line-height: 1.6; }
+
+  .network-detail { background: #1e293b; border-radius: 12px; padding: 24px; margin-top: 24px; border: 1px solid #334155; max-width: 900px; width: 100%; }
+  .network-detail h3 { color: #6ee7b7; margin-bottom: 10px; font-size: 16px; }
+  .network-detail p { font-size: 14px; color: #cbd5e1; line-height: 1.6; }
+  .network-detail ul { list-style: none; padding: 0; margin-top: 8px; }
+  .network-detail li { font-size: 13px; color: #94a3b8; padding: 4px 0 4px 16px; position: relative; }
+  .network-detail li::before { content: ''; position: absolute; left: 0; top: 11px; width: 5px; height: 5px; background: #6ee7b7; border-radius: 50%; }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <h1>CLAUDE.md in Microservice Projects</h1>
+  <p>Interactive diagram showing distributed CLAUDE.md strategy across services</p>
+</div>
+
+<div class="tabs">
+  <div class="tab active" onclick="switchTab('tree')">File Tree View</div>
+  <div class="tab" onclick="switchTab('network')">Service Map View</div>
+</div>
+
+<!-- TREE VIEW -->
+<div class="view active" id="tree-view">
+  <div class="main">
+    <div class="tree-panel">
+      <div class="tree-title">Monorepo Structure</div>
+      <div id="tree"></div>
+    </div>
+    <div class="detail-panel" id="detail">
+      <div class="welcome">
+        <div class="welcome-icon">🔗</div>
+        <h2>Click any file to explore</h2>
+        <p>Select a CLAUDE.md file to see its purpose, recommended content, and how it relates to the service architecture.</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- NETWORK VIEW -->
+<div class="view" id="network-view">
+  <div class="network-view active">
+    <div class="network-title">Service Communication & CLAUDE.md Coverage</div>
+    <div class="service-map" id="service-map">
+      <svg class="svc-line" width="900" height="560" style="position:absolute;top:0;left:0">
+        <!-- Gateway to services -->
+        <line x1="450" y1="80" x2="150" y2="220" stroke="#334155" stroke-width="2" stroke-dasharray="6,4"/>
+        <line x1="450" y1="80" x2="450" y2="220" stroke="#334155" stroke-width="2" stroke-dasharray="6,4"/>
+        <line x1="450" y1="80" x2="750" y2="220" stroke="#334155" stroke-width="2" stroke-dasharray="6,4"/>
+        <!-- Service to service -->
+        <line x1="220" y1="270" x2="380" y2="270" stroke="#6ee7b7" stroke-width="1.5" stroke-dasharray="4,4" opacity="0.4"/>
+        <line x1="520" y1="270" x2="680" y2="270" stroke="#6ee7b7" stroke-width="1.5" stroke-dasharray="4,4" opacity="0.4"/>
+        <!-- Services to shared -->
+        <line x1="150" y1="310" x2="300" y2="420" stroke="#60a5fa" stroke-width="1.5" stroke-dasharray="4,4" opacity="0.3"/>
+        <line x1="450" y1="310" x2="380" y2="420" stroke="#60a5fa" stroke-width="1.5" stroke-dasharray="4,4" opacity="0.3"/>
+        <line x1="750" y1="310" x2="500" y2="420" stroke="#60a5fa" stroke-width="1.5" stroke-dasharray="4,4" opacity="0.3"/>
+        <!-- Services to infra -->
+        <line x1="150" y1="310" x2="650" y2="420" stroke="#fde68a" stroke-width="1" stroke-dasharray="4,4" opacity="0.2"/>
+        <line x1="450" y1="310" x2="650" y2="420" stroke="#fde68a" stroke-width="1" stroke-dasharray="4,4" opacity="0.2"/>
+        <line x1="750" y1="310" x2="650" y2="420" stroke="#fde68a" stroke-width="1" stroke-dasharray="4,4" opacity="0.2"/>
+      </svg>
+
+      <div class="svc-node" style="left:380px;top:20px" onclick="showNetworkDetail('gateway')">
+        <div class="svc-icon">🌐</div>
+        <div class="svc-name">API Gateway</div>
+        <div class="svc-tag">CLAUDE.md</div>
+      </div>
+
+      <div class="svc-node" style="left:60px;top:200px" onclick="showNetworkDetail('user')">
+        <div class="svc-icon">👤</div>
+        <div class="svc-name">User Service</div>
+        <div class="svc-tag">CLAUDE.md</div>
+      </div>
+
+      <div class="svc-node" style="left:370px;top:200px" onclick="showNetworkDetail('order')">
+        <div class="svc-icon">📦</div>
+        <div class="svc-name">Order Service</div>
+        <div class="svc-tag">CLAUDE.md</div>
+      </div>
+
+      <div class="svc-node" style="left:660px;top:200px" onclick="showNetworkDetail('payment')">
+        <div class="svc-icon">💳</div>
+        <div class="svc-name">Payment Service</div>
+        <div class="svc-tag">CLAUDE.md</div>
+      </div>
+
+      <div class="svc-node" style="left:230px;top:390px;border-color:#60a5fa" onclick="showNetworkDetail('shared')">
+        <div class="svc-icon">📚</div>
+        <div class="svc-name">Shared Libraries</div>
+        <div class="svc-tag" style="color:#60a5fa">CLAUDE.md</div>
+      </div>
+
+      <div class="svc-node" style="left:560px;top:390px;border-color:#fde68a" onclick="showNetworkDetail('infra')">
+        <div class="svc-icon">⚙️</div>
+        <div class="svc-name">Infrastructure</div>
+        <div class="svc-tag" style="color:#fde68a">CLAUDE.md</div>
+      </div>
+
+      <!-- Org-level floating badge -->
+      <div style="position:absolute;top:500px;left:300px;background:#7c2d12;border:1px solid #9a3412;border-radius:8px;padding:10px 20px;text-align:center;cursor:pointer" onclick="showNetworkDetail('org')">
+        <div style="font-size:12px;color:#fed7aa;font-weight:600">📋 Organization-Level CLAUDE.md</div>
+        <div style="font-size:10px;color:#fdba74;margin-top:4px">Applied to all services</div>
+      </div>
+    </div>
+
+    <div class="network-detail" id="network-detail">
+      <h3>Click a service to see its CLAUDE.md strategy</h3>
+      <p>Each service in a microservice architecture should have its own CLAUDE.md that documents service responsibilities, communication patterns, and domain-specific conventions.</p>
+    </div>
+  </div>
+</div>
+
+<div class="legend">
+  <div class="legend-item"><div class="legend-dot" style="background:#6ee7b7"></div> Service CLAUDE.md</div>
+  <div class="legend-item"><div class="legend-dot" style="background:#fed7aa"></div> Organization-level</div>
+  <div class="legend-item"><div class="legend-dot" style="background:#60a5fa"></div> Shared libraries</div>
+  <div class="legend-item"><div class="legend-dot" style="background:#fde68a"></div> Infrastructure</div>
+  <div class="legend-item"><div class="legend-dot" style="background:#a78bfa"></div> Referenced docs</div>
+</div>
+
+<script>
+const networkDetails = {
+  gateway: {
+    title: "API Gateway - CLAUDE.md",
+    desc: "Documents routing rules, rate limiting, authentication middleware, and request transformation patterns.",
+    items: ["Route configuration patterns", "Rate limiting and throttling rules", "Authentication/authorization flow", "Request/response transformation", "CORS and security headers", "Health check endpoints"]
+  },
+  user: {
+    title: "User Service - CLAUDE.md",
+    desc: "Covers user management domain: registration, authentication, profile management, and role-based access.",
+    items: ["User entity and schema conventions", "Authentication flow (JWT, OAuth)", "Password hashing and security patterns", "Profile management API patterns", "Role-based access control (RBAC)", "Database: PostgreSQL (owns user data)"]
+  },
+  order: {
+    title: "Order Service - CLAUDE.md",
+    desc: "Documents order processing domain: cart management, order lifecycle, inventory integration, and event publishing.",
+    items: ["Order state machine and lifecycle", "Cart management patterns", "Event publishing (OrderCreated, OrderShipped)", "Integration with Payment Service via async messaging", "Inventory reservation patterns", "Database: PostgreSQL (owns order data)"]
+  },
+  payment: {
+    title: "Payment Service - CLAUDE.md",
+    desc: "Covers payment processing: Stripe integration, refund handling, webhook processing, and PCI compliance notes.",
+    items: ["Stripe API integration patterns", "Payment intent lifecycle", "Webhook signature verification", "Refund and dispute handling", "PCI compliance requirements", "Database: PostgreSQL (owns transaction data)"]
+  },
+  shared: {
+    title: "Shared Libraries - CLAUDE.md",
+    desc: "Documents common libraries used across all services: logging, error handling, middleware, and shared types.",
+    items: ["Common TypeScript types and interfaces", "Shared middleware (auth, logging, error handling)", "Message queue client abstractions", "Health check utilities", "Testing helpers and fixtures", "Versioning and publishing strategy"]
+  },
+  infra: {
+    title: "Infrastructure - CLAUDE.md",
+    desc: "Covers Kubernetes manifests, Helm charts, CI/CD pipelines, monitoring stack, and deployment procedures.",
+    items: ["Kubernetes namespace and resource conventions", "Helm chart structure and values", "CI/CD pipeline stages (build, test, deploy)", "Monitoring: Prometheus + Grafana setup", "Log aggregation: ELK stack configuration", "Secret management (Vault integration)"]
+  },
+  org: {
+    title: "Organization-Level CLAUDE.md",
+    desc: "System-wide standards deployed to all developers' machines. Provides baseline conventions that every service inherits.",
+    items: ["Company coding standards (TypeScript strict, ESLint)", "Common Git conventions (conventional commits)", "Inter-service communication protocol (REST + async events)", "Logging format (structured JSON with correlation IDs)", "Security baseline (OWASP, dependency scanning)", "PR review checklist and quality gates"]
+  }
+};
+
+function showNetworkDetail(key) {
+  const d = networkDetails[key];
+  document.querySelectorAll('.svc-node').forEach(n => n.classList.remove('active'));
+  event.currentTarget.classList.add('active');
+  document.getElementById('network-detail').innerHTML = `
+    <h3>${d.title}</h3>
+    <p>${d.desc}</p>
+    <ul>${d.items.map(i => `<li>${i}</li>`).join('')}</ul>
+  `;
+}
+
+function switchTab(view) {
+  document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+  document.querySelectorAll('.view').forEach(v => { v.classList.remove('active'); v.style.display = 'none'; });
+  event.currentTarget.classList.add('active');
+  const el = document.getElementById(view + '-view');
+  el.classList.add('active');
+  el.style.display = view === 'tree' ? 'flex' : 'block';
+}
+
+// Tree data
+const treeData = {
+  name: "platform-services/", type: "folder", open: true,
+  children: [
+    { name: "CLAUDE.md", type: "claude", badge: "ORG", badgeClass: "badge-org",
+      detail: {
+        title: "Organization-Level CLAUDE.md",
+        path: "/platform-services/CLAUDE.md",
+        loading: "Auto-loaded at every session start (root file)",
+        lines: "40-60 lines recommended",
+        sections: [
+          { title: "Purpose", text: "Provides organization-wide standards that apply across all microservices. This is the root file that Claude loads at the start of every session." },
+          { title: "Recommended Content", items: [
+            "Company coding standards and language conventions",
+            "Inter-service communication protocols (REST, gRPC, async events)",
+            "Shared authentication and authorization patterns",
+            "Logging, monitoring, and observability standards",
+            "Common CI/CD pipeline structure",
+            "References to shared docs via @imports"
+          ]},
+          { title: "Example", code: `<span class="comment"># Platform Services (Microservices)</span>
+<span class="key">Architecture:</span> Event-driven microservices
+<span class="key">Language:</span> TypeScript (strict mode)
+<span class="key">Communication:</span> REST + RabbitMQ events
+
+<span class="comment"># Standards</span>
+- Conventional commits required
+- All services must expose /health endpoint
+- Structured JSON logging with correlation IDs
+
+<span class="comment"># References</span>
+See <span class="value">@docs/service-map.md</span> for dependencies
+See <span class="value">@docs/api-contracts.md</span> for shared contracts` }
+        ],
+        tags: [{ text: "Auto-loaded", class: "tag-auto" }, { text: "40-60 lines", class: "tag-lines" }]
+      }
+    },
+    { name: "services/", type: "folder", open: true, children: [
+      { name: "user-service/", type: "folder", open: true, children: [
+        { name: "CLAUDE.md", type: "claude", badge: "SERVICE", badgeClass: "badge-service",
+          detail: {
+            title: "User Service CLAUDE.md",
+            path: "/platform-services/services/user-service/CLAUDE.md",
+            loading: "Loaded on-demand when working in user-service/",
+            lines: "30-60 lines",
+            sections: [
+              { title: "Purpose", text: "Documents the user management domain: authentication flows, user entity patterns, RBAC implementation, and service-specific testing strategies." },
+              { title: "Recommended Content", items: [
+                "Service responsibility: user registration, auth, profiles",
+                "Database: PostgreSQL (owns user data exclusively)",
+                "Auth patterns: JWT + refresh tokens, OAuth2 providers",
+                "Events published: UserCreated, UserUpdated, UserDeleted",
+                "Events consumed: none (source of truth for user data)",
+                "Key commands: npm run dev, npm run test, npm run migrate"
+              ]},
+              { title: "Example", code: `<span class="comment"># User Service</span>
+<span class="key">Domain:</span> User management & authentication
+<span class="key">Database:</span> PostgreSQL (exclusive ownership)
+<span class="key">Port:</span> 3001
+
+<span class="comment"># Events</span>
+<span class="key">Publishes:</span> UserCreated, UserUpdated, UserDeleted
+<span class="key">Consumes:</span> none
+
+<span class="comment"># Patterns</span>
+- Password hashing: bcrypt (12 rounds)
+- JWT expiry: 15min access, 7d refresh
+- All endpoints require auth except /register, /login` }
+            ],
+            tags: [{ text: "On-demand", class: "tag-demand" }, { text: "30-60 lines", class: "tag-lines" }]
+          }
+        },
+        { name: "src/", type: "folder", children: [
+          { name: "controllers/", type: "folder", children: [] },
+          { name: "services/", type: "folder", children: [] },
+          { name: "models/", type: "folder", children: [] },
+        ]},
+        { name: "package.json", type: "file" },
+      ]},
+      { name: "order-service/", type: "folder", children: [
+        { name: "CLAUDE.md", type: "claude", badge: "SERVICE", badgeClass: "badge-service",
+          detail: {
+            title: "Order Service CLAUDE.md",
+            path: "/platform-services/services/order-service/CLAUDE.md",
+            loading: "Loaded on-demand when working in order-service/",
+            lines: "30-60 lines",
+            sections: [
+              { title: "Purpose", text: "Documents order processing domain including the order state machine, cart management, inventory integration, and event-driven communication with payment service." },
+              { title: "Recommended Content", items: [
+                "Order state machine: Draft > Confirmed > Paid > Shipped > Delivered",
+                "Cart management patterns and session handling",
+                "Event publishing: OrderCreated, OrderConfirmed, OrderShipped",
+                "Event consuming: PaymentCompleted, PaymentFailed",
+                "Integration with inventory service for stock reservation",
+                "Database: PostgreSQL (owns order and cart data)"
+              ]}
+            ],
+            tags: [{ text: "On-demand", class: "tag-demand" }, { text: "30-60 lines", class: "tag-lines" }]
+          }
+        },
+        { name: "src/", type: "folder", children: [] },
+        { name: "package.json", type: "file" },
+      ]},
+      { name: "payment-service/", type: "folder", children: [
+        { name: "CLAUDE.md", type: "claude", badge: "SERVICE", badgeClass: "badge-service",
+          detail: {
+            title: "Payment Service CLAUDE.md",
+            path: "/platform-services/services/payment-service/CLAUDE.md",
+            loading: "Loaded on-demand when working in payment-service/",
+            lines: "30-60 lines",
+            sections: [
+              { title: "Purpose", text: "Covers payment processing patterns, Stripe integration, webhook handling, refund flows, and PCI compliance requirements." },
+              { title: "Recommended Content", items: [
+                "Stripe API integration patterns and key management",
+                "Payment intent lifecycle and idempotency",
+                "Webhook signature verification (never skip in production)",
+                "Refund and dispute handling workflows",
+                "PCI compliance notes and data handling rules",
+                "Events published: PaymentCompleted, PaymentFailed, RefundIssued"
+              ]}
+            ],
+            tags: [{ text: "On-demand", class: "tag-demand" }, { text: "30-60 lines", class: "tag-lines" }]
+          }
+        },
+        { name: "src/", type: "folder", children: [] },
+        { name: "package.json", type: "file" },
+      ]},
+      { name: "gateway/", type: "folder", children: [
+        { name: "CLAUDE.md", type: "claude", badge: "SERVICE", badgeClass: "badge-service",
+          detail: {
+            title: "API Gateway CLAUDE.md",
+            path: "/platform-services/services/gateway/CLAUDE.md",
+            loading: "Loaded on-demand when working in gateway/",
+            lines: "20-40 lines",
+            sections: [
+              { title: "Purpose", text: "Documents routing rules, rate limiting configuration, authentication middleware, and request transformation patterns for the API gateway." },
+              { title: "Recommended Content", items: [
+                "Route mapping: /api/users -> user-service, /api/orders -> order-service",
+                "Rate limiting rules per endpoint category",
+                "JWT validation and header forwarding",
+                "CORS configuration and allowed origins",
+                "Request/response transformation rules"
+              ]}
+            ],
+            tags: [{ text: "On-demand", class: "tag-demand" }, { text: "20-40 lines", class: "tag-lines" }]
+          }
+        },
+        { name: "src/", type: "folder", children: [] },
+      ]},
+    ]},
+    { name: "shared-libs/", type: "folder", children: [
+      { name: "CLAUDE.md", type: "claude", badge: "SHARED", badgeClass: "badge-shared",
+        detail: {
+          title: "Shared Libraries CLAUDE.md",
+          path: "/platform-services/shared-libs/CLAUDE.md",
+          loading: "Loaded on-demand when working in shared-libs/",
+          lines: "20-40 lines",
+          sections: [
+            { title: "Purpose", text: "Documents shared packages used across all services: common types, middleware, message queue clients, and testing utilities." },
+            { title: "Recommended Content", items: [
+              "Package structure and publishing workflow",
+              "Common TypeScript interfaces and types",
+              "Shared middleware: auth, logging, error handling",
+              "Message queue client abstractions",
+              "Testing helpers and fixture utilities"
+            ]}
+          ],
+          tags: [{ text: "On-demand", class: "tag-demand" }, { text: "20-40 lines", class: "tag-lines" }]
+        }
+      },
+      { name: "common-types/", type: "folder", children: [] },
+      { name: "logger/", type: "folder", children: [] },
+      { name: "mq-client/", type: "folder", children: [] },
+    ]},
+    { name: "infrastructure/", type: "folder", children: [
+      { name: "CLAUDE.md", type: "claude", badge: "INFRA", badgeClass: "badge-infra",
+        detail: {
+          title: "Infrastructure CLAUDE.md",
+          path: "/platform-services/infrastructure/CLAUDE.md",
+          loading: "Loaded on-demand when working in infrastructure/",
+          lines: "30-50 lines",
+          sections: [
+            { title: "Purpose", text: "Covers Kubernetes manifests, Helm charts, CI/CD pipelines, monitoring stack, secret management, and deployment procedures." },
+            { title: "Recommended Content", items: [
+              "Kubernetes namespace and resource naming conventions",
+              "Helm chart structure and values override patterns",
+              "CI/CD pipeline: GitHub Actions stages",
+              "Monitoring: Prometheus + Grafana dashboards",
+              "Secret management via HashiCorp Vault",
+              "Environment promotion: dev > staging > production"
+            ]}
+          ],
+          tags: [{ text: "On-demand", class: "tag-demand" }, { text: "30-50 lines", class: "tag-lines" }]
+        }
+      },
+      { name: "k8s/", type: "folder", children: [] },
+      { name: "helm/", type: "folder", children: [] },
+      { name: "ci/", type: "folder", children: [] },
+    ]},
+    { name: "docs/", type: "folder", open: true, children: [
+      { name: "service-map.md", type: "doc", badge: "REF", badgeClass: "badge-ref",
+        detail: {
+          title: "Service Map Reference",
+          path: "/platform-services/docs/service-map.md",
+          loading: "Loaded when referenced via @docs/service-map.md",
+          sections: [
+            { title: "Purpose", text: "Documents all service dependencies, communication patterns, and data ownership boundaries. Essential for understanding the overall system topology." },
+            { title: "Recommended Content", items: [
+              "Service dependency graph",
+              "Synchronous vs asynchronous communication map",
+              "Data ownership boundaries per service",
+              "Event catalog: who publishes and consumes what",
+              "Service SLAs and latency expectations"
+            ]}
+          ],
+          tags: [{ text: "Referenced via @import", class: "tag-demand" }]
+        }
+      },
+      { name: "api-contracts.md", type: "doc", badge: "REF", badgeClass: "badge-ref",
+        detail: {
+          title: "API Contracts Reference",
+          path: "/platform-services/docs/api-contracts.md",
+          loading: "Loaded when referenced via @docs/api-contracts.md",
+          sections: [
+            { title: "Purpose", text: "Shared API specifications, request/response formats, and versioning strategy used across all services." }
+          ],
+          tags: [{ text: "Referenced via @import", class: "tag-demand" }]
+        }
+      },
+      { name: "event-catalog.md", type: "doc", badge: "REF", badgeClass: "badge-ref",
+        detail: {
+          title: "Event Catalog Reference",
+          path: "/platform-services/docs/event-catalog.md",
+          loading: "Loaded when referenced via @docs/event-catalog.md",
+          sections: [
+            { title: "Purpose", text: "Complete catalog of all domain events, their schemas, publishers, and consumers." }
+          ],
+          tags: [{ text: "Referenced via @import", class: "tag-demand" }]
+        }
+      },
+    ]},
+  ]
+};
+
+function getIcon(type) {
+  if (type === "claude") return '<span class="tree-icon" style="color:#6ee7b7">📘</span>';
+  if (type === "doc") return '<span class="tree-icon" style="color:#a78bfa">📄</span>';
+  if (type === "folder") return '<span class="tree-icon" style="color:#fbbf24">📁</span>';
+  return '<span class="tree-icon" style="color:#94a3b8">📝</span>';
+}
+
+function renderTree(node, container) {
+  const el = document.createElement("div");
+  el.className = "tree-node";
+  const row = document.createElement("div");
+  row.className = "tree-row";
+  let toggleHtml = node.children && node.children.length > 0
+    ? `<span class="toggle-btn ${node.open ? 'open' : ''}">▶</span>`
+    : '<span style="width:16px;display:inline-block"></span>';
+  const labelClass = node.type === "claude" ? "claude-file" : (node.type === "doc" ? "doc-file" : "");
+  const badgeHtml = node.badge ? `<span class="tree-badge ${node.badgeClass}">${node.badge}</span>` : '';
+  row.innerHTML = `${toggleHtml}${getIcon(node.type)}<span class="tree-label ${labelClass}">${node.name}</span>${badgeHtml}`;
+  el.appendChild(row);
+
+  if (node.detail) {
+    row.addEventListener("click", (e) => {
+      e.stopPropagation();
+      document.querySelectorAll(".tree-row").forEach(r => r.classList.remove("active"));
+      row.classList.add("active");
+      showDetail(node.detail);
+    });
+  }
+
+  if (node.children && node.children.length > 0) {
+    const childContainer = document.createElement("div");
+    childContainer.className = "tree-children";
+    childContainer.style.display = node.open ? "block" : "none";
+    node.children.forEach(child => renderTree(child, childContainer));
+    el.appendChild(childContainer);
+    row.addEventListener("click", (e) => {
+      if (!node.detail || e.target.closest('.toggle-btn')) {
+        node.open = !node.open;
+        childContainer.style.display = node.open ? "block" : "none";
+        row.querySelector(".toggle-btn").classList.toggle("open");
+      }
+    });
+  }
+  container.appendChild(el);
+}
+
+function showDetail(d) {
+  const panel = document.getElementById("detail");
+  let html = `<div class="detail-header"><h2>${d.title}</h2><div class="path">${d.path}</div>
+    <div class="tag-row">${d.tags ? d.tags.map(t => `<span class="tag ${t.class}">${t.text}</span>`).join('') : ''}</div></div>`;
+  if (d.loading) html += `<div class="detail-card"><h3>Loading Behavior</h3><p>${d.loading}</p></div>`;
+  if (d.lines) html += `<div class="detail-card"><h3>Recommended Size</h3><p>${d.lines}</p></div>`;
+  d.sections.forEach(s => {
+    html += `<div class="detail-card"><h3>${s.title}</h3>`;
+    if (s.text) html += `<p>${s.text}</p>`;
+    if (s.items) html += `<ul>${s.items.map(i => `<li>${i}</li>`).join('')}</ul>`;
+    if (s.code) html += `<div class="code-block">${s.code}</div>`;
+    html += `</div>`;
+  });
+  panel.innerHTML = html;
+}
+
+renderTree(treeData, document.getElementById("tree"));
+</script>
+</body>
+</html>
