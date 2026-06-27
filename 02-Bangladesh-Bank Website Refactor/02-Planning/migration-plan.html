@@ -1,0 +1,375 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Bangladesh Bank — Migration Plan</title>
+<link rel="preconnect" href="https://rsms.me/">
+<link rel="stylesheet" href="https://rsms.me/inter/inter.css">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bb-green:#006A4E; --bb-green-dark:#0A3D2C; --bb-green-deep:#00543E;
+    --bb-red:#F42A41; --bb-mint:#E4F1EC; --bb-mint-soft:#F7FAF8;
+    --bb-bg:#F4F6F8; --bb-border:#E0E4E8; --bb-border-soft:#EDF0F3;
+    --bb-ink:#0A0A0A; --bb-ink-soft:#4A4A4A; --bb-muted:#9aa39e;
+    --bb-amber-bg:#FFF8E1; --bb-amber-border:#F2E2A8; --bb-amber-ink:#7A5A00;
+    --bb-max:1080px;
+    --bb-font:'Inter',system-ui,sans-serif; --bb-mono:'JetBrains Mono',monospace;
+  }
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;}
+  body{background:var(--bb-bg);color:var(--bb-ink);font-family:var(--bb-font);-webkit-font-smoothing:antialiased;line-height:1.6;}
+  ::selection{background:var(--bb-mint);color:var(--bb-green);}
+  a{color:var(--bb-green);text-decoration:none;}
+  a:hover{color:var(--bb-red);}
+
+  /* ---- masthead ---- */
+  header.masthead{background:var(--bb-green);color:#fff;border-bottom:3px solid var(--bb-red);}
+  .masthead .wrap{max-width:var(--bb-max);margin:0 auto;padding:26px 40px;}
+  .masthead .eyebrow{font:600 11px/1.2 var(--bb-font);letter-spacing:.14em;text-transform:uppercase;color:rgba(255,255,255,.82);}
+  .masthead h1{font:700 30px/1.1 var(--bb-font);letter-spacing:-0.02em;margin:8px 0 6px;}
+  .masthead p{font:400 14.5px/1.55 var(--bb-font);color:rgba(255,255,255,.85);margin:0;max-width:70ch;}
+
+  .container{max-width:var(--bb-max);margin:0 auto;padding:36px 40px 80px;}
+
+  /* ---- section heads ---- */
+  .sec-head{display:flex;align-items:center;gap:11px;margin:40px 0 18px;}
+  .sec-head .bar{width:26px;height:3px;background:var(--bb-green);border-radius:2px;flex:none;}
+  .sec-head h2{font:700 17px/1.2 var(--bb-font);letter-spacing:.02em;text-transform:uppercase;color:var(--bb-green);margin:0;}
+
+  /* ---- principle / structure cards ---- */
+  .panel{background:#fff;border:1px solid var(--bb-border);border-radius:14px;padding:22px 26px;margin-bottom:18px;}
+  .panel.accent{border-top:3px solid var(--bb-green);}
+  .panel ol,.panel ul{margin:0;padding-left:20px;}
+  .panel li{margin:7px 0;font-size:14.5px;}
+  .panel li strong{color:var(--bb-green-dark);}
+
+  pre.tree{background:var(--bb-green-dark);color:#dfeee7;border-radius:12px;padding:20px 22px;overflow:auto;
+           font:400 13px/1.7 var(--bb-mono);margin:0;}
+
+  /* ---- the validate loop banner ---- */
+  .loop{background:var(--bb-amber-bg);border:1px solid var(--bb-amber-border);border-radius:12px;
+        padding:16px 20px;margin-bottom:26px;display:flex;gap:14px;align-items:flex-start;}
+  .loop .tag{background:var(--bb-red);color:#fff;font:600 10px/1 var(--bb-font);letter-spacing:.07em;
+             text-transform:uppercase;padding:6px 11px;border-radius:999px;flex:none;}
+  .loop .steps{font:500 13.5px/1.6 var(--bb-font);color:var(--bb-amber-ink);}
+  .loop .steps code{font-family:var(--bb-mono);font-size:12.5px;background:rgba(122,90,0,.1);padding:1px 6px;border-radius:5px;}
+  .loop .steps .arrow{color:var(--bb-green);font-weight:700;padding:0 4px;}
+
+  /* ---- checkpoint cards ---- */
+  .cp{background:#fff;border:1px solid var(--bb-border);border-top:3px solid var(--bb-green);
+      border-radius:14px;padding:0;margin-bottom:16px;overflow:hidden;}
+  .cp summary{list-style:none;cursor:pointer;display:flex;align-items:center;gap:16px;padding:18px 22px;
+              transition:background .14s;}
+  .cp summary::-webkit-details-marker{display:none;}
+  .cp summary:hover{background:var(--bb-mint-soft);}
+  .cp .num{width:46px;height:46px;border-radius:11px;background:var(--bb-mint);color:var(--bb-green);
+           font:700 17px/1 var(--bb-mono);display:flex;align-items:center;justify-content:center;flex:none;}
+  .cp .title{flex:1;}
+  .cp .title .id{font:600 10.5px/1 var(--bb-font);letter-spacing:.08em;text-transform:uppercase;color:var(--bb-muted);}
+  .cp .title h3{font:600 17px/1.3 var(--bb-font);color:var(--bb-green-dark);margin:4px 0 0;}
+  .cp .chev{color:var(--bb-green);font-size:18px;transition:transform .2s;flex:none;}
+  .cp[open] .chev{transform:rotate(90deg);}
+  .cp .body{padding:4px 22px 22px 84px;border-top:1px solid var(--bb-border-soft);}
+  .cp .body .row{margin:14px 0 0;}
+  .cp .body .lbl{display:inline-block;font:600 10.5px/1 var(--bb-font);letter-spacing:.06em;text-transform:uppercase;
+                 padding:5px 10px;border-radius:6px;margin-bottom:8px;}
+  .lbl.do{background:#E4F1EC;color:var(--bb-green);}
+  .lbl.val{background:#E8F0FF;color:#2952cc;}
+  .lbl.test{background:#FBEAEC;color:var(--bb-red);}
+  .lbl.exit{background:#EFEAFB;color:#6b3fb0;}
+  .cp .body p{margin:0;font-size:14px;color:var(--bb-ink-soft);}
+  .cp .body code{font-family:var(--bb-mono);font-size:12.5px;background:var(--bb-bg);padding:1px 6px;border-radius:5px;color:var(--bb-green-dark);}
+
+  /* ---- risks ---- */
+  .risk{display:flex;gap:14px;align-items:flex-start;padding:14px 0;border-bottom:1px solid var(--bb-border-soft);}
+  .risk:last-child{border-bottom:none;}
+  .risk .dot{width:9px;height:9px;border-radius:50%;background:var(--bb-red);flex:none;margin-top:7px;}
+  .risk .txt{font-size:14.5px;}
+  .risk .txt strong{color:var(--bb-green-dark);}
+
+  footer.foot{background:var(--bb-green-dark);color:rgba(255,255,255,.7);text-align:center;
+              font:500 12.5px/1.6 var(--bb-font);padding:22px 40px;border-top:3px solid var(--bb-red);}
+  footer.foot strong{color:#fff;}
+
+  @media(max-width:680px){
+    .masthead .wrap,.container{padding-left:20px;padding-right:20px;}
+    .cp .body{padding-left:22px;}
+  }
+</style>
+</head>
+<body>
+
+<header class="masthead">
+  <div class="wrap">
+    <div class="eyebrow">Bangladesh Bank · Refactor &amp; Design</div>
+    <h1>Prototype HTML → Nuxt 4 SSG Migration Plan</h1>
+    <p>Companion to <code>architecture.md</code>. A 12-checkpoint, build-and-validate path from the
+    single-file design export into a modular, statically-generated Nuxt 4 site — preserving pixel
+    fidelity and the prototype's data-driven pattern.</p>
+  </div>
+</header>
+
+<div class="container">
+
+  <!-- PRINCIPLES -->
+  <div class="sec-head"><span class="bar"></span><h2>0 · Guiding Principles</h2></div>
+  <div class="panel accent">
+    <ol>
+      <li><strong>The HTML is the specification.</strong> Every color, spacing value, font weight, copy string (en <em>and</em> bn), hover state, and transition is transcribed verbatim. Nuxt conventions yield to pixel fidelity.</li>
+      <li><strong>SSG only</strong> — <code>ssr: true</code>, <code>nitro.preset: 'static'</code>. Build with <code>npm run generate</code> → <code>.output/public/</code>. No backend, no server routes, no runtime fetch.</li>
+      <li><strong>Preserve the prototype's data-driven pattern</strong> — locale dict → typed props → dumb components. The view-model render function becomes <code>useLocale</code> + per-component props.</li>
+      <li><strong>One responsibility per file.</strong> Repeated items extract into their own SFC.</li>
+      <li><strong>Incremental, verifiable steps.</strong> Each checkpoint ends in a green build + visual diff against the original before the next begins.</li>
+    </ol>
+  </div>
+
+  <!-- PROTOTYPE PATTERN -->
+  <div class="sec-head"><span class="bar"></span><h2>Prototype Design Pattern (the spec)</h2></div>
+  <div class="panel">
+    <ul>
+      <li>Single design-tool export using a custom mini-template (<code>sc-for</code>, <code>sc-if</code>, <code>style-hover</code>, <code>{{ }}</code>) — a transcription source, not runtime code.</li>
+      <li><strong>State:</strong> <code>view</code> (<code>home | mp | fin | pub | svc</code>) + <code>lang</code> (<code>en | bn</code>). No URLs in the prototype; view switches are in-memory.</li>
+      <li><strong>Content:</strong> one <code>T = { en, bn }</code> dictionary; both share an identical shape including a nested <code>pages</code> map for the 4 inner views.</li>
+      <li><strong>View-model:</strong> a render function maps locale data + icons + click handlers into flat bindings. Repeated shapes (<code>marketCards</code>, <code>news</code>, <code>modules</code>, <code>services</code>, inner <code>groups</code>/<code>tables</code>) are list-driven.</li>
+      <li><strong>Chrome:</strong> utility bar → masthead → sticky nav → ticker → (home | inner) → footer.</li>
+      <li><strong>Inner pages</strong> = one shared template driven by <code>L.pages[view]</code> (highlight, link groups, data tables, sidebar).</li>
+    </ul>
+  </div>
+
+  <!-- STRUCTURE -->
+  <div class="sec-head"><span class="bar"></span><h2>Target Structure</h2></div>
+  <div class="panel">
+<pre class="tree">app/
+├─ app.vue                      # &lt;NuxtLayout&gt;&lt;NuxtPage/&gt;&lt;/NuxtLayout&gt;
+├─ layouts/default.vue          # utility bar, masthead, nav, ticker, footer + &lt;slot/&gt;
+├─ pages/                       # index.vue + mp/fin/pub/svc one-liners
+├─ components/{base,layout,home,inner}/
+├─ composables/                 # useLocale.ts, useNav.ts
+├─ data/                        # routes.ts, icons.ts
+├─ i18n/                        # en.ts, bn.ts, types.ts
+└─ assets/css/                  # tokens.css, base.css</pre>
+  </div>
+
+  <!-- CHECKPOINTS -->
+  <div class="sec-head"><span class="bar"></span><h2>The 12 Checkpoints</h2></div>
+
+  <div class="loop">
+    <span class="tag">Loop · every CP</span>
+    <span class="steps">
+      <strong>Build</strong> <span class="arrow">→</span> <code>npm run generate</code> succeeds
+      <span class="arrow">→</span> <strong>Validate</strong> (checks below)
+      <span class="arrow">→</span> <strong>Vitest</strong> suite green
+      <span class="arrow">→</span> <strong>Live visual QA</strong> via Chrome DevTools MCP (console clean, side-by-side diff vs <code>Bangladesh Bank.html</code>)
+      <span class="arrow">→</span> <strong>Commit</strong> on green. Never advance on red.
+    </span>
+  </div>
+
+  <!-- CP1 -->
+  <details class="cp" open>
+    <summary>
+      <div class="num">01</div>
+      <div class="title"><div class="id">Checkpoint 1</div><h3>Scaffold + tooling baseline</h3></div>
+      <div class="chev">›</div>
+    </summary>
+    <div class="body">
+      <div class="row"><span class="lbl do">Do</span><p>Nuxt 4 init, <code>srcDir: app/</code>, <code>ssr: true</code>, <code>nitro.preset: 'static'</code>. TypeScript strict, ESLint + Prettier, Vitest + <code>@vue/test-utils</code> + <code>@nuxt/test-utils</code>. Load Inter + JetBrains Mono via <code>&lt;link&gt;</code> in <code>nuxt.config.ts</code> (same sources as prototype lines 11–15).</p></div>
+      <div class="row"><span class="lbl val">Validate</span><p><code>npm run generate</code> produces <code>.output/public/index.html</code>; lint + typecheck pass; one trivial Vitest passes.</p></div>
+      <div class="row"><span class="lbl test">Test loop</span><p>Smoke test that the dev server boots and fonts resolve (DevTools MCP).</p></div>
+      <div class="row"><span class="lbl exit">Exit</span><p>Empty app builds statically; CI runs the test command.</p></div>
+    </div>
+  </details>
+
+  <!-- CP2 -->
+  <details class="cp">
+    <summary>
+      <div class="num">02</div>
+      <div class="title"><div class="id">Checkpoint 2</div><h3>Design tokens + global base CSS</h3></div>
+      <div class="chev">›</div>
+    </summary>
+    <div class="body">
+      <div class="row"><span class="lbl do">Do</span><p>Extract palette (<code>#006A4E</code>, <code>#0A3D2C</code>, <code>#F42A41</code>, <code>#E4F1EC</code>, <code>#F4F6F8</code>, borders <code>#E0E4E8</code>…), fonts, max-width <code>1240px</code>, gutters <code>40px</code> → <code>assets/css/tokens.css</code> (<code>--bb-*</code>). Port global resets (<code>box-sizing</code>, <code>::selection</code>, <code>a</code> reset) → <code>base.css</code>.</p></div>
+      <div class="row"><span class="lbl val">Validate</span><p>No magic duplicates; a token sheet page renders each color/font.</p></div>
+      <div class="row"><span class="lbl test">Test</span><p>Snapshot test of the token sheet.</p></div>
+      <div class="row"><span class="lbl exit">Exit</span><p>Every recurring value referenced from a token.</p></div>
+    </div>
+  </details>
+
+  <!-- CP3 -->
+  <details class="cp">
+    <summary>
+      <div class="num">03</div>
+      <div class="title"><div class="id">Checkpoint 3 · highest-value early step</div><h3>i18n contract (types.ts + en/bn dicts)</h3></div>
+      <div class="chev">›</div>
+    </summary>
+    <div class="body">
+      <div class="row"><span class="lbl do">Do</span><p>Define <code>LocaleContent</code> in <code>i18n/types.ts</code> covering <strong>all</strong> prototype keys (utility bar, masthead, nav map, ticker, marketCards, news, policyRates, reserves, auctions, modules, moreLinks, services, hotlines, usefulLinks, aboutLinks, footer, and <code>pages: { mp, fin, pub, svc }</code> with highlight/groups/tables/related). Transcribe <code>en.ts</code> and <code>bn.ts</code> verbatim from prototype lines ~519–853.</p></div>
+      <div class="row"><span class="lbl val">Validate</span><p>Both dicts satisfy <code>LocaleContent</code> (typecheck fails on drift); key-count parity test.</p></div>
+      <div class="row"><span class="lbl test">Test</span><p><code>Object.keys(en.pages)</code> deep-equals <code>Object.keys(bn.pages)</code> recursively.</p></div>
+      <div class="row"><span class="lbl exit">Exit</span><p>Content layer complete and shape-locked.</p></div>
+    </div>
+  </details>
+
+  <!-- CP4 -->
+  <details class="cp">
+    <summary>
+      <div class="num">04</div>
+      <div class="title"><div class="id">Checkpoint 4</div><h3>useLocale composable</h3></div>
+      <div class="chev">›</div>
+    </summary>
+    <div class="body">
+      <div class="row"><span class="lbl do">Do</span><p><code>useState</code>-backed active language, <code>L</code> computed of current dict, <code>setLang('en'|'bn')</code>. Mirrors <code>L = T[lang]</code> with no URL change.</p></div>
+      <div class="row"><span class="lbl val">Validate</span><p>Toggling re-renders without navigation.</p></div>
+      <div class="row"><span class="lbl test">Test</span><p><code>setLang('bn')</code> flips <code>L</code> to Bangla; default is <code>en</code>.</p></div>
+      <div class="row"><span class="lbl exit">Exit</span><p>Language state centralized and tested.</p></div>
+    </div>
+  </details>
+
+  <!-- CP5 -->
+  <details class="cp">
+    <summary>
+      <div class="num">05</div>
+      <div class="title"><div class="id">Checkpoint 5</div><h3>Icon system (data/icons.ts + BaseIcon)</h3></div>
+      <div class="chev">›</div>
+    </summary>
+    <div class="body">
+      <div class="row"><span class="lbl do">Do</span><p>Transcribe the <code>ICONS</code> path map (lines 519–637) → <code>data/icons.ts</code>. Build <code>components/base/BaseIcon.vue</code> reproducing <code>svg(name, size)</code> (viewBox, size, currentColor).</p></div>
+      <div class="row"><span class="lbl val">Validate</span><p>Each icon renders at its prototype size; color inherits.</p></div>
+      <div class="row"><span class="lbl test">Test</span><p>Snapshot rendering all icons.</p></div>
+      <div class="row"><span class="lbl exit">Exit</span><p><code>&lt;BaseIcon name="landmark" :size="28" /&gt;</code> reusable everywhere.</p></div>
+    </div>
+  </details>
+
+  <!-- CP6 -->
+  <details class="cp">
+    <summary>
+      <div class="num">06</div>
+      <div class="title"><div class="id">Checkpoint 6</div><h3>Routing + useNav</h3></div>
+      <div class="chev">›</div>
+    </summary>
+    <div class="body">
+      <div class="row"><span class="lbl do">Do</span><p><code>data/routes.ts</code> (<code>VIEW_ROUTES</code>: home→<code>/</code>, mp→<code>/monetary-policy</code>, fin→<code>/financial-system</code>, pub→<code>/publications</code>, svc→<code>/services</code>). <code>useNav()</code> builds nav items: labels from <code>L.nav</code>, <code>active</code> from <code>useRoute().path</code>, <code>to: null</code> for prototype no-op links (<code>about</code>, <code>fx</code>, <code>gsec</code>, <code>pay</code>). Create thin page files.</p></div>
+      <div class="row"><span class="lbl val">Validate</span><p>Each route resolves and statically generates; no-op nav items render but don't navigate.</p></div>
+      <div class="row"><span class="lbl test">Test</span><p><code>useNav</code> active-state per path; <code>nuxi generate</code> emits one HTML file per route.</p></div>
+      <div class="row"><span class="lbl exit">Exit</span><p>SPA views are real routes; deep-linkable.</p></div>
+    </div>
+  </details>
+
+  <!-- CP7 -->
+  <details class="cp">
+    <summary>
+      <div class="num">07</div>
+      <div class="title"><div class="id">Checkpoint 7</div><h3>Layout chrome (layouts/default.vue)</h3></div>
+      <div class="chev">›</div>
+    </summary>
+    <div class="body">
+      <div class="row"><span class="lbl do">Do</span><p>Port utility bar, masthead (crest, search box, lang toggle → <code>setLang</code>), sticky primary nav (<code>useNav</code> + <code>BaseIcon</code>), notice ticker, footer. Each piece → <code>components/layout/</code> SFC (<code>LayoutUtilityBar</code>, <code>LayoutMasthead</code>, <code>LayoutPrimaryNav</code>, <code>LayoutTicker</code>, <code>LayoutFooter</code>). <code>style-hover</code> → scoped <code>:hover</code> rules with exact source values.</p></div>
+      <div class="row"><span class="lbl val">Validate</span><p>Chrome pixel-matches original across both languages; sticky nav intact.</p></div>
+      <div class="row"><span class="lbl test">Test</span><p>Mount test for <code>LayoutPrimaryNav</code> (active underline <code>#006A4E</code>); lang toggle style-swap test.</p></div>
+      <div class="row"><span class="lbl exit">Exit</span><p>Every route shows identical header/footer.</p></div>
+    </div>
+  </details>
+
+  <!-- CP8 -->
+  <details class="cp">
+    <summary>
+      <div class="num">08</div>
+      <div class="title"><div class="id">Checkpoint 8</div><h3>Home — market data row</h3></div>
+      <div class="chev">›</div>
+    </summary>
+    <div class="body">
+      <div class="row"><span class="lbl do">Do</span><p>Section rendering <code>home/MarketCard.vue</code> from <code>marketCards</code> (single vs dual variants, <code>font-variant-numeric: tabular-nums slashed-zero</code>) + upcoming-auctions card from <code>auctions</code>.</p></div>
+      <div class="row"><span class="lbl val">Validate</span><p>4-col grid, 16px gap, green top border, mono numerals match.</p></div>
+      <div class="row"><span class="lbl test">Test</span><p><code>MarketCard</code> props test for single/dual rendering.</p></div>
+      <div class="row"><span class="lbl exit">Exit</span><p>Top of home page verified.</p></div>
+    </div>
+  </details>
+
+  <!-- CP9 -->
+  <details class="cp">
+    <summary>
+      <div class="num">09</div>
+      <div class="title"><div class="id">Checkpoint 9</div><h3>Home — remaining sections</h3></div>
+      <div class="chev">›</div>
+    </summary>
+    <div class="body">
+      <div class="row"><span class="lbl do">Do</span><p>Port news list, policy rates, reserves, modules grid (<code>modules</code> + icon/onClick → routes), services, hotlines, useful/about links. Each repeated shape → its own <code>home/</code> component.</p></div>
+      <div class="row"><span class="lbl val">Validate</span><p>Full home diffs clean in both languages; module/service cards navigate correctly.</p></div>
+      <div class="row"><span class="lbl test">Test</span><p>Snapshot of full <code>index.vue</code>; click-through test module→route.</p></div>
+      <div class="row"><span class="lbl exit">Exit</span><p>Home view complete.</p></div>
+    </div>
+  </details>
+
+  <!-- CP10 -->
+  <details class="cp">
+    <summary>
+      <div class="num">10</div>
+      <div class="title"><div class="id">Checkpoint 10</div><h3>Shared inner-page system (inner/InnerPage.vue)</h3></div>
+      <div class="chev">›</div>
+    </summary>
+    <div class="body">
+      <div class="row"><span class="lbl do">Do</span><p>Data-driven inner template: breadcrumb, eyebrow+title+lead, conditional highlight card, <code>inner/LinkGroup.vue</code> (groups), <code>inner/DataTable.vue</code> (head + rows, mono right-aligned values), sidebar (<code>sideRates</code> + <code>related</code>). Each page file is a one-liner: <code>&lt;InnerPage view="mp" /&gt;</code>.</p></div>
+      <div class="row"><span class="lbl val">Validate</span><p>All four inner routes render from <code>L.pages[view]</code>; adding a view needs only locale data + a thin page.</p></div>
+      <div class="row"><span class="lbl test">Test</span><p><code>InnerPage</code> mounts each <code>view</code>, asserts highlight/groups/tables conditionals; <code>DataTable</code> row/column count test.</p></div>
+      <div class="row"><span class="lbl exit">Exit</span><p>Inner-page system done; 4 inner views verified.</p></div>
+    </div>
+  </details>
+
+  <!-- CP11 -->
+  <details class="cp">
+    <summary>
+      <div class="num">11</div>
+      <div class="title"><div class="id">Checkpoint 11</div><h3>Full QA pass — visual · behavioral · a11y · responsive</h3></div>
+      <div class="chev">›</div>
+    </summary>
+    <div class="body">
+      <div class="row"><span class="lbl do">Do</span><p>Review every route × every language. Verify transitions (durations/easing exact), hover states, sticky positioning, focus states, tab order, alt/aria on icons + search, responsive <code>max-vw</code> clamps.</p></div>
+      <div class="row"><span class="lbl val">Validate</span><p>Chrome DevTools MCP — console clean, no layout shift, Lighthouse a11y check.</p></div>
+      <div class="row"><span class="lbl test">Test</span><p>Add component tests for gaps; fix and re-run full Vitest suite + <code>nuxi generate</code>.</p></div>
+      <div class="row"><span class="lbl exit">Exit</span><p>Zero visual/behavioral deltas from prototype.</p></div>
+    </div>
+  </details>
+
+  <!-- CP12 -->
+  <details class="cp">
+    <summary>
+      <div class="num">12</div>
+      <div class="title"><div class="id">Checkpoint 12</div><h3>Production hardening + release</h3></div>
+      <div class="chev">›</div>
+    </summary>
+    <div class="body">
+      <div class="row"><span class="lbl do">Do</span><p>SEO meta/OG/<code>lang</code> per route, favicon/crest, 404 page, robots/sitemap, font preload, asset hashing check, bundle-size review. CI runs lint + typecheck + test + <code>generate</code> on every push. README run/build docs.</p></div>
+      <div class="row"><span class="lbl val">Validate</span><p>Lighthouse (perf/SEO/a11y/best-practices) on generated output; CI green end-to-end.</p></div>
+      <div class="row"><span class="lbl test">Test</span><p>Full suite + <code>nuxi generate</code> in CI; serve <code>.output/public</code> and smoke-test all routes.</p></div>
+      <div class="row"><span class="lbl exit">Exit</span><p>Deployable <code>.output/public/</code>; pipeline enforces quality gates.</p></div>
+    </div>
+  </details>
+
+  <!-- RISKS -->
+  <div class="sec-head"><span class="bar"></span><h2>Risks &amp; Decisions to Lock Before CP3</h2></div>
+  <div class="panel">
+    <div class="risk"><span class="dot"></span><span class="txt"><strong>Bangla content fidelity</strong> — the bn dict must be transcribed character-exact; budget a review pass.</span></div>
+    <div class="risk"><span class="dot"></span><span class="txt"><strong><code>to: null</code> nav links</strong> — confirm these stay non-navigating (faithful) vs. becoming stubs.</span></div>
+    <div class="risk"><span class="dot"></span><span class="txt"><strong><code>image-slot.js</code> / <code>support.js</code></strong> — design-tool runtime, <em>not</em> ported; all icons/images become <code>BaseIcon</code> / static assets.</span></div>
+  </div>
+
+  <!-- TOOLING -->
+  <div class="sec-head"><span class="bar"></span><h2>Tooling Decisions (locked)</h2></div>
+  <div class="panel accent">
+    <ul>
+      <li><strong>Test loop:</strong> Vitest (unit/component) + Chrome DevTools MCP (live visual/behavioral QA) at every checkpoint, gated by <code>nuxi generate</code>.</li>
+      <li><strong>Build target:</strong> TBD — scaffolding deferred until explicitly requested.</li>
+    </ul>
+  </div>
+
+</div>
+
+<footer class="foot">
+  <strong>Bangladesh Bank</strong> — Prototype → Nuxt 4 SSG Migration Plan · Companion to architecture.md
+</footer>
+
+</body>
+</html>

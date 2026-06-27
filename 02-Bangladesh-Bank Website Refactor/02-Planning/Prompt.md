@@ -1,0 +1,3 @@
+There is a prototype HTML in this folder with JavaScript. So I am to now make it Production grade nuxt + vuejs project..There is an architecture.md file in the code project. (You have 10 years experience as a senior software engineer and architect)
+
+Now make a detailed migration plan for the based on the architecture and must follow the design pattern mentioned in the prototype. Make sure have a 12-step checkpoint with validation and test loop so that you can easily go step by step development

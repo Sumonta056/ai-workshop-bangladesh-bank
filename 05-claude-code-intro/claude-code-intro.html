@@ -1,0 +1,656 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Claude Code — A Gentle Intro</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+<style>
+  :root{
+    --ink:#191512;
+    --panel:#211b17;
+    --panel-2:#2a221d;
+    --card:#2f2620;
+    --clay:#d97757;
+    --clay-2:#e89274;
+    --clay-soft:rgba(217,119,87,.13);
+    --sage:#8fb39b;
+    --gold:#d9b06a;
+    --blue:#7fa6c4;
+    --cream:#efe6da;
+    --muted:#a3958a;
+    --faint:#75695f;
+    --line:rgba(239,230,218,.09);
+    --line-2:rgba(239,230,218,.16);
+    --mono:'JetBrains Mono',ui-monospace,Menlo,Consolas,monospace;
+    --sans:'Inter',system-ui,-apple-system,sans-serif;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  html{scroll-behavior:smooth}
+  body{
+    background:var(--ink);
+    color:var(--cream);
+    font-family:var(--sans);
+    line-height:1.6;
+    -webkit-font-smoothing:antialiased;
+    min-height:100vh;
+  }
+  .shell{display:flex;min-height:100vh;}
+
+  /* ---------- SIDEBAR (styled as the .claude folder tree) ---------- */
+  .sidebar{
+    width:312px;flex-shrink:0;
+    background:var(--panel);
+    border-right:1px solid var(--line);
+    padding:26px 0 30px;
+    position:sticky;top:0;height:100vh;overflow-y:auto;
+  }
+  .brand{padding:0 24px 22px;border-bottom:1px solid var(--line);margin-bottom:14px;}
+  .brand .mark{
+    display:inline-flex;align-items:center;gap:9px;
+    font-family:var(--mono);font-weight:700;font-size:14px;letter-spacing:.02em;
+  }
+  .brand .dot{width:10px;height:10px;border-radius:50%;background:var(--clay);box-shadow:0 0 0 4px var(--clay-soft);}
+  .brand .sub{display:block;margin-top:9px;color:var(--faint);font-size:12px;font-family:var(--mono);}
+
+  .tree-label{
+    padding:4px 24px 8px;font-family:var(--mono);font-size:11px;
+    color:var(--faint);letter-spacing:.12em;text-transform:uppercase;
+  }
+  .tree-root{
+    padding:0 16px 4px 24px;font-family:var(--mono);font-size:13px;color:var(--muted);
+    display:flex;align-items:center;gap:7px;
+  }
+  .tree-root b{color:var(--cream);font-weight:600;}
+
+  nav{margin-top:2px;}
+  .navbtn{
+    display:flex;align-items:center;gap:10px;width:100%;
+    background:none;border:0;cursor:pointer;text-align:left;
+    color:var(--muted);font-family:var(--mono);font-size:13.5px;
+    padding:9px 24px 9px 40px;position:relative;
+    border-left:2px solid transparent;transition:color .15s,background .15s;
+  }
+  .navbtn:before{
+    content:"";position:absolute;left:30px;top:50%;width:6px;height:1px;
+    background:var(--line-2);transform:translateY(-50%);
+  }
+  .navbtn .idx{color:var(--faint);font-size:12px;min-width:18px;}
+  .navbtn:hover{color:var(--cream);background:rgba(239,230,218,.025);}
+  .navbtn.active{
+    color:var(--clay-2);background:var(--clay-soft);
+    border-left-color:var(--clay);font-weight:600;
+  }
+  .navbtn.active .idx{color:var(--clay);}
+  .navbtn:focus-visible{outline:2px solid var(--clay);outline-offset:-2px;}
+
+  .side-foot{
+    margin-top:22px;padding:16px 24px 0;border-top:1px solid var(--line);
+    color:var(--faint);font-size:11.5px;font-family:var(--mono);line-height:1.7;
+  }
+
+  /* ---------- MAIN ---------- */
+  .main{flex:1;min-width:0;padding:54px 60px 90px;max-width:920px;}
+  .panel{display:none;animation:fade .35s ease both;}
+  .panel.active{display:block;}
+  @keyframes fade{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+  @media (prefers-reduced-motion:reduce){.panel.active{animation:none}}
+
+  .eyebrow{
+    font-family:var(--mono);font-size:12px;letter-spacing:.16em;text-transform:uppercase;
+    color:var(--clay);margin-bottom:14px;display:flex;align-items:center;gap:10px;
+  }
+  .eyebrow:after{content:"";flex:1;height:1px;background:var(--line);max-width:120px;}
+  h1{font-size:clamp(28px,4vw,40px);font-weight:700;line-height:1.12;letter-spacing:-.02em;margin-bottom:18px;}
+  h1 .accent{color:var(--clay);}
+  .lede{font-size:18px;color:var(--cream);max-width:62ch;margin-bottom:26px;}
+  p{color:var(--muted);max-width:64ch;margin-bottom:16px;}
+  p strong, li strong{color:var(--cream);font-weight:600;}
+  h3{font-size:16px;font-weight:600;color:var(--cream);margin:30px 0 12px;font-family:var(--mono);}
+
+  ul.points{list-style:none;margin:6px 0 20px;max-width:64ch;}
+  ul.points li{
+    position:relative;padding-left:24px;margin-bottom:11px;color:var(--muted);
+  }
+  ul.points li:before{
+    content:"›";position:absolute;left:4px;top:-1px;color:var(--clay);font-family:var(--mono);font-weight:700;
+  }
+
+  /* takeaway callout */
+  .tldr{
+    display:flex;gap:14px;align-items:flex-start;
+    background:var(--clay-soft);border:1px solid rgba(217,119,87,.28);
+    border-radius:12px;padding:16px 18px;margin:6px 0 28px;max-width:64ch;
+  }
+  .tldr .tag{
+    font-family:var(--mono);font-size:11px;font-weight:700;letter-spacing:.08em;
+    color:var(--clay);background:rgba(217,119,87,.16);padding:3px 8px;border-radius:6px;
+    white-space:nowrap;margin-top:2px;
+  }
+  .tldr p{margin:0;color:var(--cream);font-size:15px;}
+
+  /* code / file blocks */
+  .code{
+    background:#15110e;border:1px solid var(--line-2);border-radius:12px;
+    font-family:var(--mono);font-size:13px;line-height:1.75;
+    margin:6px 0 26px;overflow:hidden;max-width:66ch;
+  }
+  .code .bar{
+    display:flex;align-items:center;gap:7px;padding:9px 14px;
+    border-bottom:1px solid var(--line);background:rgba(255,255,255,.015);
+  }
+  .code .bar i{width:11px;height:11px;border-radius:50%;display:inline-block;}
+  .code .bar .r{background:#e06b5c}.code .bar .y{background:#d9b06a}.code .bar .g{background:#8fb39b}
+  .code .bar span{margin-left:8px;color:var(--faint);font-size:11.5px;}
+  .code pre{padding:15px 18px;overflow-x:auto;color:#cdbfb2;}
+  .code .c{color:var(--faint);}
+  .code .k{color:var(--clay-2);}
+  .code .s{color:var(--sage);}
+  .code .f{color:var(--gold);}
+  .code .b{color:var(--cream);font-weight:600;}
+
+  /* diagram wrapper */
+  .figure{margin:8px 0 26px;max-width:100%;}
+  .figure svg{width:100%;height:auto;display:block;
+    background:#15110e;border:1px solid var(--line-2);border-radius:12px;padding:8px;}
+  .figcap{font-family:var(--mono);font-size:12px;color:var(--faint);margin-top:10px;text-align:center;}
+
+  /* analogy pill */
+  .analogy{
+    border-left:2px solid var(--sage);padding:4px 0 4px 16px;margin:4px 0 24px;
+    color:var(--cream);font-size:15px;max-width:62ch;
+  }
+  .analogy b{color:var(--sage);font-family:var(--mono);font-size:12px;letter-spacing:.06em;display:block;margin-bottom:3px;text-transform:uppercase;}
+
+  /* footer nav */
+  .pager{display:flex;justify-content:space-between;gap:14px;margin-top:46px;border-top:1px solid var(--line);padding-top:24px;}
+  .pager button{
+    background:var(--panel-2);border:1px solid var(--line-2);border-radius:10px;
+    color:var(--cream);font-family:var(--mono);font-size:13px;padding:11px 16px;cursor:pointer;
+    transition:border-color .15s,background .15s;display:flex;flex-direction:column;gap:2px;min-width:0;
+  }
+  .pager button:hover{border-color:var(--clay);background:var(--card);}
+  .pager button:disabled{opacity:.32;cursor:default;}
+  .pager button:focus-visible{outline:2px solid var(--clay);outline-offset:2px;}
+  .pager .dir{font-size:10px;color:var(--faint);letter-spacing:.1em;text-transform:uppercase;}
+  .pager .t-next{text-align:right;align-items:flex-end;}
+
+  /* mobile */
+  .menutoggle{display:none;}
+  @media (max-width:880px){
+    .shell{flex-direction:column;}
+    .sidebar{
+      width:100%;height:auto;position:relative;top:0;padding:18px 0;
+      border-right:0;border-bottom:1px solid var(--line);
+    }
+    .brand{padding:0 20px 16px;}
+    .side-foot{display:none;}
+    nav{display:flex;overflow-x:auto;gap:4px;padding:4px 14px 2px;}
+    .navbtn{
+      width:auto;white-space:nowrap;padding:8px 14px;border-left:0;border-bottom:2px solid transparent;border-radius:8px;
+    }
+    .navbtn:before{display:none;}
+    .navbtn.active{border-left:0;border-bottom-color:var(--clay);border-radius:8px 8px 0 0;}
+    .tree-label,.tree-root{display:none;}
+    .main{padding:34px 22px 70px;}
+    .lede{font-size:16px;}
+  }
+</style>
+</head>
+<body>
+<div class="shell">
+
+  <!-- SIDEBAR -->
+  <aside class="sidebar">
+    <div class="brand">
+      <span class="mark"><span class="dot"></span>Claude Code</span>
+      <span class="sub">a gentle intro for the team</span>
+    </div>
+
+    <div class="tree-label">your project</div>
+    <div class="tree-root">📁 <b>my-app/</b></div>
+    <div class="tree-root" style="padding-left:38px;">📁 <b>.claude/</b></div>
+
+    <nav id="nav">
+      <button class="navbtn active" data-i="0"><span class="idx">00</span> overview</button>
+      <button class="navbtn" data-i="1"><span class="idx">01</span> .claude/ folder</button>
+      <button class="navbtn" data-i="2"><span class="idx">02</span> CLAUDE.md</button>
+      <button class="navbtn" data-i="3"><span class="idx">03</span> skills/</button>
+      <button class="navbtn" data-i="4"><span class="idx">04</span> hooks</button>
+      <button class="navbtn" data-i="5"><span class="idx">05</span> agents/</button>
+      <button class="navbtn" data-i="6"><span class="idx">06</span> plugins</button>
+      <button class="navbtn" data-i="7"><span class="idx">07</span> MCP</button>
+    </nav>
+
+    <div class="side-foot">
+      Tip → click a file on the left,<br>read it on the right.<br>
+      Use ← / → to move through.
+    </div>
+  </aside>
+
+  <!-- MAIN -->
+  <main class="main" id="main">
+
+    <!-- 0 OVERVIEW -->
+    <section class="panel active" data-i="0">
+      <div class="eyebrow">00 · Start here</div>
+      <h1>Claude Code, <span class="accent">without the jargon</span></h1>
+      <p class="lede">Claude Code is an AI coding assistant that lives in your terminal. Out of the box it can read, write and run code. Everything below is the <em>extension layer</em> — small pieces you add to make it understand <strong>your</strong> project.</p>
+      <p>Don't try to learn all of it today. Here is the one-line mental model for each piece — the rest of the tabs just expand on these.</p>
+      <ul class="points">
+        <li><strong>.claude/ folder</strong> — the one place all your custom settings live.</li>
+        <li><strong>CLAUDE.md</strong> — notes Claude reads every time, so it knows your project.</li>
+        <li><strong>Skills</strong> — how-to guides Claude opens only when needed.</li>
+        <li><strong>Hooks</strong> — "when X happens, always run Y." Automatic, every time.</li>
+        <li><strong>Agents</strong> — a helper Claude with its own fresh memory for side tasks.</li>
+        <li><strong>Plugins</strong> — a bundle of the above, so a whole team installs it in one go.</li>
+        <li><strong>MCP</strong> — the cable that connects Claude to outside tools (DB, ClickUp, GitHub…).</li>
+      </ul>
+      <div class="tldr">
+        <span class="tag">REMEMBER</span>
+        <p>CLAUDE.md &amp; hooks run <strong>every time</strong> (deterministic). Skills &amp; agents run <strong>when Claude decides</strong> they're useful (Claude's judgement). That single line explains most design choices.</p>
+      </div>
+    </section>
+
+    <!-- 1 .claude FOLDER -->
+    <section class="panel" data-i="1">
+      <div class="eyebrow">01 · Setup</div>
+      <h1>The <span class="accent">.claude/</span> folder</h1>
+      <p class="lede">This is the home for everything you teach Claude Code. One hidden folder in your project that holds your rules, skills, agents and config.</p>
+
+      <ul class="points">
+        <li>It sits at the <strong>root of your project</strong> — and is usually committed to git so the whole team shares it.</li>
+        <li>There's also a <strong>user-level</strong> one at <code style="font-family:var(--mono);color:var(--gold)">~/.claude/</code> for your personal settings across all projects.</li>
+        <li>You rarely build it by hand. Run <strong>/init</strong> inside a project and Claude creates a starter for you.</li>
+      </ul>
+
+      <h3>What's inside</h3>
+      <div class="code">
+        <div class="bar"><i class="r"></i><i class="y"></i><i class="g"></i><span>my-app/.claude/</span></div>
+<pre><span class="c"># lives at the root of your repo</span>
+.claude/
+├── <span class="b">CLAUDE.md</span>        <span class="c"># project memory (rules, commands)</span>
+├── <span class="b">settings.json</span>    <span class="c"># config + hooks</span>
+├── <span class="b">skills/</span>          <span class="c"># your custom how-to guides</span>
+│   └── pdf/<span class="s">SKILL.md</span>
+├── <span class="b">agents/</span>          <span class="c"># helper sub-assistants</span>
+│   └── <span class="f">reviewer.md</span>
+└── <span class="b">commands/</span>        <span class="c"># /shortcuts you type</span></pre>
+      </div>
+
+      <div class="tldr">
+        <span class="tag">TL;DR</span>
+        <p>One folder, checked into git, that turns generic Claude into <strong>your team's</strong> Claude.</p>
+      </div>
+    </section>
+
+    <!-- 2 CLAUDE.md -->
+    <section class="panel" data-i="2">
+      <div class="eyebrow">02 · Memory</div>
+      <h1>What is <span class="accent">CLAUDE.md</span>?</h1>
+      <p class="lede">A plain markdown file Claude reads automatically at the <strong>start of every session</strong>. Think of it as the sticky note on your project that Claude never forgets.</p>
+
+      <h3>Why is it a must?</h3>
+      <p>Without it, you re-explain your stack, your commands and your rules in <em>every single chat</em>. With it, Claude already knows them before you type a word. It's <strong>always-on context</strong>.</p>
+      <ul class="points">
+        <li>Put <strong>always-true facts</strong> here: tech stack, build/test commands, folder layout, coding conventions.</li>
+        <li>Keep it <strong>short</strong> (aim under ~200 lines). Anything that's a multi-step <em>procedure</em> belongs in a skill, not here.</li>
+        <li>Generate a first draft instantly with <strong>/init</strong>.</li>
+      </ul>
+
+      <h3>Example</h3>
+      <div class="code">
+        <div class="bar"><i class="r"></i><i class="y"></i><i class="g"></i><span>.claude/CLAUDE.md</span></div>
+<pre><span class="k"># Project: Vortibhai API</span>
+
+- <span class="b">Stack:</span> Java Spring Boot + MongoDB
+- <span class="b">Run tests:</span> ./mvnw test
+- <span class="b">Frontend:</span> Nuxt 3, deployed on Vercel
+- Never edit files in <span class="s">src/legacy/</span>
+- Commit style: <span class="s">feat:</span>, <span class="s">fix:</span>, <span class="s">chore:</span></pre>
+      </div>
+
+      <div class="tldr">
+        <span class="tag">TL;DR</span>
+        <p>Write your project's "house rules" once. Claude reads them on <strong>every</strong> session.</p>
+      </div>
+    </section>
+
+    <!-- 3 SKILLS -->
+    <section class="panel" data-i="3">
+      <div class="eyebrow">03 · On-demand knowledge</div>
+      <h1>What are <span class="accent">Skills</span>?</h1>
+      <p class="lede">A skill is a folder with a <strong>SKILL.md</strong> file that teaches Claude how to do one specific task. Unlike CLAUDE.md, it loads <strong>only when it's relevant</strong> — so it doesn't waste Claude's memory.</p>
+
+      <ul class="points">
+        <li>Every skill has a <strong>name</strong> and a <strong>description</strong>. Claude reads the description and decides if this task needs it.</li>
+        <li>Great for repeated workflows: "how we write PDFs", "our PR-review checklist", "our release steps".</li>
+        <li>If you keep pasting the same instructions into chat → that should be a skill.</li>
+      </ul>
+
+      <h3>Example — a tiny PDF skill</h3>
+      <div class="code">
+        <div class="bar"><i class="r"></i><i class="y"></i><i class="g"></i><span>.claude/skills/pdf/SKILL.md</span></div>
+<pre><span class="c">---</span>
+<span class="k">name:</span> pdf-helper
+<span class="k">description:</span> Extract text, fill forms, merge PDFs.
+  Use when working with PDF files.
+<span class="c">---</span>
+
+<span class="b">## How to merge PDFs</span>
+Use pypdf. Read each file, append pages,
+write the combined output... </pre>
+      </div>
+
+      <h3>How Claude uses a skill</h3>
+      <div class="figure">
+        <svg viewBox="0 0 760 130" role="img" aria-label="Flow: you ask, Claude scans skill descriptions, matches the PDF skill, loads it, does the task">
+          <defs>
+            <marker id="ar" markerWidth="9" markerHeight="9" refX="6" refY="3" orient="auto">
+              <path d="M0,0 L6,3 L0,6 Z" fill="#d97757"/>
+            </marker>
+          </defs>
+          <g font-family="JetBrains Mono, monospace" font-size="12">
+            <rect x="8" y="40" width="130" height="50" rx="9" fill="#2f2620" stroke="#8fb39b"/>
+            <text x="73" y="61" fill="#efe6da" text-anchor="middle">You ask:</text>
+            <text x="73" y="77" fill="#a3958a" text-anchor="middle">"merge PDFs"</text>
+
+            <rect x="178" y="40" width="150" height="50" rx="9" fill="#2f2620" stroke="#d97757"/>
+            <text x="253" y="61" fill="#efe6da" text-anchor="middle">Claude scans</text>
+            <text x="253" y="77" fill="#a3958a" text-anchor="middle">skill descriptions</text>
+
+            <rect x="368" y="40" width="150" height="50" rx="9" fill="#2f2620" stroke="#d9b06a"/>
+            <text x="443" y="61" fill="#efe6da" text-anchor="middle">match found:</text>
+            <text x="443" y="77" fill="#a3958a" text-anchor="middle">loads SKILL.md</text>
+
+            <rect x="558" y="40" width="140" height="50" rx="9" fill="#2f2620" stroke="#8fb39b"/>
+            <text x="628" y="61" fill="#efe6da" text-anchor="middle">does the task</text>
+            <text x="628" y="77" fill="#a3958a" text-anchor="middle">the right way ✓</text>
+
+            <line x1="140" y1="65" x2="174" y2="65" stroke="#d97757" stroke-width="1.6" marker-end="url(#ar)"/>
+            <line x1="330" y1="65" x2="364" y2="65" stroke="#d97757" stroke-width="1.6" marker-end="url(#ar)"/>
+            <line x1="520" y1="65" x2="554" y2="65" stroke="#d97757" stroke-width="1.6" marker-end="url(#ar)"/>
+          </g>
+        </svg>
+        <div class="figcap">Skills are pulled in on demand — Claude opens the manual only when the job calls for it.</div>
+      </div>
+
+      <div class="tldr">
+        <span class="tag">TL;DR</span>
+        <p>A reusable how-to guide. Loaded <strong>only when relevant</strong>, so it stays out of the way until needed.</p>
+      </div>
+    </section>
+
+    <!-- 4 HOOKS -->
+    <section class="panel" data-i="4">
+      <div class="eyebrow">04 · Automation</div>
+      <h1>What are <span class="accent">Hooks</span>?</h1>
+      <p class="lede">A hook is a command that runs <strong>automatically</strong> when a certain event happens. The rule: <em>"when event B happens, always do A."</em> No asking, no forgetting.</p>
+
+      <div class="analogy">
+        <b>Skill vs Hook</b>
+        A skill is advice Claude <em>chooses</em> to follow. A hook is a rule that <em>enforces itself</em> — it fires every time, whether Claude wants to or not.
+      </div>
+
+      <ul class="points">
+        <li>Defined in <strong>settings.json</strong>.</li>
+        <li>Classic use: after Claude edits a file → <strong>auto-run the formatter / linter</strong>.</li>
+        <li>Safety use: before a command runs → <strong>block dangerous ones</strong> (like deleting things).</li>
+      </ul>
+
+      <h3>Example — format code after every edit</h3>
+      <div class="code">
+        <div class="bar"><i class="r"></i><i class="y"></i><i class="g"></i><span>.claude/settings.json</span></div>
+<pre>{
+  <span class="k">"hooks"</span>: {
+    <span class="k">"PostToolUse"</span>: [{
+      <span class="k">"matcher"</span>: <span class="s">"Write|Edit"</span>,
+      <span class="k">"hooks"</span>: [{ <span class="k">"type"</span>:<span class="s">"command"</span>,
+        <span class="k">"command"</span>: <span class="s">"npm run format"</span> }]
+    }]
+  }
+}</pre>
+      </div>
+
+      <h3>How a hook fires</h3>
+      <div class="figure">
+        <svg viewBox="0 0 760 130" role="img" aria-label="Flow: Claude edits a file, the PostToolUse event fires the hook automatically, it runs the formatter, code stays clean">
+          <g font-family="JetBrains Mono, monospace" font-size="12">
+            <rect x="8" y="40" width="150" height="50" rx="9" fill="#2f2620" stroke="#8fb39b"/>
+            <text x="83" y="61" fill="#efe6da" text-anchor="middle">Claude edits</text>
+            <text x="83" y="77" fill="#a3958a" text-anchor="middle">a file</text>
+
+            <rect x="208" y="40" width="160" height="50" rx="9" fill="#2f2620" stroke="#d97757"/>
+            <text x="288" y="61" fill="#efe6da" text-anchor="middle">event fires hook</text>
+            <text x="288" y="77" fill="#a3958a" text-anchor="middle">automatically</text>
+
+            <rect x="418" y="40" width="150" height="50" rx="9" fill="#2f2620" stroke="#d9b06a"/>
+            <text x="493" y="61" fill="#efe6da" text-anchor="middle">runs command</text>
+            <text x="493" y="77" fill="#a3958a" text-anchor="middle">npm run format</text>
+
+            <rect x="618" y="40" width="134" height="50" rx="9" fill="#2f2620" stroke="#8fb39b"/>
+            <text x="685" y="61" fill="#efe6da" text-anchor="middle">clean code ✓</text>
+            <text x="685" y="77" fill="#a3958a" text-anchor="middle">every time</text>
+
+            <line x1="160" y1="65" x2="204" y2="65" stroke="#d97757" stroke-width="1.6" marker-end="url(#ar)"/>
+            <line x1="370" y1="65" x2="414" y2="65" stroke="#d97757" stroke-width="1.6" marker-end="url(#ar)"/>
+            <line x1="570" y1="65" x2="614" y2="65" stroke="#d97757" stroke-width="1.6" marker-end="url(#ar)"/>
+          </g>
+        </svg>
+        <div class="figcap">You don't trigger a hook. It just runs — invisibly, on its event.</div>
+      </div>
+
+      <div class="tldr">
+        <span class="tag">TL;DR</span>
+        <p>Automatic "if this, then that" rules. Perfect for non-negotiables like formatting and safety.</p>
+      </div>
+    </section>
+
+    <!-- 5 AGENTS -->
+    <section class="panel" data-i="5">
+      <div class="eyebrow">05 · Delegation</div>
+      <h1>What are <span class="accent">Agents</span>?</h1>
+      <p class="lede">A sub-agent is a separate Claude with its <strong>own fresh memory</strong>, its own instructions and its own tools. The main Claude hands it a side job, and it reports back a short summary.</p>
+
+      <div class="analogy">
+        <b>Why bother</b>
+        Big tasks (reading 50 files, deep research) fill up the main chat's memory with noise. A sub-agent does that mess in <em>its own</em> window and only returns the clean answer — keeping your main conversation focused.
+      </div>
+
+      <ul class="points">
+        <li>Defined as markdown files in <strong>.claude/agents/</strong>.</li>
+        <li>Common example: a <strong>code-reviewer</strong> agent that reviews a change in isolation and sends back the findings.</li>
+        <li>You can even give grunt-work agents a cheaper, faster model to save cost.</li>
+      </ul>
+
+      <h3>How delegation works</h3>
+      <div class="figure">
+        <svg viewBox="0 0 760 200" role="img" aria-label="Main Claude delegates a research task to a sub-agent with its own context, which returns a short summary">
+          <g font-family="JetBrains Mono, monospace" font-size="12">
+            <rect x="30" y="74" width="180" height="56" rx="10" fill="#2f2620" stroke="#d97757"/>
+            <text x="120" y="98" fill="#efe6da" text-anchor="middle">Main Claude</text>
+            <text x="120" y="115" fill="#a3958a" text-anchor="middle">your conversation</text>
+
+            <rect x="500" y="30" width="220" height="62" rx="10" fill="#211b17" stroke="#8fb39b" stroke-dasharray="5 4"/>
+            <text x="610" y="54" fill="#efe6da" text-anchor="middle">Sub-agent</text>
+            <text x="610" y="71" fill="#a3958a" text-anchor="middle">own fresh context</text>
+            <text x="610" y="85" fill="#75695f" text-anchor="middle" font-size="10.5">reads 50 files, researches...</text>
+
+            <line x1="210" y1="92" x2="496" y2="61" stroke="#d97757" stroke-width="1.6" marker-end="url(#ar)"/>
+            <text x="350" y="62" fill="#d9b06a" text-anchor="middle" font-size="11">delegate task →</text>
+
+            <line x1="496" y1="80" x2="214" y2="108" stroke="#8fb39b" stroke-width="1.6" marker-end="url(#ar2)"/>
+            <text x="356" y="128" fill="#8fb39b" text-anchor="middle" font-size="11">← short summary back</text>
+
+            <rect x="500" y="130" width="220" height="44" rx="10" fill="#2f2620" stroke="#d9b06a"/>
+            <text x="610" y="157" fill="#a3958a" text-anchor="middle">main chat stays clean ✓</text>
+          </g>
+          <defs>
+            <marker id="ar2" markerWidth="9" markerHeight="9" refX="6" refY="3" orient="auto">
+              <path d="M0,0 L6,3 L0,6 Z" fill="#8fb39b"/>
+            </marker>
+          </defs>
+        </svg>
+        <div class="figcap">Heavy work happens in a separate window. Only the result comes home.</div>
+      </div>
+
+      <div class="tldr">
+        <span class="tag">TL;DR</span>
+        <p>A helper Claude for side tasks. Protects your main conversation from clutter.</p>
+      </div>
+    </section>
+
+    <!-- 6 PLUGINS -->
+    <section class="panel" data-i="6">
+      <div class="eyebrow">06 · Packaging</div>
+      <h1>What are <span class="accent">Plugins</span>?</h1>
+      <p class="lede">A plugin <strong>bundles</strong> skills, hooks, agents and MCP servers into one installable package. It's the sharing layer — so a whole team gets the exact same setup with one install.</p>
+
+      <div class="analogy">
+        <b>Think of it as</b>
+        An app store for your workflow. Skills and hooks are for <em>you</em>. A plugin is those same pieces packaged to <em>travel</em> to your teammates.
+      </div>
+
+      <ul class="points">
+        <li>Installed from a <strong>marketplace</strong> (a GitHub repo, npm, or your team's own registry) — no manual file-copying.</li>
+        <li>Plugin skills are <strong>namespaced</strong> (e.g. <code style="font-family:var(--mono);color:var(--gold)">/security:scan</code>) so they never clash with your own.</li>
+        <li>Example: a "PR-review plugin" — everyone installs it and instantly shares the same review skill, formatting hook and reviewer agent.</li>
+      </ul>
+
+      <h3>One bundle → the whole team</h3>
+      <div class="figure">
+        <svg viewBox="0 0 760 190" role="img" aria-label="A plugin bundles skills, hooks, agents and MCP; installed once, three teammates get the same setup">
+          <g font-family="JetBrains Mono, monospace" font-size="11.5">
+            <rect x="20" y="38" width="230" height="116" rx="12" fill="#211b17" stroke="#d97757"/>
+            <text x="135" y="58" fill="#d97757" text-anchor="middle" font-size="12" font-weight="700">PR-review plugin</text>
+            <rect x="38" y="70" width="92" height="32" rx="7" fill="#2f2620" stroke="#8fb39b"/>
+            <text x="84" y="90" fill="#efe6da" text-anchor="middle">skills</text>
+            <rect x="140" y="70" width="92" height="32" rx="7" fill="#2f2620" stroke="#d9b06a"/>
+            <text x="186" y="90" fill="#efe6da" text-anchor="middle">hooks</text>
+            <rect x="38" y="110" width="92" height="32" rx="7" fill="#2f2620" stroke="#7fa6c4"/>
+            <text x="84" y="130" fill="#efe6da" text-anchor="middle">agents</text>
+            <rect x="140" y="110" width="92" height="32" rx="7" fill="#2f2620" stroke="#8fb39b"/>
+            <text x="186" y="130" fill="#efe6da" text-anchor="middle">MCP</text>
+
+            <text x="330" y="100" fill="#d9b06a" text-anchor="middle" font-size="11">install once →</text>
+            <line x1="250" y1="96" x2="408" y2="96" stroke="#d97757" stroke-width="1.6" marker-end="url(#ar)"/>
+
+            <rect x="540" y="30" width="200" height="34" rx="8" fill="#2f2620" stroke="#8fb39b"/>
+            <text x="640" y="52" fill="#a3958a" text-anchor="middle">teammate 1 ✓</text>
+            <rect x="540" y="78" width="200" height="34" rx="8" fill="#2f2620" stroke="#8fb39b"/>
+            <text x="640" y="100" fill="#a3958a" text-anchor="middle">teammate 2 ✓</text>
+            <rect x="540" y="126" width="200" height="34" rx="8" fill="#2f2620" stroke="#8fb39b"/>
+            <text x="640" y="148" fill="#a3958a" text-anchor="middle">teammate 3 ✓</text>
+
+            <line x1="430" y1="96" x2="536" y2="48" stroke="#75695f" stroke-width="1.3"/>
+            <line x1="430" y1="96" x2="536" y2="95" stroke="#75695f" stroke-width="1.3"/>
+            <line x1="430" y1="96" x2="536" y2="143" stroke="#75695f" stroke-width="1.3"/>
+          </g>
+        </svg>
+        <div class="figcap">Same building blocks, packaged so everyone gets identical Claude behaviour.</div>
+      </div>
+
+      <div class="tldr">
+        <span class="tag">TL;DR</span>
+        <p>A shareable box of skills + hooks + agents. Build once, distribute to the whole team.</p>
+      </div>
+    </section>
+
+    <!-- 7 MCP -->
+    <section class="panel" data-i="7">
+      <div class="eyebrow">07 · Connections</div>
+      <h1>What is <span class="accent">MCP</span>?</h1>
+      <p class="lede">MCP (Model Context Protocol) is a <strong>standard way to plug Claude into outside tools</strong> — your database, GitHub, Slack, Google Calendar, ClickUp, and more.</p>
+
+      <div class="analogy">
+        <b>Think of it as</b>
+        A USB port for AI. One standard socket — and any tool that speaks MCP can plug straight in, no custom wiring per tool.
+      </div>
+
+      <ul class="points">
+        <li>Without MCP, Claude only knows your code. With it, Claude can <strong>read and act on live data</strong> from real services.</li>
+        <li>Each connection is an <strong>MCP server</strong> that sits between Claude and the tool.</li>
+        <li>Example: connect a <strong>ClickUp</strong> MCP, then ask "what are my open tasks?" and Claude pulls them live.</li>
+      </ul>
+
+      <h3>How Claude reaches the outside</h3>
+      <div class="figure">
+        <svg viewBox="0 0 760 180" role="img" aria-label="Claude Code connects through MCP servers to external tools like ClickUp, a database, and GitHub">
+          <g font-family="JetBrains Mono, monospace" font-size="12">
+            <rect x="30" y="64" width="170" height="56" rx="10" fill="#2f2620" stroke="#d97757"/>
+            <text x="115" y="88" fill="#efe6da" text-anchor="middle">Claude Code</text>
+            <text x="115" y="105" fill="#a3958a" text-anchor="middle">your terminal</text>
+
+            <rect x="300" y="64" width="150" height="56" rx="10" fill="#211b17" stroke="#d9b06a"/>
+            <text x="375" y="88" fill="#efe6da" text-anchor="middle">MCP server</text>
+            <text x="375" y="105" fill="#a3958a" text-anchor="middle">the bridge</text>
+
+            <line x1="200" y1="92" x2="296" y2="92" stroke="#d97757" stroke-width="1.6" marker-end="url(#ar)"/>
+            <line x1="296" y1="100" x2="200" y2="100" stroke="#8fb39b" stroke-width="1.6" marker-end="url(#ar2)"/>
+
+            <rect x="560" y="20" width="170" height="38" rx="9" fill="#2f2620" stroke="#7fa6c4"/>
+            <text x="645" y="44" fill="#a3958a" text-anchor="middle">ClickUp</text>
+            <rect x="560" y="73" width="170" height="38" rx="9" fill="#2f2620" stroke="#8fb39b"/>
+            <text x="645" y="97" fill="#a3958a" text-anchor="middle">Database</text>
+            <rect x="560" y="126" width="170" height="38" rx="9" fill="#2f2620" stroke="#d9b06a"/>
+            <text x="645" y="150" fill="#a3958a" text-anchor="middle">GitHub</text>
+
+            <line x1="450" y1="92" x2="556" y2="39" stroke="#75695f" stroke-width="1.3"/>
+            <line x1="450" y1="92" x2="556" y2="92" stroke="#75695f" stroke-width="1.3"/>
+            <line x1="450" y1="92" x2="556" y2="145" stroke="#75695f" stroke-width="1.3"/>
+          </g>
+        </svg>
+        <div class="figcap">One protocol, many tools. Claude asks the MCP server; the server talks to the real service.</div>
+      </div>
+
+      <div class="tldr">
+        <span class="tag">TL;DR</span>
+        <p>The standard "cable" that lets Claude use real tools and live data, not just your code.</p>
+      </div>
+    </section>
+
+    <!-- PAGER -->
+    <div class="pager">
+      <button id="prev"><span class="dir">← Previous</span><span id="prevT">—</span></button>
+      <button id="next" class="t-next"><span class="dir">Next →</span><span id="nextT">—</span></button>
+    </div>
+
+  </main>
+</div>
+
+<script>
+  const titles = ["overview",".claude/ folder","CLAUDE.md","skills/","hooks","agents/","plugins","MCP"];
+  const btns = Array.from(document.querySelectorAll('.navbtn'));
+  const panels = Array.from(document.querySelectorAll('.panel'));
+  const prev = document.getElementById('prev'), next = document.getElementById('next');
+  const prevT = document.getElementById('prevT'), nextT = document.getElementById('nextT');
+  let cur = 0;
+
+  function show(i){
+    cur = i;
+    btns.forEach(b=>b.classList.toggle('active', +b.dataset.i===i));
+    panels.forEach(p=>p.classList.toggle('active', +p.dataset.i===i));
+    prev.disabled = i===0;
+    next.disabled = i===titles.length-1;
+    prevT.textContent = i>0 ? titles[i-1] : "—";
+    nextT.textContent = i<titles.length-1 ? titles[i+1] : "—";
+    document.getElementById('main').scrollIntoView({behavior:'smooth',block:'start'});
+    // keep active tab visible on mobile horizontal scroll
+    btns[i].scrollIntoView({block:'nearest', inline:'center'});
+  }
+
+  btns.forEach(b=> b.addEventListener('click', ()=> show(+b.dataset.i)));
+  prev.addEventListener('click', ()=> { if(cur>0) show(cur-1); });
+  next.addEventListener('click', ()=> { if(cur<titles.length-1) show(cur+1); });
+  document.addEventListener('keydown', e=>{
+    if(e.target.tagName==='INPUT'||e.target.tagName==='TEXTAREA') return;
+    if(e.key==='ArrowRight' && cur<titles.length-1) show(cur+1);
+    if(e.key==='ArrowLeft' && cur>0) show(cur-1);
+  });
+  show(0);
+</script>
+</body>
+</html>

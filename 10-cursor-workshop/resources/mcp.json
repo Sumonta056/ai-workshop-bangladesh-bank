@@ -1,0 +1,16 @@
+{
+    "mcpServers": {
+      "postgres": {
+        "command": "npx",
+        "args": [
+          "-y",
+          "enhanced-postgres-mcp-server",
+          "postgresql://workshop:workshop123@localhost:5432/taskmanager_db"
+        ]
+      },
+      "Atlassian-workshop": {
+        "url": "https://mcp.atlassian.com/v1/sse",
+        "headers": {}
+      }
+    }
+  }

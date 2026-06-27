@@ -1,0 +1,16 @@
+---
+globs: frontend/**/*.tsx
+alwaysApply: false
+---
+
+# Tech Stack
+- Next.js 14 App Router
+- TypeScript 5
+- Tailwind CSS 3
+
+## Component Standards
+- Use 'use client' for client components
+- Server components by default
+- Functional components only
+- Named exports (no default exports)
+- Tailwind for all styling
