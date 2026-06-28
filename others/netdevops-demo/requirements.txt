@@ -1,0 +1,5 @@
+# Only needed for LIVE mode (real devices). The offline demo runs on the
+# Python standard library alone — no installs required.
+netmiko>=4.3.0
+napalm>=4.1.0
+ansible>=9.0.0

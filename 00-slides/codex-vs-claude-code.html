@@ -1,0 +1,224 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Codex vs Claude Code — Core Differences</title>
+<style>
+  :root{
+    --bg:#f7f6f3;
+    --panel:#ffffff;
+    --panel-line:#e6e3dc;
+    --ink:#1c1e22;
+    --muted:#6b7178;
+    --codex:#0a8f6f;       /* OpenAI green */
+    --codex-soft:#e3f4ee;
+    --claude:#c25a35;      /* Anthropic clay */
+    --claude-soft:#fbeae3;
+    --rule:#ece9e2;
+    --mono:'SF Mono',ui-monospace,'JetBrains Mono','Cascadia Code',Menlo,Consolas,monospace;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  html{scroll-behavior:smooth}
+  body{
+    background:var(--bg);
+    color:var(--ink);
+    font-family:var(--mono);
+    line-height:1.55;
+    -webkit-font-smoothing:antialiased;
+    padding:48px 20px 80px;
+  }
+  .wrap{max-width:920px;margin:0 auto}
+
+  /* Header */
+  .eyebrow{
+    color:var(--muted);font-size:12px;letter-spacing:.22em;
+    text-transform:uppercase;margin-bottom:14px;
+  }
+  .eyebrow .dot{color:var(--claude)}
+  h1{
+    font-size:clamp(28px,5vw,46px);line-height:1.05;
+    font-weight:600;letter-spacing:-.02em;margin-bottom:18px;
+  }
+  h1 .cdx{color:var(--codex)}
+  h1 .cld{color:var(--claude)}
+  h1 .vs{color:var(--muted);font-weight:400}
+  .lede{
+    color:var(--muted);font-size:15px;max-width:620px;
+    border-left:2px solid var(--rule);padding-left:16px;
+  }
+
+  /* TL;DR cards */
+  .tldr{
+    display:grid;grid-template-columns:1fr 1fr;gap:16px;margin:40px 0 8px;
+  }
+  .card{
+    background:var(--panel);border:1px solid var(--panel-line);
+    border-radius:12px;padding:22px 22px 24px;position:relative;overflow:hidden;
+  }
+  .card::before{content:"";position:absolute;top:0;left:0;width:100%;height:3px}
+  .card.cdx::before{background:var(--codex)}
+  .card.cld::before{background:var(--claude)}
+  .card .tag{
+    font-size:11px;letter-spacing:.16em;text-transform:uppercase;
+    padding:4px 10px;border-radius:999px;display:inline-block;margin-bottom:14px;font-weight:600;
+  }
+  .card.cdx .tag{background:var(--codex-soft);color:var(--codex)}
+  .card.cld .tag{background:var(--claude-soft);color:var(--claude)}
+  .card h2{font-size:18px;font-weight:600;margin-bottom:6px}
+  .card .by{font-size:12px;color:var(--muted);margin-bottom:14px}
+  .card p{font-size:13.5px;color:#3f444b}
+  .card .essence{
+    margin-top:16px;padding-top:14px;border-top:1px dashed var(--rule);
+    font-size:13px;color:var(--ink);
+  }
+  .card .essence b{font-weight:600}
+  .card.cdx .essence b{color:var(--codex)}
+  .card.cld .essence b{color:var(--claude)}
+
+  /* Section label */
+  .sec{
+    margin:48px 0 18px;display:flex;align-items:center;gap:12px;
+    color:var(--muted);font-size:12px;letter-spacing:.2em;text-transform:uppercase;
+  }
+  .sec::after{content:"";flex:1;height:1px;background:var(--rule)}
+  .sec .hash{color:var(--claude)}
+
+  /* Table */
+  .tablewrap{
+    border:1px solid var(--panel-line);border-radius:12px;overflow:hidden;
+    background:var(--panel);
+  }
+  table{width:100%;border-collapse:collapse;font-size:13.5px}
+  thead th{
+    text-align:left;padding:16px 18px;background:#faf9f6;
+    font-weight:600;font-size:12px;letter-spacing:.05em;
+    border-bottom:1px solid var(--panel-line);
+  }
+  thead th.dim{color:var(--muted);text-transform:uppercase;letter-spacing:.14em;font-size:11px}
+  thead th.c-cdx{color:var(--codex)}
+  thead th.c-cld{color:var(--claude)}
+  tbody td{padding:15px 18px;vertical-align:top;border-bottom:1px solid var(--rule)}
+  tbody tr:last-child td{border-bottom:none}
+  tbody tr:hover{background:#faf9f6}
+  .crit{color:var(--ink);font-weight:600;font-size:12px;letter-spacing:.03em}
+  td.cdx-cell{color:#3f444b}
+  td.cld-cell{color:#3f444b}
+  .pill{
+    display:inline-block;font-size:10.5px;font-weight:600;letter-spacing:.06em;
+    padding:2px 8px;border-radius:6px;margin-bottom:7px;text-transform:uppercase;
+  }
+  .pill.cdx{background:var(--codex-soft);color:var(--codex)}
+  .pill.cld{background:var(--claude-soft);color:var(--claude)}
+
+  /* Bottom line */
+  .bottom{
+    margin-top:40px;background:linear-gradient(135deg,#ffffff,#faf9f6);
+    border:1px solid var(--panel-line);border-radius:12px;padding:26px 28px;
+  }
+  .bottom .sec{margin-top:0}
+  .bottom p{font-size:14px;color:#3f444b}
+  .bottom p .cdx{color:var(--codex);font-weight:600}
+  .bottom p .cld{color:var(--claude);font-weight:600}
+
+  footer{
+    margin-top:40px;text-align:center;color:var(--muted);font-size:11px;letter-spacing:.05em;
+  }
+  footer span{color:var(--rule)}
+
+  @media(max-width:640px){
+    body{padding:32px 14px 60px}
+    .tldr{grid-template-columns:1fr}
+    thead th,tbody td{padding:12px 12px}
+    table{font-size:12.5px}
+    .crit{display:block;margin-bottom:4px}
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <div class="eyebrow"><span class="dot">●</span> AI Coding Agents <span style="color:var(--panel-line)">/</span> June 2026</div>
+  <h1><span class="cdx">Codex</span> <span class="vs">vs</span> <span class="cld">Claude Code</span></h1>
+  <p class="lede">Both are AI helpers that write and fix code for you. The big difference is simple: <b>where</b> they do the work, and <b>how much</b> they need you watching over them.</p>
+
+  <!-- TL;DR -->
+  <div class="tldr">
+    <div class="card cdx">
+      <span class="tag">OpenAI</span>
+      <h2>Codex</h2>
+      <div class="by">Works on its own, in the cloud</div>
+      <p>You give it a clear task and walk away. It does the work on OpenAI's computers and shows you the finished result. Like handing a job to a contractor.</p>
+      <div class="essence">In a nutshell → <b>the do-it-for-me helper.</b> Fast, cheaper, hands-off.</div>
+    </div>
+    <div class="card cld">
+      <span class="tag">Anthropic</span>
+      <h2>Claude Code</h2>
+      <div class="by">Works with you, on your computer</div>
+      <p>It works on your actual files, right there with you, step by step. You guide it as it goes. Like a colleague sitting next to you figuring things out together.</p>
+      <div class="essence">In a nutshell → <b>the work-with-me helper.</b> Thorough, deeper, hands-on.</div>
+    </div>
+  </div>
+
+  <!-- Table -->
+  <div class="sec"><span class="hash">#</span> Side by side, in plain words</div>
+  <div class="tablewrap">
+    <table>
+      <thead>
+        <tr>
+          <th class="dim" style="width:22%">Criterion</th>
+          <th class="c-cdx" style="width:39%">Codex</th>
+          <th class="c-cld" style="width:39%">Claude Code</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td class="crit">Where it works</td>
+          <td class="cdx-cell"><span class="pill cdx">In the cloud</span><br>On OpenAI's computers. You send the job, it works somewhere else.</td>
+          <td class="cld-cell"><span class="pill cld">On your computer</span><br>Right on your own machine, using your real files.</td>
+        </tr>
+        <tr>
+          <td class="crit">How you use it</td>
+          <td class="cdx-cell">Hand it a clear task and let it finish on its own.</td>
+          <td class="cld-cell">Work alongside it, guiding each step as it goes.</td>
+        </tr>
+        <tr>
+          <td class="crit">Best for</td>
+          <td class="cdx-cell">Clear, repeat jobs — and running several at once.</td>
+          <td class="cld-cell">Tricky, messy problems where you're still figuring it out.</td>
+        </tr>
+        <tr>
+          <td class="crit">Memory in a long session</td>
+          <td class="cdx-cell">Tends to start each task fresh; can forget earlier details.</td>
+          <td class="cld-cell"><span class="pill cld">Stronger</span><br>Holds onto the conversation better over long sessions.</td>
+        </tr>
+        <tr>
+          <td class="crit">Cost</td>
+          <td class="cdx-cell"><span class="pill cdx">Cheaper</span><br>Uses less to get a task done — better for high volume.</td>
+          <td class="cld-cell">Costs more per task, but the work is often more thorough.</td>
+        </tr>
+        <tr>
+          <td class="crit">Beyond writing code</td>
+          <td class="cdx-cell">Can also click around apps and the web to get things done.</td>
+          <td class="cld-cell">Can do this too; main strength stays deep coding work.</td>
+        </tr>
+        <tr>
+          <td class="crit">Desktop app</td>
+          <td class="cdx-cell">Available on both Mac and Windows.</td>
+          <td class="cld-cell">Runs in the terminal; works on Mac, Windows, and Linux.</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- Bottom line -->
+  <div class="bottom">
+    <div class="sec"><span class="hash">#</span> Bottom line</div>
+    <p>It really comes down to one choice: do you want a helper that <span class="cdx">runs off and does the job for you</span>, or one that <span class="cld">works beside you and thinks it through with you</span>? Pick <span class="cdx">Codex</span> when the task is clear and you just want it done fast and cheap. Pick <span class="cld">Claude Code</span> when the problem is messy and you want care, depth, and control. Plenty of people use both — Claude to figure things out, Codex to crank through the routine stuff.</p>
+  </div>
+
+  <footer>Compiled from June 2026 developer comparisons <span>·</span> model capabilities change fast</footer>
+
+</div>
+</body>
+</html>

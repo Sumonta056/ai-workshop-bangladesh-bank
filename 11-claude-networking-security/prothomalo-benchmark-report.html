@@ -1,0 +1,365 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Performance Benchmark — prothomalo.com</title>
+<style>
+  :root{
+    --bg:#0d1117; --panel:#161b22; --panel2:#1c2330; --border:#2d3340;
+    --txt:#e6edf3; --muted:#9aa5b1; --accent:#58a6ff;
+    --crit:#f85149; --warn:#e3b341; --ok:#3fb950; --info:#a371f7;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--txt);
+    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+    line-height:1.55;font-size:15px}
+  .wrap{max-width:1080px;margin:0 auto;padding:40px 24px 80px}
+  header{border-bottom:1px solid var(--border);padding-bottom:24px;margin-bottom:32px}
+  h1{font-size:28px;margin:0 0 6px}
+  h2{font-size:21px;margin:44px 0 16px;padding-bottom:8px;border-bottom:1px solid var(--border)}
+  h3{font-size:16px;margin:24px 0 10px;color:var(--accent)}
+  .sub{color:var(--muted);font-size:14px}
+  a{color:var(--accent)}
+  code{background:var(--panel2);padding:2px 6px;border-radius:4px;font-size:13px;
+    font-family:"SF Mono",Menlo,Consolas,monospace}
+  .grid{display:grid;gap:14px}
+  .cards{grid-template-columns:repeat(auto-fit,minmax(150px,1fr));margin:24px 0}
+  .card{background:var(--panel);border:1px solid var(--border);border-radius:10px;padding:16px}
+  .card .val{font-size:26px;font-weight:700;margin:2px 0}
+  .card .lbl{color:var(--muted);font-size:12px;text-transform:uppercase;letter-spacing:.04em}
+  .card .note{font-size:12px;margin-top:4px}
+  .pill{display:inline-block;font-size:11px;font-weight:700;padding:2px 8px;border-radius:20px;
+    text-transform:uppercase;letter-spacing:.03em}
+  .p-crit{background:rgba(248,81,73,.15);color:var(--crit)}
+  .p-warn{background:rgba(227,179,65,.15);color:var(--warn)}
+  .p-ok{background:rgba(63,185,80,.15);color:var(--ok)}
+  .p-info{background:rgba(163,113,247,.15);color:var(--info)}
+  table{width:100%;border-collapse:collapse;margin:14px 0;font-size:14px}
+  th,td{text-align:left;padding:9px 12px;border-bottom:1px solid var(--border)}
+  th{color:var(--muted);font-size:12px;text-transform:uppercase;letter-spacing:.04em;font-weight:600}
+  tbody tr:hover{background:var(--panel)}
+  td.num{text-align:right;font-variant-numeric:tabular-nums;font-family:"SF Mono",Menlo,monospace}
+  .issue{background:var(--panel);border:1px solid var(--border);border-left-width:4px;
+    border-radius:8px;padding:16px 18px;margin:14px 0}
+  .issue.crit{border-left-color:var(--crit)}
+  .issue.warn{border-left-color:var(--warn)}
+  .issue.info{border-left-color:var(--info)}
+  .issue h4{margin:0 0 8px;font-size:16px;display:flex;align-items:center;gap:10px}
+  .issue .diag{color:var(--muted);font-size:13px;margin:6px 0}
+  .issue .fix{font-size:13px;margin-top:8px;padding-top:8px;border-top:1px dashed var(--border)}
+  .issue .fix b{color:var(--ok)}
+  .bar{height:8px;border-radius:4px;background:var(--panel2);overflow:hidden;margin-top:4px}
+  .bar > span{display:block;height:100%}
+  .grade{font-size:48px;font-weight:800}
+  .legend{display:flex;gap:18px;flex-wrap:wrap;font-size:12px;color:var(--muted);margin-top:8px}
+  .legend span{display:inline-flex;align-items:center;gap:6px}
+  .dot{width:10px;height:10px;border-radius:50%}
+  footer{margin-top:60px;padding-top:20px;border-top:1px solid var(--border);
+    color:var(--muted);font-size:12px}
+  .muted{color:var(--muted)}
+  ul.tight{margin:6px 0;padding-left:20px}
+  ul.tight li{margin:3px 0}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<header>
+  <h1>Performance &amp; Network Benchmark</h1>
+  <div class="sub">
+    Target: <a href="https://www.prothomalo.com/">https://www.prothomalo.com/</a> (home page)<br>
+    Generated: 2026-06-28 &nbsp;·&nbsp; Headless Chromium (h2/h3), cold cache, single pass<br>
+    Tool: gstack <code>/benchmark</code> — live <code>performance.getEntries()</code> data, not estimates
+  </div>
+</header>
+
+<!-- ===================== EXEC SUMMARY ===================== -->
+<h2>Executive Summary</h2>
+<p>
+The page <b>renders fast but finishes slow</b>. First paint lands at <b>380&nbsp;ms</b> and the DOM is
+interactive by <b>256&nbsp;ms</b> — excellent. But the full load event does not fire until
+<b>~4.97&nbsp;s</b>, and everything between <code>DOMContentLoaded</code> (561&nbsp;ms) and
+<code>load</code> (4,972&nbsp;ms) is <b>third-party advertising and tracking</b>.
+</p>
+<p>
+Two structural problems dominate: (1) a single <b>3.15&nbsp;MB inline state script</b> bloats the HTML
+document to <b>4.4&nbsp;MB decoded</b>, and (2) a <b>heavy third-party footprint</b> — 24 external domains,
+17 iframes, and 427&nbsp;KB of third-party JS versus only 157&nbsp;KB of first-party code.
+</p>
+
+<div class="grid cards">
+  <div class="card"><div class="lbl">Overall Grade</div><div class="grade" style="color:var(--warn)">C+</div><div class="note muted">Fast FCP, heavy tail</div></div>
+  <div class="card"><div class="lbl">First Contentful Paint</div><div class="val" style="color:var(--ok)">380ms</div><div class="note"><span class="pill p-ok">Good</span> budget &lt;1.8s</div></div>
+  <div class="card"><div class="lbl">DOM Interactive</div><div class="val" style="color:var(--ok)">256ms</div><div class="note"><span class="pill p-ok">Good</span></div></div>
+  <div class="card"><div class="lbl">Full Load (loadEventEnd)</div><div class="val" style="color:var(--warn)">4.97s</div><div class="note"><span class="pill p-warn">Slow tail</span></div></div>
+  <div class="card"><div class="lbl">HTML Document</div><div class="val" style="color:var(--crit)">4.4MB</div><div class="note"><span class="pill p-crit">decoded</span> 407KB on wire</div></div>
+  <div class="card"><div class="lbl">Total Requests</div><div class="val">103+</div><div class="note muted">grows with ad syncs</div></div>
+  <div class="card"><div class="lbl">3rd-Party Domains</div><div class="val" style="color:var(--crit)">24</div><div class="note"><span class="pill p-crit">High</span></div></div>
+  <div class="card"><div class="lbl">Total Transfer</div><div class="val">~1.4MB</div><div class="note muted">3.3MB decoded</div></div>
+</div>
+
+<!-- ===================== CORE METRICS ===================== -->
+<h2>Core Timing Metrics</h2>
+<table>
+  <thead><tr><th>Metric</th><th class="num">Value</th><th>Budget</th><th>Status</th><th>Notes</th></tr></thead>
+  <tbody>
+    <tr><td>DNS lookup</td><td class="num">12 ms</td><td>—</td><td><span class="pill p-ok">OK</span></td><td class="muted">cold resolve</td></tr>
+    <tr><td>TCP + TLS connect</td><td class="num">~54 ms</td><td>—</td><td><span class="pill p-ok">OK</span></td><td class="muted">h2, single connection reused</td></tr>
+    <tr><td>TTFB (responseStart)</td><td class="num">123 ms</td><td>&lt;200 ms</td><td><span class="pill p-ok">Good</span></td><td class="muted">server is fast; Brotli HTML</td></tr>
+    <tr><td>Response download</td><td class="num">109 ms</td><td>—</td><td><span class="pill p-ok">OK</span></td><td class="muted">407 KB compressed body</td></tr>
+    <tr><td>First Paint / FCP</td><td class="num">380 ms</td><td>&lt;1.8 s</td><td><span class="pill p-ok">Good</span></td><td class="muted">strong above-the-fold paint</td></tr>
+    <tr><td>DOM Interactive</td><td class="num">256 ms</td><td>—</td><td><span class="pill p-ok">Good</span></td><td class="muted"></td></tr>
+    <tr><td>DOMContentLoaded</td><td class="num">561 ms</td><td>&lt;1.5 s</td><td><span class="pill p-ok">Good</span></td><td class="muted">first-party content ready</td></tr>
+    <tr><td>DOM Complete</td><td class="num">4,968 ms</td><td>&lt;3 s</td><td><span class="pill p-warn">Slow</span></td><td class="muted">+4.4 s spent on 3rd-party</td></tr>
+    <tr><td>Load Event End</td><td class="num">4,972 ms</td><td>&lt;3 s</td><td><span class="pill p-warn">Slow</span></td><td class="muted">ads/trackers gate the load event</td></tr>
+    <tr><td>LCP</td><td class="num">n/a*</td><td>&lt;2.5 s</td><td><span class="pill p-info">No entry</span></td><td class="muted">*no LCP entry emitted — see Issue&nbsp;#9</td></tr>
+  </tbody>
+</table>
+<p class="muted" style="font-size:13px">
+The 561&nbsp;ms → 4,968&nbsp;ms gap between DOMContentLoaded and DOM Complete is the entire story:
+the user-visible page is done in ~0.5&nbsp;s, but the browser is busy for another 4.4&nbsp;s loading
+ad frames, cookie-sync pixels, the Facebook pixel, Google GSI, Chartbeat and analytics beacons.
+</p>
+
+<!-- ===================== PAYLOAD ===================== -->
+<h2>Payload Breakdown</h2>
+<table>
+  <thead><tr><th>Resource type</th><th class="num">Requests</th><th class="num">Transfer</th><th>Share of bytes</th></tr></thead>
+  <tbody>
+    <tr><td>Script (JS)</td><td class="num">29</td><td class="num">598 KB</td><td><div class="bar"><span style="width:100%;background:var(--crit)"></span></div></td></tr>
+    <tr><td>HTML/SVG sprite (other)</td><td class="num">1</td><td class="num">362 KB</td><td><div class="bar"><span style="width:62%;background:var(--warn)"></span></div></td></tr>
+    <tr><td>Images</td><td class="num">20</td><td class="num">286 KB</td><td><div class="bar"><span style="width:48%;background:var(--info)"></span></div></td></tr>
+    <tr><td>Fetch / XHR</td><td class="num">30</td><td class="num">111 KB</td><td><div class="bar"><span style="width:19%;background:var(--accent)"></span></div></td></tr>
+    <tr><td>CSS</td><td class="num">3</td><td class="num">21 KB</td><td><div class="bar"><span style="width:4%;background:var(--ok)"></span></div></td></tr>
+    <tr><td>Iframes</td><td class="num">11+</td><td class="num">3 KB</td><td><div class="bar"><span style="width:1%;background:var(--muted)"></span></div></td></tr>
+  </tbody>
+</table>
+
+<h3>JavaScript: first-party vs third-party</h3>
+<table>
+  <thead><tr><th>Origin</th><th class="num">Scripts</th><th class="num">Transfer</th><th>Verdict</th></tr></thead>
+  <tbody>
+    <tr><td>First-party (prothomalo / Quintype)</td><td class="num">10</td><td class="num">157 KB</td><td><span class="pill p-ok">Lean</span></td></tr>
+    <tr><td>Third-party (ads, social, analytics)</td><td class="num">19</td><td class="num">427 KB</td><td><span class="pill p-crit">73% of JS</span></td></tr>
+  </tbody>
+</table>
+<p class="muted" style="font-size:13px">
+The site's own code is small and well-behaved. The performance cost is almost entirely imported:
+Google Publisher Tag (191&nbsp;KB), Facebook pixel config + fbevents (244&nbsp;KB combined),
+Google GSI one-tap (99&nbsp;KB), plus PushEngage, Chartbeat, Qlitics and Funding Choices.
+</p>
+
+<!-- ===================== SLOWEST ===================== -->
+<h2>Top 10 Slowest Resources</h2>
+<table>
+  <thead><tr><th>#</th><th>Resource</th><th>Type</th><th class="num">Duration</th><th>Owner</th></tr></thead>
+  <tbody>
+    <tr><td>1</td><td><code>ping.chartbeat.net/ping</code></td><td>img beacon</td><td class="num">4,587 ms</td><td><span class="pill p-info">3rd-party</span> Chartbeat</td></tr>
+    <tr><td>2</td><td><code>services.prothomalo.com/fifawc/.../score-card</code></td><td>iframe</td><td class="num">4,331 ms</td><td><span class="pill p-warn">1st-party</span> FIFA widget</td></tr>
+    <tr><td>3</td><td><code>prod-analytics.qlitics.com/.../device-tracker-id</code></td><td>xhr</td><td class="num">3,055 ms</td><td><span class="pill p-info">3rd-party</span> Qlitics</td></tr>
+    <tr><td>4</td><td><code>csi.gstatic.com/csi</code></td><td>beacon</td><td class="num">2,195 ms</td><td><span class="pill p-info">3rd-party</span> Google CSI</td></tr>
+    <tr><td>5</td><td><code>connect.facebook.net/.../fbevents.js</code></td><td>script</td><td class="num">1,293 ms</td><td><span class="pill p-info">3rd-party</span> Meta</td></tr>
+    <tr><td>6</td><td><code>analytics.google.com/g/collect</code></td><td>fetch</td><td class="num">1,246 ms</td><td><span class="pill p-info">3rd-party</span> GA4</td></tr>
+    <tr><td>7</td><td><code>securepubads.../gampad/ads</code></td><td>fetch</td><td class="num">928 ms</td><td><span class="pill p-info">3rd-party</span> GPT ads</td></tr>
+    <tr><td>8</td><td><code>fonts.gstatic.com/.../roboto.woff</code></td><td>font</td><td class="num">718 ms</td><td><span class="pill p-info">3rd-party</span> Google Fonts</td></tr>
+    <tr><td>9</td><td><code>accounts.google.com/gsi/client</code></td><td>script</td><td class="num">677 ms</td><td><span class="pill p-info">3rd-party</span> Google GSI</td></tr>
+    <tr><td>10</td><td><code>...gpt/m202606...</code> (GPT core)</td><td>script</td><td class="num">650 ms</td><td><span class="pill p-info">3rd-party</span> GPT ads</td></tr>
+  </tbody>
+</table>
+<p class="muted" style="font-size:13px">
+9 of the 10 slowest resources are third-party. The one first-party offender (the FIFA score-card iframe)
+is loaded <b>three times</b> with three identical API calls — a clear redundancy bug (Issue&nbsp;#6).
+</p>
+
+<!-- ===================== ISSUES ===================== -->
+<h2>Diagnosed Issues</h2>
+<div class="legend">
+  <span><span class="dot" style="background:var(--crit)"></span>Critical</span>
+  <span><span class="dot" style="background:var(--warn)"></span>Warning</span>
+  <span><span class="dot" style="background:var(--info)"></span>Informational / 3rd-party</span>
+</div>
+
+<div class="issue crit">
+  <h4>#1 &nbsp;3.15&nbsp;MB inline state script bloats the HTML to 4.4&nbsp;MB <span class="pill p-crit">Critical</span></h4>
+  <div class="diag">
+    The document carries <b>14 inline scripts totalling 3.17&nbsp;MB</b>, of which a single blob is
+    <b>3,155&nbsp;KB</b>. This is the server-rendered application state (Quintype/Bold CMS hydration data)
+    serialized directly into the HTML. Result: decoded document size <b>4.4&nbsp;MB</b> for only
+    <b>2,275 DOM nodes</b>. Brotli compresses it to 407&nbsp;KB on the wire, but the browser still
+    parses, deserializes and holds 4.4&nbsp;MB in memory on the main thread before hydration.
+  </div>
+  <div class="fix"><b>Fix:</b> Trim the hydration payload to what above-the-fold components actually need.
+    Move the rest behind a deferred <code>fetch()</code> after first paint, or stream it. Most news-feed
+    state (related stories, section lists, ad config) does not need to be inline. Target &lt;500&nbsp;KB inline.</div>
+</div>
+
+<div class="issue crit">
+  <h4>#2 &nbsp;Excessive third-party footprint — 24 domains, 427&nbsp;KB JS <span class="pill p-crit">Critical</span></h4>
+  <div class="diag">
+    24 distinct third-party hostnames are contacted: Google Ad Manager / DoubleClick, Funding Choices
+    (consent), Facebook, Chartbeat, Qlitics, PushEngage, GSI one-tap, plus a chain of ad
+    cookie-sync partners (3lift, teads, seedtag, moloco, appier, tribalfusion, onetag). Third-party JS
+    (427&nbsp;KB) is <b>2.7×</b> the first-party JS (157&nbsp;KB) and is the primary cause of the 4.4&nbsp;s
+    post-DCL tail.
+  </div>
+  <div class="fix"><b>Fix:</b> Audit the tag stack. Load every non-essential tag with <code>async</code>/<code>defer</code>
+    and ideally after the <code>load</code> event or on idle (<code>requestIdleCallback</code>). Consolidate
+    analytics (GA4 + Chartbeat + Qlitics overlap). Lazy-init the Facebook pixel on first interaction.</div>
+</div>
+
+<div class="issue warn">
+  <h4>#3 &nbsp;Full load gated by ads — 4.4&nbsp;s between DCL and load <span class="pill p-warn">Warning</span></h4>
+  <div class="diag">
+    <code>DOMContentLoaded</code> = 561&nbsp;ms but <code>loadEventEnd</code> = 4,972&nbsp;ms. The 4.4&nbsp;s
+    gap is entirely ad/tracker activity (GPT slot fills, sodar verification, cookie syncs, beacons).
+    Long-running beacons like Chartbeat (4.6&nbsp;s) keep the connection and main thread busy well past
+    user-perceived readiness.
+  </div>
+  <div class="fix"><b>Fix:</b> Defer ad initialization until after <code>load</code> or first scroll. Use GPT
+    lazy-loading (<code>enableLazyLoad</code>) so below-the-fold slots only request when near the viewport.</div>
+</div>
+
+<div class="issue warn">
+  <h4>#4 &nbsp;Images have no width/height and no lazy-loading <span class="pill p-warn">Warning</span></h4>
+  <div class="diag">
+    All <b>12 above-the-fold images</b> ship with <b>no <code>width</code>/<code>height</code> attributes</b>
+    (cumulative layout shift risk) and <b>zero use <code>loading="lazy"</code></b> — every image is fetched
+    eagerly even when off-screen.
+  </div>
+  <div class="fix"><b>Fix:</b> Add explicit <code>width</code>/<code>height</code> (or CSS <code>aspect-ratio</code>)
+    to reserve layout space and kill CLS. Add <code>loading="lazy"</code> to all below-the-fold thumbnails;
+    keep only the hero/LCP image eager with <code>fetchpriority="high"</code>.</div>
+</div>
+
+<div class="issue warn">
+  <h4>#5 &nbsp;17 iframes on a single page <span class="pill p-warn">Warning</span></h4>
+  <div class="diag">
+    The DOM contains <b>17 iframes</b> — mostly ad/safeframe containers plus the FIFA World Cup widget.
+    Each iframe is a separate document with its own resource graph, multiplying connection and CPU cost.
+  </div>
+  <div class="fix"><b>Fix:</b> Lazy-mount ad iframes (GPT lazy-load). Render the FIFA widget inline or load it
+    on demand rather than as multiple persistent iframes.</div>
+</div>
+
+<div class="issue warn">
+  <h4>#6 &nbsp;FIFA score-card iframe + API loaded 3× (redundant) <span class="pill p-warn">Warning</span></h4>
+  <div class="diag">
+    <code>services.prothomalo.com/fifawc/2026/score-card-football/</code> is requested as an iframe
+    <b>three times</b> (4,331&nbsp;ms / 1,423&nbsp;ms / 1,422&nbsp;ms), and the
+    <code>api-proxy.php?type=schedules</code> endpoint is called <b>three identical times</b>
+    (~125&nbsp;ms each, ~7.9&nbsp;KB each). This is duplicated work that returns the same data.
+  </div>
+  <div class="fix"><b>Fix:</b> Mount the widget once and cache the schedules response (one fetch, shared across
+    instances). This is a first-party bug fully under your control.</div>
+</div>
+
+<div class="issue warn">
+  <h4>#7 &nbsp;Ad cookie-sync redirect chains <span class="pill p-warn">Warning</span></h4>
+  <div class="diag">
+    A long chain of <code>302</code> cookie-matching pixels fires after load (3lift, teads, seedtag, moloco,
+    appier, onetag, tribalfusion → doubleclick). Several take 300–570&nbsp;ms each and add 15+ requests
+    that contribute nothing to the content.
+  </div>
+  <div class="fix"><b>Fix:</b> These come bundled with Google Ad Manager demand partners — partly outside your
+    control, but you can reduce them by trimming the partner list in your GAM/consent config and deferring
+    the ad stack until after load.</div>
+</div>
+
+<div class="issue info">
+  <h4>#8 &nbsp;Console errors: Google one-tap & FedCM <span class="pill p-info">Info</span></h4>
+  <div class="diag">
+    Runtime console shows: <code>google.accounts.id.initialize() is called multiple times</code>,
+    <code>FedCM get() rejects with NotAllowedError: Only one navigator.credentials.get request may be
+    outstanding</code>, <code>Provider's accounts list is empty</code>, and a <code>401</code> on one
+    resource. Indicates Google GSI one-tap is being initialized more than once.
+  </div>
+  <div class="fix"><b>Fix:</b> Initialize GSI exactly once. Guard the init so re-renders don't re-call it. The
+    duplicate FedCM call is rejected by the browser and wastes a round trip.</div>
+</div>
+
+<div class="issue info">
+  <h4>#9 &nbsp;No LCP entry emitted <span class="pill p-info">Info</span></h4>
+  <div class="diag">
+    The <code>largest-contentful-paint</code> buffer was empty, and ad slots logged
+    <code>Can not detect viewport width</code>. In a real metered field measurement LCP should be captured;
+    its absence here suggests the largest element may be inside an iframe/ad or rendered after JS, which
+    hurts real-world LCP attribution.
+  </div>
+  <div class="fix"><b>Fix:</b> Ensure the hero image/headline is a first-party, server-rendered element with
+    <code>fetchpriority="high"</code> so it becomes a clean, fast LCP candidate. Verify with field
+    (CrUX/RUM) data.</div>
+</div>
+
+<div class="issue info">
+  <h4>#10 &nbsp;<code>document.write</code> from async script <span class="pill p-info">Info</span></h4>
+  <div class="diag">
+    Warning: <i>"Failed to execute 'write' on 'Document': It isn't possible to write into a document from an
+    asynchronously-loaded external script."</i> A third-party (ad) script attempts <code>document.write</code>,
+    which is ignored in async context and is a known performance/anti-pattern.
+  </div>
+  <div class="fix"><b>Fix:</b> Identify the offending tag (typically a legacy ad creative) and replace with a
+    DOM-injection variant; flag it with the ad partner.</div>
+</div>
+
+<div class="issue info">
+  <h4>#11 &nbsp;362&nbsp;KB SVG sprite served with gzip, not Brotli <span class="pill p-info">Info</span></h4>
+  <div class="diag">
+    <code>sprite-*.svg</code> is the single largest non-script asset: <b>362&nbsp;KB transfer / 573&nbsp;KB
+    decoded</b>, served with <code>content-encoding: gzip</code> while the HTML uses Brotli. It is one
+    monolithic sprite loaded up front.
+  </div>
+  <div class="fix"><b>Fix:</b> Serve it with Brotli (≈15–20% smaller), and split the sprite so only icons used
+    above the fold load initially. Ensure a long <code>Cache-Control: immutable</code> (the hashed filename
+    already supports it).</div>
+</div>
+
+<!-- ===================== BUDGET ===================== -->
+<h2>Performance Budget Check</h2>
+<table>
+  <thead><tr><th>Metric</th><th>Budget</th><th class="num">Actual</th><th>Status</th></tr></thead>
+  <tbody>
+    <tr><td>FCP</td><td>&lt; 1.8 s</td><td class="num">0.38 s</td><td><span class="pill p-ok">PASS</span></td></tr>
+    <tr><td>DOMContentLoaded</td><td>&lt; 1.5 s</td><td class="num">0.56 s</td><td><span class="pill p-ok">PASS</span></td></tr>
+    <tr><td>Full Load</td><td>&lt; 3.0 s</td><td class="num">4.97 s</td><td><span class="pill p-crit">FAIL</span></td></tr>
+    <tr><td>Total JS</td><td>&lt; 500 KB</td><td class="num">598 KB</td><td><span class="pill p-crit">FAIL</span></td></tr>
+    <tr><td>HTML document</td><td>&lt; 1 MB</td><td class="num">4.4 MB</td><td><span class="pill p-crit">FAIL</span></td></tr>
+    <tr><td>Total CSS</td><td>&lt; 100 KB</td><td class="num">21 KB</td><td><span class="pill p-ok">PASS</span></td></tr>
+    <tr><td>Total Transfer</td><td>&lt; 2 MB</td><td class="num">~1.4 MB</td><td><span class="pill p-ok">PASS</span></td></tr>
+    <tr><td>HTTP Requests</td><td>&lt; 50</td><td class="num">103+</td><td><span class="pill p-crit">FAIL</span></td></tr>
+    <tr><td>3rd-party domains</td><td>&lt; 10</td><td class="num">24</td><td><span class="pill p-crit">FAIL</span></td></tr>
+  </tbody>
+</table>
+<p><b>Score: 3 / 9 budgets passing → Grade C+.</b> Strong first-paint experience is held back by document
+bloat and an oversized third-party stack.</p>
+
+<!-- ===================== PRIORITIES ===================== -->
+<h2>Recommended Fix Order</h2>
+<ol>
+  <li><b>Shrink the 3.15&nbsp;MB inline state blob (Issue&nbsp;#1).</b> Biggest single win for parse time and
+    memory; entirely first-party.</li>
+  <li><b>Fix the 3× FIFA widget / schedules duplication (Issue&nbsp;#6).</b> Easy, first-party, removes
+    redundant 4.3&nbsp;s iframe work.</li>
+  <li><b>Defer the ad &amp; tracking stack until after <code>load</code> (Issues&nbsp;#2, #3, #5, #7).</b>
+    Collapses the 4.4&nbsp;s tail.</li>
+  <li><b>Add image dimensions + lazy-loading (Issue&nbsp;#4).</b> Cheap CLS and bandwidth win.</li>
+  <li><b>Clean up GSI double-init and document.write warnings (Issues&nbsp;#8, #10).</b> Correctness +
+    small latency.</li>
+  <li><b>Brotli + split the SVG sprite (Issue&nbsp;#11).</b></li>
+</ol>
+
+<footer>
+  <b>Methodology.</b> Measured with a headless Chromium navigation to the live page (HTTP/2 + HTTP/3, cold
+  cache, single pass) using the browser's own <code>PerformanceNavigationTiming</code>,
+  <code>PerformanceResourceTiming</code>, <code>paint</code> and console APIs — no synthetic estimates.
+  Numbers reflect one run from a single network vantage point; absolute timings vary with geography, device
+  and connection. For trend tracking and regression alerts, capture a baseline
+  (<code>/benchmark &lt;url&gt; --baseline</code>) and re-run on each release.
+  <br><br>
+  Third-party timings (ads, social, analytics) are reported for transparency but are largely outside the
+  site owner's direct control; recommendations focus on first-party fixes and tag-loading strategy.
+</footer>
+
+</div>
+</body>
+</html>

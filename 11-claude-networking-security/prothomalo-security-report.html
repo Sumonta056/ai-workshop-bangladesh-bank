@@ -1,0 +1,306 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Security Posture Report — prothomalo.com</title>
+<style>
+  :root{
+    --bg:#0c0f17;--panel:#141925;--panel2:#1b2230;--line:#26304a;
+    --txt:#e7ecf5;--muted:#94a0b8;--accent:#4da3ff;
+    --crit:#ff5470;--high:#ff8a3d;--med:#ffce4d;--low:#5fd6a6;--info:#7aa2ff;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+    background:var(--bg);color:var(--txt);line-height:1.55;font-size:15px}
+  .wrap{max-width:1040px;margin:0 auto;padding:40px 24px 80px}
+  header.hero{border-bottom:1px solid var(--line);padding-bottom:28px;margin-bottom:32px}
+  .kicker{color:var(--accent);font-weight:600;letter-spacing:.08em;text-transform:uppercase;font-size:12px}
+  h1{font-size:30px;margin:8px 0 6px}
+  h2{font-size:21px;margin:42px 0 14px;border-left:3px solid var(--accent);padding-left:12px}
+  h3{font-size:16px;margin:0 0 4px}
+  .sub{color:var(--muted);font-size:14px}
+  .meta{display:flex;flex-wrap:wrap;gap:18px;margin-top:18px;font-size:13px;color:var(--muted)}
+  .meta b{color:var(--txt)}
+  .banner{background:var(--panel2);border:1px solid var(--line);border-radius:10px;padding:16px 18px;margin:22px 0;font-size:13.5px;color:var(--muted)}
+  .banner b{color:var(--med)}
+  .grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:14px;margin:22px 0}
+  .stat{background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:16px;text-align:center}
+  .stat .n{font-size:30px;font-weight:700}
+  .stat .l{font-size:12px;color:var(--muted);text-transform:uppercase;letter-spacing:.05em;margin-top:4px}
+  .n.crit{color:var(--crit)}.n.high{color:var(--high)}.n.med{color:var(--med)}.n.low{color:var(--low)}
+  .grade{background:linear-gradient(135deg,#1b2230,#141925);border:1px solid var(--line);border-radius:14px;
+    padding:24px;display:flex;align-items:center;gap:24px;margin:22px 0}
+  .grade .score{font-size:54px;font-weight:800;color:var(--med);line-height:1}
+  .grade .desc{font-size:14px;color:var(--muted)}
+  table{width:100%;border-collapse:collapse;margin:14px 0;font-size:13.5px}
+  th,td{text-align:left;padding:10px 12px;border-bottom:1px solid var(--line);vertical-align:top}
+  th{color:var(--muted);font-weight:600;text-transform:uppercase;font-size:11px;letter-spacing:.05em}
+  .pill{display:inline-block;padding:2px 9px;border-radius:20px;font-size:11px;font-weight:700;letter-spacing:.03em}
+  .pill.crit{background:rgba(255,84,112,.15);color:var(--crit)}
+  .pill.high{background:rgba(255,138,61,.15);color:var(--high)}
+  .pill.med{background:rgba(255,206,77,.15);color:var(--med)}
+  .pill.low{background:rgba(95,214,166,.15);color:var(--low)}
+  .pill.info{background:rgba(122,162,255,.15);color:var(--info)}
+  .pill.ok{background:rgba(95,214,166,.15);color:var(--low)}
+  .finding{background:var(--panel);border:1px solid var(--line);border-left-width:4px;border-radius:10px;padding:18px 20px;margin:16px 0}
+  .finding.crit{border-left-color:var(--crit)}
+  .finding.high{border-left-color:var(--high)}
+  .finding.med{border-left-color:var(--med)}
+  .finding.low{border-left-color:var(--low)}
+  .finding.info{border-left-color:var(--info)}
+  .finding .top{display:flex;justify-content:space-between;align-items:flex-start;gap:14px;flex-wrap:wrap}
+  .finding .row{margin-top:10px}
+  .finding .label{color:var(--muted);font-size:11px;text-transform:uppercase;letter-spacing:.05em;margin-bottom:2px}
+  code,pre{font-family:"SF Mono",Menlo,Consolas,monospace;font-size:12.5px}
+  code{background:var(--panel2);padding:1px 6px;border-radius:5px;color:#cfe2ff}
+  pre{background:#0a0d14;border:1px solid var(--line);border-radius:8px;padding:12px 14px;overflow-x:auto;color:#cfe2ff}
+  .good{color:var(--low)}
+  footer{margin-top:48px;padding-top:22px;border-top:1px solid var(--line);color:var(--muted);font-size:12px}
+  .disclaimer{background:rgba(255,84,112,.06);border:1px solid rgba(255,84,112,.25);border-radius:10px;padding:16px 18px;font-size:12.5px;color:var(--muted)}
+  a{color:var(--accent)}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <header class="hero">
+    <div class="kicker">Chief Security Officer — External Posture Review</div>
+    <h1>Security Posture Report: prothomalo.com</h1>
+    <div class="sub">Passive, non-intrusive external assessment of publicly-observable security signals.</div>
+    <div class="meta">
+      <span><b>Target:</b> https://www.prothomalo.com/</span>
+      <span><b>Date:</b> 2026-06-28</span>
+      <span><b>Method:</b> Passive recon (headers, TLS, cookies, public files)</span>
+      <span><b>Confidence gate:</b> observed evidence only</span>
+    </div>
+  </header>
+
+  <div class="banner">
+    <b>⚠ Scope &amp; authorization.</b> This is a <b>passive</b> review. It analyzes only data the server
+    voluntarily returns to every visitor — HTTP response headers, the TLS handshake, cookie attributes, and
+    public files (<code>robots.txt</code>, <code>.well-known/security.txt</code>). <b>No active scanning,
+    fuzzing, injection testing, authentication probing, or exploitation was performed</b>, because that would
+    require explicit written authorization from the site owner. Findings below describe configuration weaknesses
+    visible from the outside, not confirmed exploits. For an authenticated/active penetration test, engage the
+    owner and a qualified firm with a signed scope.
+  </div>
+
+  <div class="grade">
+    <div class="score">C</div>
+    <div class="desc">
+      <b style="color:var(--txt)">Overall transport &amp; TLS hygiene is strong; HTTP security-header posture is weak.</b><br>
+      Modern TLS (1.2/1.3 only), valid cert, and a global Cloudflare edge are in place. The gaps are in
+      defense-in-depth headers — missing HSTS, an effectively permissive CSP, no clickjacking protection, and
+      backend tech disclosure. These are common on high-traffic media sites and mostly low-to-medium severity,
+      but they materially weaken protection against XSS, clickjacking, and TLS-downgrade.
+    </div>
+  </div>
+
+  <div class="grid">
+    <div class="stat"><div class="n crit">0</div><div class="l">Critical</div></div>
+    <div class="stat"><div class="n high">1</div><div class="l">High</div></div>
+    <div class="stat"><div class="n med">3</div><div class="l">Medium</div></div>
+    <div class="stat"><div class="n low">5</div><div class="l">Low / Info</div></div>
+    <div class="stat"><div class="n good">✓</div><div class="l">TLS healthy</div></div>
+  </div>
+
+  <h2>1. What's working well</h2>
+  <table>
+    <tr><th>Control</th><th>Observed</th><th>Status</th></tr>
+    <tr><td>TLS protocol versions</td><td>TLS 1.2 &amp; 1.3 only; TLS 1.0/1.1 disabled</td><td><span class="pill ok">GOOD</span></td></tr>
+    <tr><td>Certificate</td><td>Google Trust Services (WE1), CN=prothomalo.com + <code>*.prothomalo.com</code>, valid May–Aug 2026</td><td><span class="pill ok">GOOD</span></td></tr>
+    <tr><td>HTTP → HTTPS</td><td><code>301 Moved Permanently</code> to https on plain-HTTP request</td><td><span class="pill ok">GOOD</span></td></tr>
+    <tr><td>Edge / WAF</td><td><code>server: cloudflare</code> — DDoS protection &amp; WAF available at the edge</td><td><span class="pill ok">GOOD</span></td></tr>
+    <tr><td>Session cookie flags</td><td><code>_cfuvid</code> set with <code>HttpOnly</code> + <code>Secure</code></td><td><span class="pill ok">GOOD</span></td></tr>
+    <tr><td>Mixed content</td><td>CSP includes <code>block-all-mixed-content</code></td><td><span class="pill ok">GOOD</span></td></tr>
+  </table>
+
+  <h2>2. Findings</h2>
+
+  <div class="finding high">
+    <div class="top">
+      <h3>F-1 &nbsp; Content-Security-Policy is effectively permissive</h3>
+      <span class="pill high">HIGH</span>
+    </div>
+    <div class="row"><span class="label">Category</span> Headers / XSS defense-in-depth · <b>Confidence 9/10</b> · VERIFIED (observed)</div>
+    <div class="row"><span class="label">Observed</span>
+      <pre>content-security-policy: default-src data: 'unsafe-inline' 'unsafe-eval' https: http:;
+  script-src data: 'unsafe-inline' 'unsafe-eval' https: http: blob:;
+  style-src ...; img-src ...; object-src https: http:; ...</pre>
+    </div>
+    <div class="row"><span class="label">Why it matters</span>
+      A CSP exists, which is good intent — but <code>script-src</code> allows <code>'unsafe-inline'</code>,
+      <code>'unsafe-eval'</code>, plus any <code>https:</code> and <code>http:</code> origin. That permits inline
+      scripts and arbitrary external script hosts, so the policy provides almost no real protection against
+      reflected/stored/DOM XSS. <code>object-src https: http:</code> also allows plugin/embed content from any host.
+    </div>
+    <div class="row"><span class="label">Exploit scenario</span>
+      If any XSS sink exists anywhere in the app (a comment field, a search reflection, a third-party widget),
+      an injected <code>&lt;script&gt;</code> or inline handler executes unhindered because the CSP whitelists
+      inline + eval + all https/http origins. On a news site that loads many ad/analytics scripts, a single
+      compromised third-party script also runs with no origin restriction.
+    </div>
+    <div class="row"><span class="label">Recommendation</span>
+      Move to a nonce- or hash-based CSP: drop <code>'unsafe-inline'</code> and <code>'unsafe-eval'</code>,
+      replace blanket <code>https:</code>/<code>http:</code> in <code>script-src</code> with an explicit allowlist
+      of ad/analytics/CDN domains, set <code>object-src 'none'</code>, and remove <code>http:</code> entirely.
+      Roll out via <code>Content-Security-Policy-Report-Only</code> first to catch breakage.
+    </div>
+  </div>
+
+  <div class="finding med">
+    <div class="top">
+      <h3>F-2 &nbsp; No HSTS (Strict-Transport-Security header missing)</h3>
+      <span class="pill med">MEDIUM</span>
+    </div>
+    <div class="row"><span class="label">Category</span> Transport security · <b>Confidence 9/10</b> · VERIFIED (observed)</div>
+    <div class="row"><span class="label">Observed</span> No <code>Strict-Transport-Security</code> header on the HTTPS response. (A 301 http→https redirect exists, but that alone doesn't protect the first request.)</div>
+    <div class="row"><span class="label">Exploit scenario</span>
+      A user on hostile Wi-Fi types <code>prothomalo.com</code>. The first request goes over plain HTTP. An
+      on-path attacker (SSL-strip) intercepts before the 301 lands and keeps the victim on HTTP, serving a
+      cloned page or capturing the session. HSTS would force the browser to use HTTPS from the start and refuse
+      the downgrade.
+    </div>
+    <div class="row"><span class="label">Recommendation</span>
+      Add <code>Strict-Transport-Security: max-age=31536000; includeSubDomains; preload</code> (ramp
+      <code>max-age</code> up gradually), then submit to the HSTS preload list. Easy to enable at the Cloudflare edge.
+    </div>
+  </div>
+
+  <div class="finding med">
+    <div class="top">
+      <h3>F-3 &nbsp; No clickjacking protection (no X-Frame-Options / frame-ancestors)</h3>
+      <span class="pill med">MEDIUM</span>
+    </div>
+    <div class="row"><span class="label">Category</span> Headers / UI redress · <b>Confidence 8/10</b> · VERIFIED (observed)</div>
+    <div class="row"><span class="label">Observed</span> No <code>X-Frame-Options</code> header, and the CSP defines <code>child-src</code> but no <code>frame-ancestors</code> directive.</div>
+    <div class="row"><span class="label">Exploit scenario</span>
+      An attacker embeds prothomalo.com in a transparent iframe over a decoy page, tricking logged-in users
+      into clicking actions (e.g. account/comment actions) they didn't intend — classic clickjacking. Without
+      <code>frame-ancestors</code>/<code>X-Frame-Options</code>, the browser allows framing from any origin.
+    </div>
+    <div class="row"><span class="label">Recommendation</span>
+      Add <code>frame-ancestors 'self'</code> to the CSP (and/or <code>X-Frame-Options: SAMEORIGIN</code> for
+      older clients). Allowlist any legitimate partner embed domains explicitly.
+    </div>
+  </div>
+
+  <div class="finding med">
+    <div class="top">
+      <h3>F-4 &nbsp; robots.txt discloses sensitive paths (incl. /shell.html)</h3>
+      <span class="pill med">MEDIUM</span>
+    </div>
+    <div class="row"><span class="label">Category</span> Information disclosure · <b>Confidence 7/10</b> · UNVERIFIED (not probed)</div>
+    <div class="row"><span class="label">Observed</span>
+      <pre>Disallow: /shell.html
+Disallow: /api/auth/
+Disallow: /api/comments/get_comments_json
+Disallow: /story/*/element/</pre>
+    </div>
+    <div class="row"><span class="label">Why it matters</span>
+      <code>robots.txt</code> is a public file; listing <code>/shell.html</code> and <code>/api/auth/</code>
+      effectively advertises paths worth attacking. <code>/shell.html</code> is an unusual, attention-grabbing
+      name (often a leftover diagnostic/admin/debug artifact). <b>It was not accessed during this passive review.</b>
+    </div>
+    <div class="row"><span class="label">Recommendation</span>
+      Confirm what <code>/shell.html</code> is and remove it if it's a leftover. Protect sensitive endpoints with
+      auth/network controls rather than obscurity. Don't rely on <code>robots.txt</code> to hide anything —
+      use it only for crawl control, and gate real secrets behind authentication.
+    </div>
+  </div>
+
+  <div class="finding low">
+    <div class="top">
+      <h3>F-5 &nbsp; Backend technology disclosure (x-powered-by: Express)</h3>
+      <span class="pill low">LOW</span>
+    </div>
+    <div class="row"><span class="label">Category</span> Information disclosure · <b>Confidence 9/10</b> · VERIFIED (observed)</div>
+    <div class="row"><span class="label">Observed</span> <code>x-powered-by: Express</code></div>
+    <div class="row"><span class="label">Why it matters</span>
+      Reveals the server framework, letting attackers target Express/Node-specific CVEs and misconfigurations
+      and narrow their tooling. Pure information leak — low on its own, but free to fix.
+    </div>
+    <div class="row"><span class="label">Recommendation</span> Disable it: <code>app.disable('x-powered-by')</code> or the <code>helmet()</code> middleware.</div>
+  </div>
+
+  <div class="finding low">
+    <div class="top">
+      <h3>F-6 &nbsp; Missing X-Content-Type-Options: nosniff</h3>
+      <span class="pill low">LOW</span>
+    </div>
+    <div class="row"><span class="label">Category</span> Headers · <b>Confidence 9/10</b> · VERIFIED (observed)</div>
+    <div class="row"><span class="label">Why it matters</span> Without <code>nosniff</code>, browsers may MIME-sniff responses and execute content as a type the server didn't intend (e.g. treating an uploaded file as script).</div>
+    <div class="row"><span class="label">Recommendation</span> Add <code>X-Content-Type-Options: nosniff</code> globally.</div>
+  </div>
+
+  <div class="finding low">
+    <div class="top">
+      <h3>F-7 &nbsp; Missing Referrer-Policy &amp; Permissions-Policy</h3>
+      <span class="pill low">LOW</span>
+    </div>
+    <div class="row"><span class="label">Category</span> Headers / privacy · <b>Confidence 9/10</b> · VERIFIED (observed)</div>
+    <div class="row"><span class="label">Why it matters</span> No <code>Referrer-Policy</code> can leak full URLs to third parties via the Referer header; no <code>Permissions-Policy</code> leaves camera/mic/geolocation/etc. unrestricted for embedded content.</div>
+    <div class="row"><span class="label">Recommendation</span> Add <code>Referrer-Policy: strict-origin-when-cross-origin</code> and a least-privilege <code>Permissions-Policy</code> (deny features the site doesn't use).</div>
+  </div>
+
+  <div class="finding info">
+    <div class="top">
+      <h3>F-8 &nbsp; No vulnerability-disclosure contact (security.txt absent)</h3>
+      <span class="pill info">INFO</span>
+    </div>
+    <div class="row"><span class="label">Category</span> Process · <b>Confidence 9/10</b> · VERIFIED (observed)</div>
+    <div class="row"><span class="label">Observed</span> <code>/.well-known/security.txt</code> → <code>HTTP 404</code></div>
+    <div class="row"><span class="label">Why it matters</span> Researchers who find a bug have no documented, trusted way to report it, which slows responsible disclosure.</div>
+    <div class="row"><span class="label">Recommendation</span> Publish <code>/.well-known/security.txt</code> (RFC 9116) with a security contact, encryption key, and policy URL.</div>
+  </div>
+
+  <div class="finding info">
+    <div class="top">
+      <h3>F-9 &nbsp; Cookie SameSite=None</h3>
+      <span class="pill info">INFO</span>
+    </div>
+    <div class="row"><span class="label">Category</span> Cookies · <b>Confidence 8/10</b> · VERIFIED (observed)</div>
+    <div class="row"><span class="label">Observed</span> <code>_cfuvid=...; HttpOnly; Secure; SameSite=None</code> (a Cloudflare bot-management cookie).</div>
+    <div class="row"><span class="label">Why it matters</span> <code>SameSite=None</code> sends the cookie on cross-site requests. It's <code>HttpOnly</code>+<code>Secure</code> and not a session/auth cookie, so risk is low — but verify that any <i>application session/auth</i> cookies use <code>SameSite=Lax</code> or <code>Strict</code> for CSRF defense.</div>
+    <div class="row"><span class="label">Recommendation</span> Audit application auth cookies (not visible to anonymous visitors) and ensure they're <code>SameSite=Lax/Strict</code>, <code>HttpOnly</code>, <code>Secure</code>.</div>
+  </div>
+
+  <h2>3. Remediation priority</h2>
+  <table>
+    <tr><th>#</th><th>Fix</th><th>Severity</th><th>Effort</th></tr>
+    <tr><td>F-2</td><td>Enable HSTS (Cloudflare toggle)</td><td><span class="pill med">MED</span></td><td>~5 min</td></tr>
+    <tr><td>F-3</td><td>Add <code>frame-ancestors 'self'</code> / X-Frame-Options</td><td><span class="pill med">MED</span></td><td>~15 min</td></tr>
+    <tr><td>F-5/6/7</td><td>Add nosniff, Referrer-Policy, Permissions-Policy; drop x-powered-by (helmet)</td><td><span class="pill low">LOW</span></td><td>~30 min</td></tr>
+    <tr><td>F-4</td><td>Investigate &amp; remove <code>/shell.html</code>; gate sensitive endpoints with auth</td><td><span class="pill med">MED</span></td><td>investigate</td></tr>
+    <tr><td>F-1</td><td>Harden CSP (nonce-based, drop unsafe-inline/eval, explicit allowlist)</td><td><span class="pill high">HIGH</span></td><td>days (report-only rollout)</td></tr>
+    <tr><td>F-8</td><td>Publish security.txt</td><td><span class="pill info">INFO</span></td><td>~10 min</td></tr>
+  </table>
+
+  <h2>4. What this review did NOT cover</h2>
+  <p class="sub" style="font-size:13.5px">
+    Because no authorization for active testing exists, the following were intentionally excluded and remain
+    <b>unknown</b>: authenticated flows &amp; session management, input validation / XSS / SQLi / SSRF on
+    application endpoints, the comments &amp; auth APIs, file-upload handling, the <code>/shell.html</code>
+    artifact, admin panels, rate-limiting, business-logic flaws, server-side dependency CVEs, source code,
+    secrets, and CI/CD. A complete assessment requires owner authorization and an active penetration test.
+  </p>
+
+  <div class="disclaimer">
+    <b>Disclaimer.</b> This is an AI-assisted <i>passive</i> external posture review of publicly-served data — not
+    a professional or comprehensive security audit, and not a penetration test. It catches common configuration
+    weaknesses visible from outside; it cannot find logic flaws, server-side vulnerabilities, or anything behind
+    authentication, and it may produce false positives/negatives. No active probing, scanning, or exploitation was
+    performed against the target. For production systems handling user data, comments, or accounts, engage a
+    qualified penetration-testing firm with written authorization from the site owner. Use this report as a
+    starting checklist, not as your only line of defense.
+  </div>
+
+  <footer>
+    Generated by /cso (Chief Security Officer mode) — passive external posture review · 2026-06-28 ·
+    Evidence: HTTP headers, TLS handshake, robots.txt, .well-known probe. Read-only. No code or systems modified.
+  </footer>
+
+</div>
+</body>
+</html>

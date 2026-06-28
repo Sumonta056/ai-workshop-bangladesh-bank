@@ -1,0 +1,393 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Codex Demo Playbook — What to Cover</title>
+<style>
+  :root{
+    --bg:#f7f6f3;
+    --panel:#ffffff;
+    --line:#e6e3dc;
+    --ink:#1c1e22;
+    --soft-ink:#3f444b;
+    --muted:#6b7178;
+    --accent:#0a8f6f;          /* OpenAI green */
+    --accent-soft:#e3f4ee;
+    --warn:#b5701f;
+    --warn-soft:#fbeede;
+    --danger:#c0392b;
+    --danger-soft:#fbe7e4;
+    --code-bg:#11141a;
+    --code-ink:#e6e8ea;
+    --code-green:#6fcf97;
+    --code-dim:#7d8590;
+    --sans:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;
+    --mono:'SF Mono',ui-monospace,'JetBrains Mono','Cascadia Code',Menlo,Consolas,monospace;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  html{scroll-behavior:smooth}
+  body{
+    background:var(--bg);color:var(--ink);font-family:var(--sans);
+    line-height:1.6;-webkit-font-smoothing:antialiased;padding:48px 20px 90px;
+  }
+  .wrap{max-width:900px;margin:0 auto}
+
+  /* Header */
+  .eyebrow{
+    font-family:var(--mono);color:var(--muted);font-size:12px;
+    letter-spacing:.2em;text-transform:uppercase;margin-bottom:14px;
+  }
+  .eyebrow .dot{color:var(--accent)}
+  h1{font-size:clamp(30px,5vw,46px);line-height:1.04;font-weight:700;letter-spacing:-.02em;margin-bottom:16px}
+  h1 .g{color:var(--accent)}
+  .lede{color:var(--soft-ink);font-size:16px;max-width:660px}
+
+  /* Agenda box */
+  .agenda{
+    margin:34px 0 10px;background:var(--panel);border:1px solid var(--line);
+    border-radius:14px;padding:24px 26px;
+  }
+  .agenda h3{
+    font-family:var(--mono);font-size:12px;letter-spacing:.16em;text-transform:uppercase;
+    color:var(--accent);margin-bottom:16px;font-weight:600;
+  }
+  .agenda ol{list-style:none;counter-reset:step}
+  .agenda li{
+    counter-increment:step;display:flex;align-items:baseline;gap:14px;
+    padding:9px 0;border-bottom:1px dashed var(--line);font-size:14.5px;
+  }
+  .agenda li:last-child{border-bottom:none}
+  .agenda li::before{
+    content:counter(step);font-family:var(--mono);font-size:12px;font-weight:700;
+    color:var(--accent);background:var(--accent-soft);min-width:26px;height:26px;
+    border-radius:7px;display:inline-flex;align-items:center;justify-content:center;flex-shrink:0;
+  }
+  .agenda li .t{flex:1}
+  .agenda li .min{font-family:var(--mono);font-size:12px;color:var(--muted);white-space:nowrap}
+  .agenda .total{margin-top:14px;font-family:var(--mono);font-size:12px;color:var(--muted);text-align:right}
+
+  /* Section */
+  section{margin-top:50px}
+  .sec-h{display:flex;align-items:center;gap:12px;margin-bottom:6px}
+  .sec-h .num{
+    font-family:var(--mono);font-size:13px;font-weight:700;color:var(--accent);
+    background:var(--accent-soft);padding:3px 10px;border-radius:7px;
+  }
+  h2{font-size:23px;font-weight:700;letter-spacing:-.01em}
+  .sec-sub{color:var(--muted);font-size:14px;margin:4px 0 20px}
+
+  p{margin-bottom:14px;color:var(--soft-ink)}
+  .wrap > section p, section li{color:var(--soft-ink)}
+  strong{color:var(--ink);font-weight:650}
+
+  ul.clean{list-style:none;margin:0 0 8px}
+  ul.clean li{position:relative;padding-left:22px;margin-bottom:10px;font-size:14.5px}
+  ul.clean li::before{content:"▸";position:absolute;left:0;color:var(--accent);font-size:13px;top:1px}
+
+  /* Cards grid */
+  .grid{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin:6px 0 4px}
+  .tile{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:18px 20px}
+  .tile h4{font-size:15px;font-weight:650;margin-bottom:4px;display:flex;align-items:center;gap:8px}
+  .tile .badge{font-family:var(--mono);font-size:10px;font-weight:600;letter-spacing:.05em;
+    text-transform:uppercase;padding:2px 7px;border-radius:5px;background:var(--accent-soft);color:var(--accent)}
+  .tile p{font-size:13.5px;margin-bottom:0;color:var(--soft-ink)}
+  .tile .when{margin-top:9px;padding-top:9px;border-top:1px dashed var(--line);font-size:12.5px;color:var(--muted)}
+  .tile .when b{color:var(--ink)}
+
+  /* Table */
+  .tablewrap{border:1px solid var(--line);border-radius:12px;overflow:hidden;margin:6px 0}
+  table{width:100%;border-collapse:collapse;font-size:13.5px;background:var(--panel)}
+  thead th{text-align:left;padding:13px 16px;background:#faf9f6;font-weight:650;font-size:12px;
+    letter-spacing:.04em;border-bottom:1px solid var(--line);color:var(--ink)}
+  tbody td{padding:13px 16px;vertical-align:top;border-bottom:1px solid var(--line);color:var(--soft-ink)}
+  tbody tr:last-child td{border-bottom:none}
+  tbody tr:hover{background:#faf9f6}
+  td .k{font-family:var(--mono);font-size:12.5px;color:var(--ink);font-weight:600}
+
+  /* Code block */
+  .code{
+    background:var(--code-bg);border-radius:10px;padding:16px 18px;margin:14px 0;
+    font-family:var(--mono);font-size:13px;line-height:1.7;color:var(--code-ink);
+    overflow-x:auto;
+  }
+  .code .c{color:var(--code-dim)}      /* comment */
+  .code .p{color:var(--code-green)}    /* prompt $ */
+  .code .o{color:#79c0ff}              /* command output / flag */
+  .inline{font-family:var(--mono);font-size:.9em;background:#ece9e2;padding:1px 6px;border-radius:5px;color:#2b2f36}
+
+  /* Demo step */
+  .step{
+    background:var(--panel);border:1px solid var(--line);border-left:3px solid var(--accent);
+    border-radius:10px;padding:18px 20px;margin-bottom:14px;
+  }
+  .step .label{font-family:var(--mono);font-size:11px;letter-spacing:.1em;text-transform:uppercase;
+    color:var(--accent);font-weight:600;margin-bottom:6px}
+  .step h4{font-size:16px;font-weight:650;margin-bottom:8px}
+  .step .say{margin-top:10px;font-size:13px;color:var(--muted);font-style:italic;
+    border-top:1px dashed var(--line);padding-top:10px}
+  .step .say b{font-style:normal;color:var(--ink)}
+
+  /* Callout */
+  .callout{border-radius:10px;padding:15px 18px;margin:14px 0;font-size:13.5px;border:1px solid}
+  .callout.warn{background:var(--warn-soft);border-color:#ecd6b3}
+  .callout.tip{background:var(--accent-soft);border-color:#bfe6d8}
+  .callout.danger{background:var(--danger-soft);border-color:#f2c4bd}
+  .callout .ct{font-weight:650;color:var(--ink);margin-bottom:3px;display:flex;align-items:center;gap:7px}
+  .callout p{margin:0;color:var(--soft-ink)}
+
+  footer{margin-top:54px;padding-top:22px;border-top:1px solid var(--line);
+    text-align:center;color:var(--muted);font-size:12px;font-family:var(--mono)}
+
+  @media(max-width:640px){
+    body{padding:32px 14px 60px}
+    .grid{grid-template-columns:1fr}
+    thead th,tbody td{padding:11px 12px}
+    .agenda li{flex-wrap:wrap}
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <div class="eyebrow"><span class="dot">●</span> Presenter Playbook <span style="color:var(--line)">/</span> Developer Demo</div>
+  <h1>Demoing <span class="g">Codex</span> to Developers</h1>
+  <p class="lede">A focused running order for a short session: what to say, what to show live, the concepts to explain, and the gotchas worth flagging. Built for an audience that already writes code.</p>
+
+  <!-- Agenda -->
+  <div class="agenda">
+    <h3>// Suggested running order (~30 min)</h3>
+    <ol>
+      <li><span class="t">What Codex is & where it lives (positioning)</span><span class="min">3 min</span></li>
+      <li><span class="t">The surfaces — CLI, IDE, Cloud, App, GitHub</span><span class="min">4 min</span></li>
+      <li><span class="t">Live: first task in the CLI</span><span class="min">6 min</span></li>
+      <li><span class="t">Concepts: sandbox, approvals, AGENTS.md</span><span class="min">6 min</span></li>
+      <li><span class="t">Live: cloud delegation & parallel agents</span><span class="min">5 min</span></li>
+      <li><span class="t">Best practices & gotchas</span><span class="min">3 min</span></li>
+      <li><span class="t">When to reach for Codex (vs. not)</span><span class="min">2 min</span></li>
+      <li><span class="t">Q&A</span><span class="min">remainder</span></li>
+    </ol>
+    <div class="total">Trim sections 5–6 first if you're short on time.</div>
+  </div>
+
+  <!-- 1 -->
+  <section>
+    <div class="sec-h"><span class="num">01</span><h2>What Codex is & where it lives</h2></div>
+    <p class="sec-sub">Set the framing before touching a terminal — people conflate the old 2021 Codex with today's agent.</p>
+    <p>Lead with one sentence: <strong>Codex is OpenAI's agentic coding system</strong> — not a chatbot you ask coding questions, but an agent that reads your repo, edits files, runs commands and tests, and proposes changes. The key idea to land is that "Codex" is an <strong>umbrella over several surfaces that share one model and one account</strong>, so work started in one place can be continued in another.</p>
+    <ul class="clean">
+      <li>Runs on OpenAI's latest <strong>GPT-5.x-Codex</strong> models (GPT-5.5 generation as of mid-2026), purpose-trained for long-horizon agentic coding — selectable per session, with a reasoning-effort dial.</li>
+      <li>One <strong>"app server" architecture</strong> underpins the CLI, IDE extension, web, and desktop app, so long-running sessions and approvals stay consistent across clients.</li>
+      <li>Adoption talking point: roughly <strong>4 million developers a week</strong> by the GPT-5.5 launch — useful for "this is mainstream now," not a feature.</li>
+    </ul>
+    <div class="callout tip">
+      <div class="ct">🎯 One-liner to open with</div>
+      <p>"Treat Codex less like an assistant you prompt once, and more like a teammate you configure — give it the same context a new hire would need, and it gets reliably better."</p>
+    </div>
+  </section>
+
+  <!-- 2 -->
+  <section>
+    <div class="sec-h"><span class="num">02</span><h2>The surfaces — pick the right door</h2></div>
+    <p class="sec-sub">Show this as a map. The point isn't "many tools," it's "one agent, several entry points, shared config."</p>
+    <div class="tablewrap">
+      <table>
+        <thead>
+          <tr><th style="width:20%">Surface</th><th style="width:48%">What it is</th><th style="width:32%">Reach for it when…</th></tr>
+        </thead>
+        <tbody>
+          <tr><td><span class="k">CLI</span></td><td>Terminal agent (Rust). Full-screen TUI that reads the repo, edits, runs commands. The primary "do real work" surface.</td><td>Hands-on local work, scripting, CI.</td></tr>
+          <tr><td><span class="k">IDE extension</span></td><td>VS Code, Cursor, Windsurf, JetBrains, Xcode. Side-panel agent that uses open files & selections as context. Shares CLI config.</td><td>You want file context with less typing.</td></tr>
+          <tr><td><span class="k">Cloud / Web</span></td><td>chatgpt.com/codex. Delegate a task to a sandboxed container; it works async and returns a diff/PR.</td><td>Bigger or parallel jobs you walk away from.</td></tr>
+          <tr><td><span class="k">Desktop app</span></td><td>Mac & Windows. A command center for running and monitoring multiple agents/threads, with worktrees and Git built in.</td><td>Supervising several agents at once.</td></tr>
+          <tr><td><span class="k">GitHub bot</span></td><td>Tag <span class="inline">@codex</span> on an issue or PR to kick off a cloud task; it can auto-review PRs.</td><td>Review workflows, issue-to-PR.</td></tr>
+          <tr><td><span class="k">Computer use</span></td><td>Sees, clicks, and types in desktop apps and the browser (Mac & Windows in supported regions).</td><td>UI testing, apps with no API.</td></tr>
+          <tr><td><span class="k">Mobile remote</span></td><td>Start/continue work on a paired Mac or Windows host from the ChatGPT mobile app; approve actions from your phone.</td><td>Checking on long runs away from desk.</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="callout tip">
+      <div class="ct">🔗 The thing to emphasize</div>
+      <p>Config, <span class="inline">AGENTS.md</span>, skills, and MCP servers are <b>shared across surfaces</b>. Set a preference once and it follows you from CLI to IDE to cloud. That continuity is Codex's real story.</p>
+    </div>
+  </section>
+
+  <!-- 3 -->
+  <section>
+    <div class="sec-h"><span class="num">03</span><h2>Live demo — first task in the CLI</h2></div>
+    <p class="sec-sub">Keep it to a real repo with tests. The audience wants to see the loop, not a toy.</p>
+
+    <div class="step">
+      <div class="label">Step 1 · Install & auth</div>
+      <h4>Show the install — and the auth fork that decides everything</h4>
+      <div class="code">
+<span class="c"># macOS / Linux</span><br>
+<span class="p">$</span> curl -fsSL https://chatgpt.com/codex/install.sh | sh<br>
+<span class="c"># or, with Node 22+</span><br>
+<span class="p">$</span> npm i -g <span class="o">@openai/codex</span><br><br>
+<span class="p">$</span> codex   <span class="c"># first run prompts you to sign in</span>
+      </div>
+      <div class="say"><b>Say:</b> the first screen asks you to sign in with a ChatGPT account <i>or</i> an API key — and that one choice quietly decides your models, rate limits, and bill. ChatGPT login = newest models, included in your plan. API key = better for CI, but pay-per-token.</div>
+    </div>
+
+    <div class="step">
+      <div class="label">Step 2 · Run a task</div>
+      <h4>Give it a real, scoped job and narrate the plan-then-act loop</h4>
+      <div class="code">
+<span class="p">$</span> codex <span class="o">"add input validation to the signup endpoint and a test for it"</span>
+      </div>
+      <div class="say"><b>Point out:</b> Codex explains its plan before changing anything, shows syntax-highlighted diffs in the TUI, and you approve or reject inline. Press <span class="inline">Tab</span> to queue a follow-up mid-run. Use <span class="inline">codex resume</span> to reopen an earlier thread with the same repo state.</div>
+    </div>
+
+    <div class="step">
+      <div class="label">Step 3 · Close the loop</div>
+      <h4>Don't stop at the edit — make it verify</h4>
+      <p style="font-size:14px;margin-bottom:0">Ask it to run the tests and confirm green before you accept. This is the single habit that separates "confident but subtly wrong" output from trustworthy output. Then create a Git checkpoint so reverting is one command.</p>
+    </div>
+
+    <div class="callout warn">
+      <div class="ct">⚠️ Install gotcha to mention</div>
+      <p>There's an unrelated <span class="inline">codex</span> package on npm from 2012 that installs silently and does nothing. Use the <b>scoped</b> name <span class="inline">@openai/codex</span>, and note you need <b>Node 22+</b>. On Windows, native PowerShell works, but WSL2 is smoother.</p>
+    </div>
+  </section>
+
+  <!-- 4 -->
+  <section>
+    <div class="sec-h"><span class="num">04</span><h2>Core concepts to explain</h2></div>
+    <p class="sec-sub">These four ideas are what make Codex predictable. Spend your explanation budget here.</p>
+
+    <h4 style="margin:18px 0 8px;font-size:16px">Sandbox mode × approval policy</h4>
+    <p>The two safety knobs that work together. <strong>Sandbox mode</strong> decides what Codex <em>can</em> do (where it writes, whether it reaches the network). <strong>Approval policy</strong> decides <em>when</em> it must stop and ask you.</p>
+    <div class="tablewrap">
+      <table>
+        <thead><tr><th style="width:30%">Setting</th><th>Behavior</th></tr></thead>
+        <tbody>
+          <tr><td><span class="k">read-only</span></td><td>Can read the workspace; no edits without approval. Good for chat/planning.</td></tr>
+          <tr><td><span class="k">workspace-write</span></td><td>Default. Reads, edits inside the workspace, runs routine commands. Network off by default.</td></tr>
+          <tr><td><span class="k">danger-full-access</span></td><td>No restrictions. Only inside an already-isolated runner (e.g. CI container).</td></tr>
+          <tr><td><span class="k">on-request</span></td><td>Approval default — works in the sandbox, asks when it needs to step outside.</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <p style="font-size:14px">The recommended local preset is <span class="inline">--sandbox workspace-write --ask-for-approval on-request</span>. On Mac the sandbox uses the built-in Seatbelt framework; Linux and Windows have native equivalents.</p>
+
+    <h4 style="margin:22px 0 8px;font-size:16px">AGENTS.md — durable project context</h4>
+    <p>Codex's equivalent of a project brief (analogous to <span class="inline">CLAUDE.md</span>). It's read <strong>before any task</strong>, so every session — yours, a teammate's, or a cloud task from a GitHub issue — starts with the same rules. Version-controlled and reviewable.</p>
+    <div class="code">
+<span class="c"># AGENTS.md (repo root)</span><br>
+<span class="c">## Architecture</span><br>
+- Frontend: Nuxt + TypeScript &nbsp; · &nbsp; API: Spring Boot &nbsp; · &nbsp; DB: MongoDB<br><br>
+<span class="c">## Working agreements</span><br>
+- Run <span class="o">`npm run lint`</span> and tests before opening a PR<br>
+- New endpoints need an integration test<br>
+- Ask before adding a production dependency
+      </div>
+    <ul class="clean">
+      <li><strong>Layering:</strong> <span class="inline">~/.codex/AGENTS.md</span> for personal defaults everywhere → repo-root file for team rules → nested files override per-directory. Run <span class="inline">/init</span> to scaffold one.</li>
+      <li><strong>Keep it lean.</strong> It loads into context every turn; bloat wastes tokens and confuses results. Cap is 32 KiB.</li>
+      <li><strong>Honest limit:</strong> it <em>reduces</em> rule violations, it doesn't guarantee them. For irreversible actions, back it with execpolicy rules and approval gates — not the file alone.</li>
+    </ul>
+
+    <h4 style="margin:22px 0 8px;font-size:16px">MCP & skills — context beyond the repo</h4>
+    <p>When the context Codex needs lives outside the codebase (issue trackers, your calendar, internal tools), connect it via <strong>MCP servers</strong> rather than pasting live info into prompts. <strong>Skills</strong> bundle reusable workflows. Both are configured in <span class="inline">config.toml</span> and shared across surfaces.</p>
+
+    <h4 style="margin:22px 0 8px;font-size:16px">Models & reasoning effort</h4>
+    <p>You can switch models per session and adjust <strong>reasoning effort</strong> (low / medium / high — medium is the sensible default). Higher effort helps on hard problems but is slower and burns rate limits faster. Worth a quick live toggle so people see the tradeoff is theirs to make.</p>
+  </section>
+
+  <!-- 5 -->
+  <section>
+    <div class="sec-h"><span class="num">05</span><h2>Live demo — cloud delegation & parallel agents</h2></div>
+    <p class="sec-sub">This is the "walk away and it keeps working" moment. It lands well after the hands-on CLI part.</p>
+    <div class="step">
+      <div class="label">Option A · From the terminal</div>
+      <h4>Fire a cloud task without leaving the shell</h4>
+      <div class="code">
+<span class="p">$</span> codex cloud exec --env <span class="o">ENV_ID</span> <span class="o">"summarize open bugs and draft fixes"</span><br>
+<span class="c"># --attempts 3  → best-of-N runs</span><br>
+<span class="p">$</span> codex apply <span class="o">TASK_ID</span>   <span class="c"># pull the resulting diff into your local tree</span>
+      </div>
+      <div class="say"><b>Say:</b> the cloud task runs in an isolated OpenAI-managed container — setup phase can install deps with network, then the agent phase runs offline by default. Secrets are removed before the agent phase.</div>
+    </div>
+    <div class="step">
+      <div class="label">Option B · The desktop app</div>
+      <h4>Show several agents on separate worktrees at once</h4>
+      <p style="font-size:14px;margin-bottom:0">In the app you can monitor multiple threads from one window — each on its own branch/worktree, no conflicts. Mention <strong>automations</strong> (scheduled background tasks) and <strong>goal mode</strong> (runs toward an objective for hours with check-ins). The catch worth stating: parallelism only pays off with <strong>clear per-task scope</strong> — define what each agent produces and where, or you get competing changes.</p>
+    </div>
+    <div class="step">
+      <div class="label">Bonus · exec for CI</div>
+      <h4>One line that shows Codex as automation, not just a chat</h4>
+      <div class="code">
+<span class="p">$</span> codex exec <span class="o">"write a CHANGELOG entry for commits since v2.4.0 and append it"</span>
+      </div>
+      <div class="say"><b>Say:</b> <span class="inline">codex exec</span> is the non-interactive mode — streams to stdout/JSONL, exits non-zero on failure, so you can wire it into pipelines.</div>
+    </div>
+  </section>
+
+  <!-- 6 -->
+  <section>
+    <div class="sec-h"><span class="num">06</span><h2>Best practices & gotchas</h2></div>
+    <p class="sec-sub">The "save yourself a week" slide. Frame these as lessons, not warnings.</p>
+    <div class="grid">
+      <div class="tile">
+        <h4>✅ Configure the environment early</h4>
+        <p>Most "bad output" is really bad setup — wrong working dir, missing write access, wrong model default. Fix <span class="inline">AGENTS.md</span> + <span class="inline">config.toml</span> first.</p>
+      </div>
+      <div class="tile">
+        <h4>✅ Always verify before accepting</h4>
+        <p>Make it run tests and checks. Codex produces confident output that's sometimes subtly wrong, especially in less-common frameworks.</p>
+      </div>
+      <div class="tile">
+        <h4>✅ Start tight, loosen later</h4>
+        <p>Begin with default permissions. Only widen sandbox/approval for trusted repos once the need is concrete.</p>
+      </div>
+      <div class="tile">
+        <h4>✅ Scope parallel agents</h4>
+        <p>Give each agent a clear deliverable and output location. Unscoped parallel runs produce conflicting changes.</p>
+      </div>
+      <div class="tile">
+        <h4>⚠️ Git checkpoints</h4>
+        <p>It can modify your codebase — commit before/after tasks so a revert is trivial.</p>
+      </div>
+      <div class="tile">
+        <h4>⚠️ Teach it from mistakes</h4>
+        <p>When Codex repeats an error, ask for a retrospective and fold it into <span class="inline">AGENTS.md</span>.</p>
+      </div>
+    </div>
+    <div class="callout danger">
+      <div class="ct">🚫 Don't demo this casually</div>
+      <p><span class="inline">--yolo</span> / <span class="inline">danger-full-access</span> bypasses approvals <b>and</b> sandboxing. There are real reports of agents running destructive commands. Only ever inside a throwaway isolated runner — and say so out loud if you show it at all.</p>
+    </div>
+    <div class="callout warn">
+      <div class="ct">⚠️ Honest caveat for credibility</div>
+      <p>OpenAI's own README still calls the CLI experimental and under active development. It moves fast with rough edges — plan for breaking changes between versions. Saying this earns trust with a developer crowd.</p>
+    </div>
+  </section>
+
+  <!-- 7 -->
+  <section>
+    <div class="sec-h"><span class="num">07</span><h2>When to reach for Codex (and when not)</h2></div>
+    <p class="sec-sub">Close with judgment, not hype. Developers respect a tool pitch that names its limits.</p>
+    <div class="grid">
+      <div class="tile">
+        <h4><span class="badge">Great fit</span></h4>
+        <p>Well-scoped, repeatable work; large refactors and migrations; running several tasks in parallel; issue-to-PR and automated review; UI/app tasks with no API (computer use); long-horizon jobs you delegate and check on later.</p>
+      </div>
+      <div class="tile">
+        <h4><span class="badge" style="background:var(--warn-soft);color:var(--warn)">Be careful</span></h4>
+        <p>Anything irreversible or high-stakes (prod deploys, DB ops, credential rotation) — gate with approvals and execpolicy. Unfamiliar frameworks where it has less training signal — verify harder. Tasks you can't clearly describe — scope first.</p>
+      </div>
+    </div>
+    <div class="callout tip">
+      <div class="ct">💬 Closing line</div>
+      <p>"The question for our team isn't <i>whether</i> to use Codex — it's <i>where</i> in our workflow cloud-delegated agent work actually pays off. Let's pick one repo this week and try it."</p>
+    </div>
+  </section>
+
+  <footer>
+    Codex details current as of June 2026 · surfaces, models, and limits change fast — verify against developers.openai.com/codex before presenting
+  </footer>
+
+</div>
+</body>
+</html>

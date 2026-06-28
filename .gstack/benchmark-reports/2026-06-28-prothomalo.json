@@ -1,0 +1,18 @@
+{
+  "url": "https://www.prothomalo.com/",
+  "timestamp": "2026-06-28",
+  "page": "/",
+  "metrics": {
+    "ttfb_ms": 123, "fcp_ms": 380, "dom_interactive_ms": 256,
+    "dcl_ms": 561, "dom_complete_ms": 4968, "full_load_ms": 4972,
+    "total_requests": 103, "total_transfer_bytes": 1413587, "total_decoded_bytes": 3348461,
+    "html_transfer_bytes": 406886, "html_decoded_bytes": 4409447,
+    "inline_script_largest_kb": 3155, "inline_script_total_kb": 3167,
+    "js_transfer_bytes": 597543, "js_first_party_kb": 157, "js_third_party_kb": 427,
+    "css_transfer_bytes": 20568, "img_transfer_bytes": 286412,
+    "third_party_domains": 24, "iframes": 17, "dom_nodes": 2275,
+    "images_total": 12, "images_no_dims": 12, "images_lazy": 0
+  },
+  "grade": "C+",
+  "budgets_passing": "3/9"
+}

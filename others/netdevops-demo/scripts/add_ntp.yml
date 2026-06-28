@@ -1,0 +1,37 @@
+---
+# add_ntp.yml — Add an NTP server to all IOS devices.
+#
+# SAFETY: always dry-run first:
+#     ansible-playbook -i hosts.ini add_ntp.yml --check --diff
+# Then apply for real:
+#     ansible-playbook -i hosts.ini add_ntp.yml
+#
+# Requires the cisco.ios collection:
+#     ansible-galaxy collection install cisco.ios
+#
+# This is a TEMPLATE for the demo. You need a real hosts.ini inventory and
+# reachable devices to actually run it. Credentials should come from a vault
+# or environment, never hardcoded here.
+
+- name: Configure NTP on IOS devices
+  hosts: ios_devices
+  gather_facts: no
+  connection: network_cli
+  vars:
+    ntp_server: 10.0.0.123
+  tasks:
+    - name: Back up running config before any change
+      cisco.ios.ios_config:
+        backup: yes
+        backup_options:
+          dir_path: ./backups
+
+    - name: Ensure NTP server is configured
+      cisco.ios.ios_config:
+        lines:
+          - "ntp server {{ ntp_server }}"
+      register: ntp_change
+
+    - name: Report what changed
+      ansible.builtin.debug:
+        msg: "{{ inventory_hostname }}: {{ 'CHANGED' if ntp_change.changed else 'already compliant' }}"

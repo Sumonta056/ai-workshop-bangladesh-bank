@@ -1,0 +1,344 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Antigravity & the CLI — Demo Report</title>
+<style>
+  :root{
+    --bg:#f4f5f8;
+    --panel:#ffffff;
+    --line:#e4e6ec;
+    --ink:#13151c;
+    --soft:#3d4150;
+    --muted:#717689;
+    --lift:#4a5dff;          /* electric blue-violet — "lift" */
+    --lift-soft:#e9ebff;
+    --agent:#00a389;         /* secondary agents */
+    --agent-soft:#dcf5ef;
+    --amber:#c47e1c;
+    --amber-soft:#fbeed6;
+    --red:#c0392b;
+    --red-soft:#fbe6e3;
+    --space:#0b1020;         /* deep space — snapshots/terminal */
+    --space-ink:#d5d9e6;
+    --space-dim:#7b8199;
+    --space-blue:#8aa0ff;
+    --space-teal:#4fd6bd;
+    --space-amber:#e8b65a;
+    --sans:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;
+    --mono:'SF Mono',ui-monospace,'JetBrains Mono','Cascadia Code',Menlo,Consolas,monospace;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  html{scroll-behavior:smooth}
+  body{background:var(--bg);color:var(--ink);font-family:var(--sans);line-height:1.6;
+    -webkit-font-smoothing:antialiased;padding:46px 20px 90px}
+  .wrap{max-width:920px;margin:0 auto}
+
+  /* hero */
+  .eyebrow{font-family:var(--mono);color:var(--muted);font-size:12px;letter-spacing:.22em;
+    text-transform:uppercase;margin-bottom:16px}
+  .eyebrow .dot{color:var(--lift)}
+  h1{font-size:clamp(31px,5.4vw,52px);line-height:1.0;font-weight:800;letter-spacing:-.03em;margin-bottom:18px}
+  h1 .l{background:linear-gradient(120deg,var(--lift),var(--agent));-webkit-background-clip:text;
+    background-clip:text;-webkit-text-fill-color:transparent}
+  .lede{color:var(--soft);font-size:16px;max-width:690px}
+
+  /* transition banner — signature top callout */
+  .banner{margin:30px 0 6px;background:linear-gradient(135deg,#11152a,#0b1020);border-radius:16px;
+    padding:24px 26px;color:#e7eaf5;position:relative;overflow:hidden;border:1px solid #1d2440}
+  .banner::before{content:"";position:absolute;right:-60px;top:-60px;width:200px;height:200px;border-radius:50%;
+    background:radial-gradient(circle,rgba(74,93,255,.35),transparent 70%)}
+  .banner .tag{font-family:var(--mono);font-size:11px;letter-spacing:.16em;text-transform:uppercase;
+    color:var(--space-amber);margin-bottom:8px;position:relative}
+  .banner h3{font-size:18px;font-weight:700;margin-bottom:8px;position:relative}
+  .banner p{font-size:13.5px;color:#b9c0d8;margin:0;position:relative;line-height:1.65}
+  .banner code{font-family:var(--mono);font-size:.92em;background:#1c2340;color:#cdd5f5;padding:1px 6px;border-radius:5px}
+
+  /* agenda */
+  .agenda{margin:30px 0 10px;background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:24px 26px}
+  .agenda h3{font-family:var(--mono);font-size:12px;letter-spacing:.16em;text-transform:uppercase;
+    color:var(--lift);margin-bottom:16px;font-weight:600}
+  .agenda ol{list-style:none;counter-reset:s}
+  .agenda li{counter-increment:s;display:flex;align-items:baseline;gap:14px;padding:9px 0;
+    border-bottom:1px dashed var(--line);font-size:14.5px}
+  .agenda li:last-child{border-bottom:none}
+  .agenda li::before{content:counter(s);font-family:var(--mono);font-size:12px;font-weight:700;color:var(--lift);
+    background:var(--lift-soft);min-width:26px;height:26px;border-radius:7px;display:inline-flex;
+    align-items:center;justify-content:center;flex-shrink:0}
+  .agenda li .t{flex:1}
+  .agenda li .min{font-family:var(--mono);font-size:12px;color:var(--muted);white-space:nowrap}
+
+  /* sections — altitude ladder numbering */
+  section{margin-top:52px}
+  .sec-h{display:flex;align-items:center;gap:13px;margin-bottom:6px}
+  .sec-h .alt{font-family:var(--mono);font-size:12px;font-weight:700;color:#fff;
+    background:linear-gradient(135deg,var(--lift),#6b3dff);padding:5px 9px;border-radius:8px;letter-spacing:.02em}
+  h2{font-size:24px;font-weight:750;letter-spacing:-.015em}
+  .sec-sub{color:var(--muted);font-size:14px;margin:5px 0 20px}
+  h3.sub{font-size:17px;font-weight:650;margin:26px 0 8px}
+  p{margin-bottom:14px;color:var(--soft)}
+  strong{color:var(--ink);font-weight:650}
+  .inline{font-family:var(--mono);font-size:.88em;background:#e8eaf1;padding:1px 6px;border-radius:5px;color:#2b2f3a}
+
+  ul.clean{list-style:none;margin:0 0 8px}
+  ul.clean li{position:relative;padding-left:22px;margin-bottom:10px;font-size:14.5px;color:var(--soft)}
+  ul.clean li::before{content:"↑";position:absolute;left:0;color:var(--lift);font-size:13px;top:1px;font-weight:700}
+
+  .grid{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin:6px 0}
+  .grid3{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin:6px 0}
+  .tile{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:17px 19px}
+  .tile h4{font-size:15px;font-weight:650;margin-bottom:5px;display:flex;align-items:center;gap:7px}
+  .tile p{font-size:13.5px;margin-bottom:0;color:var(--soft)}
+
+  /* code + snapshots (deep space) */
+  .code{background:var(--space);border-radius:10px;padding:15px 18px;margin:14px 0;font-family:var(--mono);
+    font-size:13px;line-height:1.75;color:var(--space-ink);overflow-x:auto;border:1px solid #1a2138}
+  .code .c{color:var(--space-dim)}
+  .code .p{color:var(--space-teal)}
+  .code .f{color:var(--space-blue)}
+  .code .s{color:var(--space-amber)}
+
+  .snap{border:1px solid var(--line);border-radius:12px;overflow:hidden;margin:16px 0;
+    box-shadow:0 14px 34px -16px rgba(20,30,80,.3);background:var(--space)}
+  .snap .bar{display:flex;align-items:center;gap:8px;padding:10px 14px;background:#121831;border-bottom:1px solid #1d2440}
+  .snap .bar .dot{width:11px;height:11px;border-radius:50%}
+  .snap .bar .r{background:#ff5f57}.snap .bar .y{background:#febc2e}.snap .bar .g{background:#28c840}
+  .snap .bar .ttl{margin-left:8px;font-family:var(--mono);font-size:11.5px;color:var(--space-dim)}
+  .snap .body{padding:16px 18px;font-family:var(--mono);font-size:12.5px;line-height:1.85;color:var(--space-ink)}
+  .cap{font-size:12px;color:var(--muted);text-align:center;margin:-6px 0 18px;font-style:italic}
+  .ln{white-space:pre-wrap}
+  .tt{color:var(--space-teal)}.tb{color:var(--space-blue)}.td{color:var(--space-dim)}
+  .ty{color:var(--space-amber)}.tw{color:#fff}.chk{color:var(--space-teal)}
+
+  /* manager view snapshot */
+  .mgr{font-family:var(--mono);font-size:12px}
+  .mgr .lane{display:flex;align-items:center;gap:11px;padding:10px 0;border-bottom:1px solid #1d2440}
+  .mgr .lane:last-child{border-bottom:none}
+  .mgr .orb{width:11px;height:11px;border-radius:50%;flex-shrink:0;position:relative}
+  .mgr .run{background:var(--space-amber);box-shadow:0 0 0 4px rgba(232,182,90,.16)}
+  .mgr .done{background:var(--space-teal)}
+  .mgr .plan{background:var(--space-blue)}
+  .mgr .queue{background:var(--space-dim)}
+  .mgr .nm{color:#fff;flex:1}
+  .mgr .meta{color:var(--space-dim);font-size:11px}
+  .mgr .art{color:var(--space-blue);font-size:11px}
+
+  /* artifacts snapshot */
+  .arts{display:grid;grid-template-columns:1fr 1fr;gap:10px;font-family:var(--mono);font-size:11.5px}
+  .arts .a{background:#121831;border:1px solid #1d2440;border-radius:9px;padding:11px 13px}
+  .arts .a .h{color:#fff;font-weight:600;margin-bottom:5px;display:flex;align-items:center;gap:6px}
+  .arts .a .ic{color:var(--space-teal)}
+  .arts .a .ln2{color:var(--space-dim);line-height:1.7}
+
+  .callout{border-radius:10px;padding:15px 18px;margin:14px 0;font-size:13.5px;border:1px solid}
+  .callout.tip{background:var(--lift-soft);border-color:#cdd2ff}
+  .callout.warn{background:var(--amber-soft);border-color:#eed7ac}
+  .callout.danger{background:var(--red-soft);border-color:#f1c3bd}
+  .callout .ct{font-weight:650;color:var(--ink);margin-bottom:3px;display:flex;align-items:center;gap:7px}
+  .callout p{margin:0;color:var(--soft)}
+
+  .tablewrap{border:1px solid var(--line);border-radius:12px;overflow:hidden;margin:8px 0}
+  table{width:100%;border-collapse:collapse;font-size:13.5px;background:var(--panel)}
+  thead th{text-align:left;padding:12px 15px;background:#fafafe;font-weight:650;font-size:12px;
+    border-bottom:1px solid var(--line);color:var(--ink)}
+  tbody td{padding:12px 15px;vertical-align:top;border-bottom:1px solid var(--line);color:var(--soft)}
+  tbody tr:last-child td{border-bottom:none}
+  td .k{font-family:var(--mono);font-size:12.5px;color:var(--ink);font-weight:600}
+
+  footer{margin-top:54px;padding-top:22px;border-top:1px solid var(--line);text-align:center;
+    color:var(--muted);font-size:12px;font-family:var(--mono)}
+
+  @media(max-width:660px){
+    body{padding:32px 14px 60px}
+    .grid,.grid3,.arts{grid-template-columns:1fr}
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <div class="eyebrow"><span class="dot">●</span> Demo Report <span style="color:var(--line)">/</span> Google Antigravity + CLI</div>
+  <h1>Demoing <span class="l">Antigravity</span><br>& the agent CLI</h1>
+  <p class="lede">An agent-first platform where you direct a workforce of AI agents instead of typing every line — they plan, build, drive a real browser to test their own work, and hand back verifiable proof. Here's what to show, with snippets and mockups.</p>
+
+  <!-- TRANSITION BANNER (signature) -->
+  <div class="banner">
+    <div class="tag">⚠ Read this before you present</div>
+    <h3>Gemini CLI was retired for consumers on June 18, 2026</h3>
+    <p>The <code>gemini</code> command no longer serves requests on free, AI Pro, or AI Ultra tiers — there was no grace period. Its replacement is <strong>Antigravity CLI</strong> (the <code>agy</code> command), a Go rewrite sharing the same agent harness as the Antigravity app. Only <strong>enterprise</strong> (Gemini Code Assist Standard/Enterprise) and <strong>paid API keys</strong> keep legacy Gemini CLI. <strong>Demo <code>agy</code>, not <code>gemini</code></strong> — and check that any pipeline calling <code>gemini</code> hasn't already broken.</p>
+  </div>
+
+  <!-- agenda -->
+  <div class="agenda">
+    <h3>// Running order (~30 min)</h3>
+    <ol>
+      <li><span class="t">The shift: agent-first, two views</span><span class="min">4 min</span></li>
+      <li><span class="t">Live: one prompt → plan → build, in the Manager</span><span class="min">7 min</span></li>
+      <li><span class="t">The Browser Subagent — it tests its own work</span><span class="min">6 min</span></li>
+      <li><span class="t">Artifacts & Walkthroughs — the trust model</span><span class="min">4 min</span></li>
+      <li><span class="t">Antigravity CLI (agy) in the terminal</span><span class="min">5 min</span></li>
+      <li><span class="t">Models, integrations & security gotchas</span><span class="min">3 min</span></li>
+      <li><span class="t">Q&A</span><span class="min">remainder</span></li>
+    </ol>
+  </div>
+
+  <!-- 1 -->
+  <section>
+    <div class="sec-h"><span class="alt">01</span><h2>The shift — from writer to mission controller</h2></div>
+    <p class="sec-sub">Frame the category before the tool. This is not autocomplete; it's delegation.</p>
+    <p>Antigravity is Google's <strong>agent-first development platform</strong> (a heavily modified VS Code fork, originally shipped Nov 2025 with Gemini 3, rebuilt as <strong>2.0</strong> at I/O 2026). The premise: the AI isn't predicting your next few tokens — it <strong>plans, executes, validates, and iterates</strong> on whole tasks while you supervise. Your role moves from typing code to <strong>directing agents and reviewing their output</strong>.</p>
+    <div class="grid">
+      <div class="tile"><h4>🖥️ Editor view</h4><p>A familiar VS Code-style editor with an agent sidebar — for when you want to read, tweak, and stay close to the code.</p></div>
+      <div class="tile"><h4>🛰️ Manager view</h4><p>A mission-control surface that orchestrates many agents in parallel across workspaces, asynchronously. This is the part that feels new.</p></div>
+    </div>
+    <div class="callout tip">
+      <div class="ct">🎯 Opening line</div>
+      <p>"With Antigravity you stop being the person who types every line and become the one who assigns work to a team of agents — then checks what they bring back."</p>
+    </div>
+  </section>
+
+  <!-- 2 -->
+  <section>
+    <div class="sec-h"><span class="alt">02</span><h2>Live — one prompt, many agents</h2></div>
+    <p class="sec-sub">The headline demo. Give it a real, multi-part task and narrate the Manager filling up.</p>
+    <p>In the Manager, a single prompt fans out into a <strong>plan</strong>, then parallel <strong>subagents</strong> each take a slice of the work — and you can <strong>schedule tasks to run in the background</strong> (even overnight). One developer's framing: it lets a single person act like a "full-stack team," keeping frontend, backend, and tests moving at once.</p>
+    <h3 class="sub">Snapshot — the Agent Manager mid-run</h3>
+    <div class="snap">
+      <div class="bar"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span>
+        <span class="ttl">Antigravity — Manager · 4 agents</span></div>
+      <div class="body mgr">
+        <div class="lane"><span class="orb run"></span><span class="nm">Build signup + email verification</span><span class="meta">running</span><span class="art">▸ 2 artifacts</span></div>
+        <div class="lane"><span class="orb run"></span><span class="nm">Refactor API to new schema</span><span class="meta">running</span><span class="art">▸ plan + diff</span></div>
+        <div class="lane"><span class="orb plan"></span><span class="nm">Add Playwright e2e suite</span><span class="meta">planning</span><span class="art">▸ task list</span></div>
+        <div class="lane"><span class="orb done"></span><span class="nm">Fix mobile nav overflow</span><span class="meta">done</span><span class="art">✓ screenshots</span></div>
+        <div class="lane"><span class="orb queue"></span><span class="nm">Generate API docs from routes</span><span class="meta">queued · 02:00</span><span class="art">scheduled</span></div>
+      </div>
+    </div>
+    <div class="cap">Illustrative mockup — agents run in parallel; each produces reviewable artifacts; one is scheduled for later.</div>
+    <ul class="clean">
+      <li><strong>Dynamic subagents</strong> split a complex task and report back independently — no blocked terminal, no babysitting.</li>
+      <li><strong>Scheduled / async tasks</strong> run while you're away; you return to diffs and test results to review.</li>
+      <li><strong>Git worktrees</strong> keep each agent's edits isolated so parallel work doesn't collide.</li>
+    </ul>
+  </section>
+
+  <!-- 3 -->
+  <section>
+    <div class="sec-h"><span class="alt">03</span><h2>The Browser Subagent — it checks its own work</h2></div>
+    <p class="sec-sub">The most demo-friendly feature. Build something with a bug, let the agent catch it live.</p>
+    <p>Antigravity spins up a <strong>real Chrome instance</strong> and actually <strong>uses the app as it builds it</strong> — clicking buttons, filling forms, taking screenshots, reading what happened. If a button doesn't work, the agent <strong>sees the failure, debugs it, and fixes it</strong>, without you ever opening DevTools. This is what separates "generated code that looks right" from "code the agent verified end-to-end."</p>
+    <div class="snap">
+      <div class="bar"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span>
+        <span class="ttl">Browser Subagent — localhost:3000</span></div>
+      <div class="body">
+<div class="ln"><span class="tb">▸</span> Launched Chrome, navigated to <span class="tt">/signup</span></div>
+<div class="ln"><span class="tb">▸</span> Filled form, clicked <span class="tw">Create account</span> … 📸 screenshot</div>
+<div class="ln ty">  ✗ Nothing happened — button has no onClick handler</div>
+<div class="ln"><span class="tb">▸</span> Patched <span class="tt">SignupForm.tsx</span>, hot-reloaded</div>
+<div class="ln"><span class="tb">▸</span> Retried flow … 📸 screenshot</div>
+<div class="ln"><span class="chk">  ✓ Account created, redirected to /welcome — verified</span></div>
+      </div>
+    </div>
+    <div class="cap">Illustrative mockup — the agent reproduces a real user flow and confirms the fix visually.</div>
+    <div class="callout tip">
+      <div class="ct">💡 What to say while it runs</div>
+      <p>"It's not guessing the UI works — it opened the page, clicked the button, saw nothing happen, and fixed the missing handler. That screenshot is its proof."</p>
+    </div>
+  </section>
+
+  <!-- 4 -->
+  <section>
+    <div class="sec-h"><span class="alt">04</span><h2>Artifacts & Walkthroughs — the trust model</h2></div>
+    <p class="sec-sub">This is Antigravity's real differentiator. Don't skip it — it's why people trust autonomous runs.</p>
+    <p>Because the agents work autonomously, Antigravity makes them <strong>show their work</strong>. Every task produces <strong>Artifacts</strong> — verifiable deliverables you review in the Auxiliary Pane instead of reading raw output. The <strong>Walkthrough</strong> goes further: after finishing, the agent narrates <em>what</em> it built, <em>why</em> it chose certain patterns, and <em>how</em> the files connect — like a senior engineer explaining their PR.</p>
+    <div class="arts">
+      <div class="a"><div class="h"><span class="ic">▤</span> Implementation Plan</div><div class="ln2">Proposed architecture & files. Approve before any code is written.</div></div>
+      <div class="a"><div class="h"><span class="ic">☑</span> Task List</div><div class="ln2">Step-by-step checklist with done / pending state as it progresses.</div></div>
+      <div class="a"><div class="h"><span class="ic">▦</span> Screenshots & recordings</div><div class="ln2">Visual proof from the browser subagent that flows actually work.</div></div>
+      <div class="a"><div class="h"><span class="ic">≋</span> Walkthrough</div><div class="ln2">Narrated explanation of the changes — the reasoning, not just the diff.</div></div>
+    </div>
+    <div class="callout tip" style="margin-top:14px">
+      <div class="ct">🧭 Demo move</div>
+      <p>Open the Implementation Plan artifact and <strong>approve it on screen</strong> before letting the agent proceed. It shows the human-in-the-loop checkpoint clearly — and reviewers can approve asynchronously via review gates.</p>
+    </div>
+  </section>
+
+  <!-- 5 -->
+  <section>
+    <div class="sec-h"><span class="alt">05</span><h2>Antigravity CLI — the terminal front end</h2></div>
+    <p class="sec-sub">Same agent harness as the app, in your terminal. This is the live replacement for <span class="inline">gemini</span>.</p>
+    <p>Antigravity CLI (<span class="inline">agy</span>) is a <strong>Go binary — single file, no runtime dependencies</strong>, snappier than the old CLI. It runs <strong>asynchronous, multi-agent background workflows</strong> and shares one architecture with the desktop app, so improvements land everywhere at once. It keeps the features people relied on: <strong>Agent Skills, Hooks, Subagents, and Extensions (now plugins)</strong>.</p>
+    <div class="code">
+<span class="c"># Antigravity CLI is available to everyone now; use it with your Google Cloud project</span><br>
+<span class="p">$</span> agy                                  <span class="c"># start an interactive agent session</span><br>
+<span class="p">$</span> agy <span class="s">"scaffold a REST API for a todo app, then test the endpoints"</span><br><br>
+<span class="c"># isolate the agent to the project root, block unauthorized network</span><br>
+<span class="p">$</span> agy <span class="f">--sandbox</span> <span class="s">"refactor the auth module and run the tests"</span><br><br>
+<span class="c"># bring your skills/hooks/rules over from the old setup</span><br>
+<span class="p">$</span> agy plugin import<br><br>
+<span class="c"># settings live in a version-controllable file</span><br>
+<span class="c"># ~/.gemini/antigravity-cli/settings.json</span>
+    </div>
+    <div class="snap">
+      <div class="bar"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span>
+        <span class="ttl">zsh — agy</span></div>
+      <div class="body">
+<div class="ln"><span class="tt">➜  myapp</span> <span class="tb">agy</span> <span class="ty">"the /search route 500s on an empty query — fix and verify"</span></div>
+<div class="ln td">&nbsp;</div>
+<div class="ln"><span class="tb">◇ plan</span>  guard empty query · return 400 · add regression test</div>
+<div class="ln"><span class="tb">◇ subagent</span>  editing <span class="tt">routes/search.ts</span> …</div>
+<div class="ln"><span class="tb">◇ subagent</span>  running <span class="tt">npm test -- search</span> …</div>
+<div class="ln td">&nbsp;</div>
+<div class="ln"><span class="chk">✓ guard added · 14 tests pass · artifact: diff + test log</span></div>
+<div class="ln td">  run another in the background?  & to detach</div>
+      </div>
+    </div>
+    <div class="cap">Illustrative mockup — exact flags vary by version; confirm against the Antigravity CLI docs before presenting.</div>
+    <div class="callout warn">
+      <div class="ct">📦 The Gemini CLI lineage (for the inevitable question)</div>
+      <p>Gemini CLI proved the terminal was a great agent surface — 100k+ GitHub stars, weekly releases, open source. Google folded it into Antigravity CLI for a "single product built for multi-agent reality." Honest caveats worth stating: <code style="font-family:var(--mono);font-size:.9em">agy</code> is <strong>closed-source</strong> and <strong>not at 1:1 feature parity</strong> at launch, and the open-source community contributions don't carry into it — a sore point on developer forums.</p>
+    </div>
+  </section>
+
+  <!-- 6 -->
+  <section>
+    <div class="sec-h"><span class="alt">06</span><h2>Models, integrations & security</h2></div>
+    <p class="sec-sub">Close with the practical setup details and the agentic-IDE risks worth naming.</p>
+
+    <h3 class="sub">Models you can pick</h3>
+    <div class="tablewrap">
+      <table>
+        <thead><tr><th style="width:32%">Model</th><th>Use it for</th></tr></thead>
+        <tbody>
+          <tr><td><span class="k">Gemini 3.5 Flash</span></td><td>Default. Fast agentic engine — Google says it beats 3.1 Pro on most benchmarks at ~4× the speed.</td></tr>
+          <tr><td><span class="k">Gemini 3.1 Pro</span></td><td>Heavier reasoning when a task is genuinely complex.</td></tr>
+          <tr><td><span class="k">Claude Sonnet / Opus 4.6</span></td><td>Alternative frontier models, selectable inside Antigravity.</td></tr>
+          <tr><td><span class="k">Local (Ollama)</span></td><td>Run on your own hardware for privacy/offline — proprietary code never leaves the machine.</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <h3 class="sub">Google-native integrations</h3>
+    <p>Because it's Google: it can authenticate and wire together <strong>Sheets, Docs, Drive, and Calendar</strong>, and connects natively to <strong>AI Studio, Firebase, and Android</strong> (export an AI Studio project straight into Antigravity with full context). A demo-able prompt: "build a CRM that pulls leads from my Google Sheet and sends reminders via Calendar."</p>
+
+    <h3 class="sub">Security — name these out loud</h3>
+    <div class="grid">
+      <div class="tile"><h4>🪤 Prompt injection</h4><p>A README or code comment can hide instructions telling the agent to exfiltrate data (e.g. via Markdown image rendering). Scan auto-generated comments for stray outbound URLs; disable Markdown image rendering in previews unless needed.</p></div>
+      <div class="tile"><h4>🧱 Sandbox the agent</h4><p>Use <span class="inline">--sandbox</span> to limit operations to the project root and block unauthorized network requests. Start restrictive.</p></div>
+      <div class="tile"><h4>↩️ Commit early & often</h4><p>Set incremental commits before the first prompt. If an agent takes a wrong architectural turn, you revert in seconds instead of cleaning up for hours.</p></div>
+      <div class="tile"><h4>😮‍💨 Permission fatigue</h4><p>A known friction point — don't reflexively approve every prompt. Review what each action actually does, especially for anything irreversible.</p></div>
+    </div>
+    <div class="callout tip">
+      <div class="ct">💬 Closing line</div>
+      <p>"The skill that matters now isn't typing faster — it's writing a clear brief, reading the artifacts the agents hand back, and knowing when to approve and when to revert."</p>
+    </div>
+  </section>
+
+  <footer>
+    Details current as of June 2026 (Antigravity 2.0 era, post Gemini-CLI retirement) · Google ships weekly — verify at antigravity.google & the CLI docs · snapshots are illustrative mockups, not real screenshots
+  </footer>
+
+</div>
+</body>
+</html>

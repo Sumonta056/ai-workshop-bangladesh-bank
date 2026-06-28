@@ -1,0 +1,6 @@
+host,ip,type,site
+core-sw01,10.50.0.2,cisco_ios,dhaka-dc
+core-sw02,10.50.0.3,cisco_ios,dhaka-dc
+edge-rtr01,10.0.0.1,cisco_ios,dhaka-dc
+edge-rtr02,10.0.0.9,cisco_ios,dhaka-dc
+dist-sw01,10.50.0.4,cisco_ios,dhaka-dc

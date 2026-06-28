@@ -1,0 +1,412 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Cursor Demo Report — Browser, CLI & Agent Modes</title>
+<style>
+  :root{
+    --bg:#f6f5f2;
+    --panel:#ffffff;
+    --line:#e6e3dc;
+    --ink:#191a1d;
+    --soft:#41454c;
+    --muted:#71767e;
+    --accent:#5b54e6;        /* cursor-ish indigo */
+    --accent-soft:#ecebfb;
+    --accent2:#0a8f6f;
+    --warn:#b5701f;
+    --warn-soft:#fbeede;
+    --danger:#c0392b;
+    --danger-soft:#fbe7e4;
+    --term:#0e1116;
+    --term-ink:#d6dbe2;
+    --term-dim:#7d8590;
+    --term-green:#6fcf97;
+    --term-blue:#79c0ff;
+    --term-purple:#c3a6ff;
+    --term-yellow:#e3b341;
+    --sans:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;
+    --mono:'SF Mono',ui-monospace,'JetBrains Mono','Cascadia Code',Menlo,Consolas,monospace;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  html{scroll-behavior:smooth}
+  body{background:var(--bg);color:var(--ink);font-family:var(--sans);line-height:1.6;
+    -webkit-font-smoothing:antialiased;padding:46px 20px 90px}
+  .wrap{max-width:920px;margin:0 auto}
+
+  .eyebrow{font-family:var(--mono);color:var(--muted);font-size:12px;letter-spacing:.2em;
+    text-transform:uppercase;margin-bottom:14px}
+  .eyebrow .dot{color:var(--accent)}
+  h1{font-size:clamp(30px,5vw,48px);line-height:1.03;font-weight:700;letter-spacing:-.02em;margin-bottom:16px}
+  h1 .a{color:var(--accent)}
+  .lede{color:var(--soft);font-size:16px;max-width:680px}
+
+  /* Agenda */
+  .agenda{margin:34px 0 10px;background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:24px 26px}
+  .agenda h3{font-family:var(--mono);font-size:12px;letter-spacing:.16em;text-transform:uppercase;
+    color:var(--accent);margin-bottom:16px;font-weight:600}
+  .agenda ol{list-style:none;counter-reset:s}
+  .agenda li{counter-increment:s;display:flex;align-items:baseline;gap:14px;padding:9px 0;
+    border-bottom:1px dashed var(--line);font-size:14.5px}
+  .agenda li:last-child{border-bottom:none}
+  .agenda li::before{content:counter(s);font-family:var(--mono);font-size:12px;font-weight:700;color:var(--accent);
+    background:var(--accent-soft);min-width:26px;height:26px;border-radius:7px;display:inline-flex;
+    align-items:center;justify-content:center;flex-shrink:0}
+  .agenda li .t{flex:1}
+  .agenda li .min{font-family:var(--mono);font-size:12px;color:var(--muted);white-space:nowrap}
+
+  section{margin-top:52px}
+  .sec-h{display:flex;align-items:center;gap:12px;margin-bottom:6px}
+  .sec-h .num{font-family:var(--mono);font-size:13px;font-weight:700;color:var(--accent);
+    background:var(--accent-soft);padding:3px 10px;border-radius:7px}
+  .sec-h.star .num{color:#fff;background:var(--accent)}
+  h2{font-size:24px;font-weight:700;letter-spacing:-.01em}
+  .sec-sub{color:var(--muted);font-size:14px;margin:4px 0 20px}
+  h3.sub{font-size:17px;font-weight:650;margin:26px 0 8px}
+  p{margin-bottom:14px;color:var(--soft)}
+  strong{color:var(--ink);font-weight:650}
+  .inline{font-family:var(--mono);font-size:.88em;background:#ece9e2;padding:1px 6px;border-radius:5px;color:#2b2f36}
+
+  ul.clean{list-style:none;margin:0 0 8px}
+  ul.clean li{position:relative;padding-left:22px;margin-bottom:10px;font-size:14.5px;color:var(--soft)}
+  ul.clean li::before{content:"▸";position:absolute;left:0;color:var(--accent);font-size:13px;top:1px}
+
+  .grid{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin:6px 0}
+  .grid3{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin:6px 0}
+  .tile{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:17px 19px}
+  .tile h4{font-size:15px;font-weight:650;margin-bottom:5px}
+  .tile p{font-size:13.5px;margin-bottom:0;color:var(--soft)}
+  .tile .mode{font-family:var(--mono);font-size:11px;font-weight:600;color:var(--accent);
+    background:var(--accent-soft);padding:2px 8px;border-radius:5px;display:inline-block;margin-bottom:8px}
+
+  /* code */
+  .code{background:var(--term);border-radius:10px;padding:15px 18px;margin:14px 0;font-family:var(--mono);
+    font-size:13px;line-height:1.75;color:var(--term-ink);overflow-x:auto}
+  .code .c{color:var(--term-dim)}
+  .code .p{color:var(--term-green)}
+  .code .f{color:var(--term-blue)}
+  .code .s{color:var(--term-yellow)}
+
+  /* window mockup ("snapshot") */
+  .snap{border:1px solid var(--line);border-radius:12px;overflow:hidden;margin:16px 0;
+    box-shadow:0 10px 30px -12px rgba(0,0,0,.18);background:var(--term)}
+  .snap .bar{display:flex;align-items:center;gap:8px;padding:10px 14px;background:#171b21;border-bottom:1px solid #232830}
+  .snap .bar .dot{width:11px;height:11px;border-radius:50%}
+  .snap .bar .r{background:#ff5f57}.snap .bar .y{background:#febc2e}.snap .bar .g{background:#28c840}
+  .snap .bar .ttl{margin-left:8px;font-family:var(--mono);font-size:11.5px;color:var(--term-dim)}
+  .snap .body{padding:16px 18px;font-family:var(--mono);font-size:12.5px;line-height:1.8;color:var(--term-ink)}
+  .cap{font-size:12px;color:var(--muted);text-align:center;margin:-6px 0 18px;font-style:italic}
+
+  /* terminal lines */
+  .ln{white-space:pre-wrap}
+  .tg{color:var(--term-green)}.tb{color:var(--term-blue)}.tp{color:var(--term-purple)}
+  .td{color:var(--term-dim)}.ty{color:var(--term-yellow)}.tw{color:#fff}
+  .chk{color:var(--term-green)}
+
+  /* split browser snapshot */
+  .split{display:grid;grid-template-columns:1fr 1.15fr;min-height:230px}
+  .split .chat{background:#13171d;padding:14px;border-right:1px solid #232830;font-family:var(--mono);font-size:12px;color:var(--term-ink)}
+  .split .chat .msg{background:#1c222b;border-radius:8px;padding:9px 11px;margin-bottom:9px;line-height:1.6}
+  .split .chat .you{border-left:2px solid var(--accent)}
+  .split .chat .ag{border-left:2px solid var(--accent2);color:#c4ccd6}
+  .split .web{background:#fff;display:flex;flex-direction:column}
+  .split .urlbar{display:flex;align-items:center;gap:8px;padding:8px 12px;background:#f1f0ec;border-bottom:1px solid #e0ddd5;
+    font-family:var(--mono);font-size:11px;color:#6b7178}
+  .split .urlbar .u{flex:1;background:#fff;border:1px solid #e0ddd5;border-radius:6px;padding:4px 9px}
+  .split .render{flex:1;padding:18px;font-family:var(--sans);position:relative;background:#fafafa}
+  .split .render h5{font-size:15px;color:#191a1d;margin-bottom:10px;font-weight:700}
+  .split .render .row{display:flex;gap:8px;margin-bottom:10px}
+  .split .render .btn{font-size:11px;padding:6px 12px;border-radius:6px;border:none;font-family:var(--sans)}
+  .split .render .b1{background:var(--accent);color:#fff}
+  .split .render .b2{background:#eee;color:#444}
+  .split .render .sel{outline:2px solid var(--accent);outline-offset:2px;border-radius:6px;position:relative}
+  .split .render .tag{position:absolute;top:-9px;left:0;background:var(--accent);color:#fff;font-family:var(--mono);
+    font-size:9px;padding:1px 6px;border-radius:4px}
+  .split .render .card{background:#fff;border:1px solid #eee;border-radius:8px;padding:12px;font-size:11px;color:#555;box-shadow:0 2px 8px -4px rgba(0,0,0,.15)}
+
+  /* agents window snapshot */
+  .agw{font-family:var(--mono);font-size:12px}
+  .agw .item{display:flex;align-items:center;gap:10px;padding:9px 0;border-bottom:1px solid #232830}
+  .agw .item:last-child{border-bottom:none}
+  .agw .st{width:9px;height:9px;border-radius:50%;flex-shrink:0}
+  .agw .run{background:var(--term-yellow);box-shadow:0 0 0 3px rgba(227,179,65,.18)}
+  .agw .done{background:var(--term-green)}
+  .agw .wait{background:var(--term-dim)}
+  .agw .nm{color:#fff;flex:1}
+  .agw .br{color:var(--term-purple)}
+  .agw .pct{color:var(--term-dim)}
+
+  .callout{border-radius:10px;padding:15px 18px;margin:14px 0;font-size:13.5px;border:1px solid}
+  .callout.tip{background:var(--accent-soft);border-color:#cfccf7}
+  .callout.warn{background:var(--warn-soft);border-color:#ecd6b3}
+  .callout.danger{background:var(--danger-soft);border-color:#f2c4bd}
+  .callout .ct{font-weight:650;color:var(--ink);margin-bottom:3px;display:flex;align-items:center;gap:7px}
+  .callout p{margin:0;color:var(--soft)}
+
+  .tablewrap{border:1px solid var(--line);border-radius:12px;overflow:hidden;margin:8px 0}
+  table{width:100%;border-collapse:collapse;font-size:13.5px;background:var(--panel)}
+  thead th{text-align:left;padding:12px 15px;background:#faf9f6;font-weight:650;font-size:12px;
+    border-bottom:1px solid var(--line);color:var(--ink)}
+  tbody td{padding:12px 15px;vertical-align:top;border-bottom:1px solid var(--line);color:var(--soft)}
+  tbody tr:last-child td{border-bottom:none}
+  td .k{font-family:var(--mono);font-size:12.5px;color:var(--ink);font-weight:600}
+
+  footer{margin-top:54px;padding-top:22px;border-top:1px solid var(--line);text-align:center;
+    color:var(--muted);font-size:12px;font-family:var(--mono)}
+
+  @media(max-width:660px){
+    body{padding:32px 14px 60px}
+    .grid,.grid3,.split{grid-template-columns:1fr}
+    .split .chat{border-right:none;border-bottom:1px solid #232830}
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <div class="eyebrow"><span class="dot">●</span> Demo Report <span style="color:var(--line)">/</span> Cursor for Developers</div>
+  <h1>Demoing <span class="a">Cursor</span> — the Browser, the CLI & Agent Modes</h1>
+  <p class="lede">A presenter's report for showing what makes Cursor more than an AI autocomplete: an agent that can drive a real browser, run from your terminal, and fan out into parallel modes. Snippets to type and mockups of what each surface looks like.</p>
+
+  <div class="agenda">
+    <h3>// Running order (~30 min)</h3>
+    <ol>
+      <li><span class="t">What Cursor is now — the agent-first IDE</span><span class="min">3 min</span></li>
+      <li><span class="t">Agent modes: Ask · Agent · Debug</span><span class="min">4 min</span></li>
+      <li><span class="t">★ The Browser — test, see, and edit live</span><span class="min">9 min</span></li>
+      <li><span class="t">The CLI — Cursor in any terminal</span><span class="min">6 min</span></li>
+      <li><span class="t">Parallel & background agents</span><span class="min">4 min</span></li>
+      <li><span class="t">Context: rules, MCP, checkpoints</span><span class="min">2 min</span></li>
+      <li><span class="t">Gotchas & Q&A</span><span class="min">remainder</span></li>
+    </ol>
+  </div>
+
+  <!-- 1 -->
+  <section>
+    <div class="sec-h"><span class="num">01</span><h2>What Cursor is now</h2></div>
+    <p class="sec-sub">Frame it before opening the app — most people still picture "VS Code with autocomplete."</p>
+    <p>Cursor began as a VS Code fork and still feels familiar — your extensions, themes, and keybindings carry over. But since the 2.0 / 3.0 releases it's reframed itself as an <strong>agent-first IDE</strong>: the editor is one pane among several, and the AI reasoning layer is the main event. Cursor 3.0 even ships an <strong>Agents Window</strong> (<span class="inline">Cmd+Shift+P → Agents Window</span>) for running many agents in parallel across repos, worktrees, the cloud, and remote SSH.</p>
+    <ul class="clean">
+      <li><strong>Codebase-aware by default.</strong> A custom embedding model indexes your repo, so the agent knows about the function three files away — not just the line you're on. This is what stops it hallucinating module paths in big codebases.</li>
+      <li><strong>Model router.</strong> One subscription fronts frontier models — Claude (Sonnet / Opus), GPT-5.x, Gemini — plus Cursor's own Composer model. Switch per task.</li>
+      <li><strong>Context you control.</strong> <span class="inline">@</span>-mentions for files/symbols, and <span class="inline">.cursor/rules/</span> (the 2026 format that replaces a single <span class="inline">.cursorrules</span>) for glob-scoped standing conventions.</li>
+    </ul>
+    <div class="callout tip">
+      <div class="ct">🎯 Opening line</div>
+      <p>"Cursor isn't trying to be a smarter autocomplete — it's trying to be a teammate that can read the whole codebase, drive a browser to check its own work, and run wherever you run, including your terminal."</p>
+    </div>
+  </section>
+
+  <!-- 2 -->
+  <section>
+    <div class="sec-h"><span class="num">02</span><h2>Agent modes — pick the right gear</h2></div>
+    <p class="sec-sub">The single biggest workflow win is knowing which mode to use when. Demo this as a deliberate choice.</p>
+    <div class="grid3">
+      <div class="tile">
+        <span class="mode">Ask</span>
+        <h4>Plan & understand</h4>
+        <p>Query the codebase, get recommendations, design an approach — read-only, makes no edits. Where you start.</p>
+      </div>
+      <div class="tile">
+        <span class="mode">Agent</span>
+        <h4>Build & execute</h4>
+        <p>Multi-file edits, runs terminal commands, reads errors, self-corrects across steps. The workhorse.</p>
+      </div>
+      <div class="tile">
+        <span class="mode">Debug</span>
+        <h4>Find & fix</h4>
+        <p>Focused on identifying and resolving errors — pairs naturally with the browser and console output.</p>
+      </div>
+    </div>
+    <div class="callout tip">
+      <div class="ct">🔁 The pattern that beats "just talk to the agent"</div>
+      <p><strong>Plan in Ask → implement in Agent → drop to Manual edit for surgical control.</strong> Naming this loop out loud is one of the most useful things you can teach the room.</p>
+    </div>
+  </section>
+
+  <!-- 3 — THE BROWSER (centerpiece) -->
+  <section>
+    <div class="sec-h star"><span class="num">★ 03</span><h2>The Browser — Cursor's superpower</h2></div>
+    <p class="sec-sub">This is the part to slow down on. It closes the loop between writing frontend code and seeing whether it actually works.</p>
+    <p>Cursor ships an <strong>official Browser tool</strong> (GA since 2.0) that the agent can drive — a real browser embedded in the editor. Instead of you alt-tabbing to Chrome, taking a screenshot, and pasting it back, <strong>the agent looks for itself</strong>. Invoke it with <span class="inline">@Browser</span> in chat, or let Agent mode reach for it automatically after a frontend change.</p>
+
+    <h3 class="sub">What the agent can actually do in the browser</h3>
+    <div class="grid">
+      <div class="tile"><h4>🧭 Navigate & interact</h4><p>Open a URL, click links, fill and submit forms, scroll — exercise real user flows.</p></div>
+      <div class="tile"><h4>📸 Screenshot & see</h4><p>Capture the rendered page for visual analysis; falls back to coordinate-clicking when the DOM is unreliable.</p></div>
+      <div class="tile"><h4>🔍 Inspect the DOM</h4><p>Select specific elements, read their structure, and pull page context back into chat.</p></div>
+      <div class="tile"><h4>🐞 Read console & network</h4><p>Pull console logs and XHR/network requests to diagnose runtime errors and slow calls.</p></div>
+      <div class="tile"><h4>♿ Audit</h4><p>Run accessibility, performance, and SEO checks (Lighthouse-style) without leaving the IDE.</p></div>
+      <div class="tile"><h4>🎨 Convert designs → code</h4><p>Hand it a mockup; it builds toward the target and checks the result visually.</p></div>
+    </div>
+
+    <h3 class="sub">Live snippet — the self-checking loop</h3>
+    <div class="code">
+<span class="c"># run your app locally first</span><br>
+<span class="p">$</span> npm run dev   <span class="c"># http://localhost:3000</span><br><br>
+<span class="c"># then, in Cursor chat:</span><br>
+<span class="s">@Browser</span> open localhost:3000/checkout, fill the form with test data,<br>
+&nbsp;&nbsp;submit it, and tell me why validation isn't firing<br><br>
+<span class="s">@Browser</span> check this page in light and dark mode, screenshot both
+    </div>
+
+    <h3 class="sub">Snapshot — agent driving the browser, chat beside it</h3>
+    <div class="snap">
+      <div class="bar"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span>
+        <span class="ttl">Cursor — checkout.tsx · @Browser</span></div>
+      <div class="split">
+        <div class="chat">
+          <div class="msg you"><span class="tb">you ▸</span> @Browser test the checkout form at /checkout and fix the validation</div>
+          <div class="msg ag"><span class="tg">agent ▸</span> Navigating to localhost:3000/checkout… filled fields, clicked <b>Submit</b>.<br>📸 screenshot captured.<br>⚠️ console: <span class="td">"email validator returns undefined"</span><br>Found it — <span class="td">validateEmail()</span> is never called on blur. Patching <span class="td">CheckoutForm.tsx</span>…</div>
+          <div class="msg ag"><span class="tg">agent ▸</span> ✅ Re-tested. Validation now fires, form blocks bad input.</div>
+        </div>
+        <div class="web">
+          <div class="urlbar"><span>◀ ▶ ⟳</span><span class="u">localhost:3000/checkout</span></div>
+          <div class="render">
+            <h5>Checkout</h5>
+            <div class="card sel" style="margin-bottom:12px">
+              <span class="tag">selected · email field</span>
+              email: not-an-email<br><span style="color:#c0392b">⚠ enter a valid email</span>
+            </div>
+            <div class="row">
+              <button class="btn b1">Submit</button>
+              <button class="btn b2">Cancel</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="cap">Illustrative mockup — chat on the left, the live app on the right, with the agent's selected element highlighted.</div>
+
+    <h3 class="sub">Design Mode / Visual Editor — point, tweak, then "Apply"</h3>
+    <p>Toggle Design Mode (<span class="inline">Cmd+Shift+D</span>) and the browser becomes a DevTools-style inspector with a design sidebar. You can <strong>click any element and describe the change in plain language</strong> ("make this bigger," "swap their order," "turn this red"), or drag elements around the DOM tree and adjust spacing, colors, tokens, and layout with sliders. Multiple edits run in parallel.</p>
+    <p>The genuinely new part is the <strong>Apply step</strong>: once it looks right, you tell the agent to apply, and it <strong>finds the relevant components and writes the real code edit</strong> — using your repo's existing conventions. It moves the workflow from "screenshot + instructions" to "visually design a diff your team can review." You can also start a fresh chat with a selected element pre-attached as context, which keeps long sessions from drifting.</p>
+    <div class="callout warn">
+      <div class="ct">⚠️ Honest caveat for the room</div>
+      <p>It's powerful but not magic. Reviewers note the agent can break <em>other</em> states of a component, and everything depends on the repo running locally first (deps installed, env set, dev server up). Always review the applied diff across screen sizes — don't get complacent because the first glance looks right.</p>
+    </div>
+  </section>
+
+  <!-- 4 — CLI -->
+  <section>
+    <div class="sec-h"><span class="num">04</span><h2>The CLI — Cursor in any terminal</h2></div>
+    <p class="sec-sub">The pitch: the full Cursor agent, outside the IDE — for Neovim/JetBrains users, scripts, and CI. Still in beta.</p>
+
+    <h3 class="sub">Install & first run</h3>
+    <div class="code">
+<span class="c"># macOS / Linux / WSL</span><br>
+<span class="p">$</span> curl https://cursor.com/install -fsS | bash<br>
+<span class="c"># Windows PowerShell</span><br>
+<span class="p">$</span> irm <span class="s">'https://cursor.com/install?win32=true'</span> | iex<br><br>
+<span class="p">$</span> cursor-agent           <span class="c"># interactive session (a.k.a. `agent`)</span><br>
+<span class="p">$</span> agent chat <span class="s">"find one bug and fix it"</span>
+    </div>
+
+    <h3 class="sub">Headless / non-interactive — for scripts & CI</h3>
+    <div class="code">
+<span class="c"># -p / --print = non-interactive; --force applies edits without asking</span><br>
+<span class="p">$</span> agent <span class="f">-p</span> <span class="s">"Add JSDoc comments to this file"</span>          <span class="c"># proposes only</span><br>
+<span class="p">$</span> agent <span class="f">-p --force</span> <span class="s">"Refactor to modern ES6+"</span>           <span class="c"># actually edits</span><br><br>
+<span class="c"># structured output for pipelines</span><br>
+<span class="p">$</span> agent <span class="f">-p --output-format json</span> <span class="s">"Analyze this CI failure and draft a Jira ticket"</span><br><br>
+<span class="c"># batch over files</span><br>
+<span class="p">$</span> find src/ -name <span class="s">"*.js"</span> | while read f; do \<br>
+&nbsp;&nbsp;&nbsp;&nbsp;agent <span class="f">-p --force</span> <span class="s">"Add JSDoc to $f"</span>; done
+    </div>
+
+    <h3 class="sub">Snapshot — an interactive CLI session</h3>
+    <div class="snap">
+      <div class="bar"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span>
+        <span class="ttl">zsh — cursor-agent</span></div>
+      <div class="body">
+<div class="ln"><span class="tg">➜  myapp</span> <span class="tb">agent</span> chat <span class="ty">"the /search endpoint 500s on empty query — fix it"</span></div>
+<div class="ln td">&nbsp;</div>
+<div class="ln"><span class="tp">●</span> Reading <span class="tb">routes/search.ts</span>, <span class="tb">services/query.ts</span> …</div>
+<div class="ln"><span class="tp">●</span> Root cause: empty <span class="td">q</span> param isn't guarded → DB throws.</div>
+<div class="ln td">&nbsp;</div>
+<div class="ln ty">  Run command?  npm test -- search</div>
+<div class="ln td">  [y] approve   [n] reject   [a] always</div>
+<div class="ln"><span class="tw">  ›</span> y</div>
+<div class="ln td">&nbsp;</div>
+<div class="ln"><span class="chk">✔</span> Added guard clause + 400 response for empty query</div>
+<div class="ln"><span class="chk">✔</span> 12 tests passed</div>
+<div class="ln td">&nbsp;</div>
+<div class="ln td">  i add instruction · Ctrl+R review changes · /model switch model</div>
+      </div>
+    </div>
+    <div class="cap">Illustrative mockup — interactive mode asks before running terminal commands; press <b>i</b> to steer mid-run.</div>
+
+    <ul class="clean">
+      <li><strong>Shares your config.</strong> Same <span class="inline">.cursor/rules</span> and MCP setup as the IDE — set conventions once.</li>
+      <li><strong>Push to the cloud mid-chat.</strong> Prepend <span class="inline">&amp;</span> to a message to hand it to a Cloud Agent and keep going elsewhere; pick it up on web or mobile.</li>
+      <li><strong>Handy commands:</strong> <span class="inline">/model</span> to switch, <span class="inline">/summarize</span> to free up context, <span class="inline">@</span> to add files. Sessions are saved so you can resume.</li>
+    </ul>
+    <div class="callout danger">
+      <div class="ct">🚫 Flag before you demo it</div>
+      <p>The CLI is <strong>beta</strong> and can read, modify, and delete files and run shell commands. <span class="inline">--force</span> / <span class="inline">--yolo</span> skips confirmation entirely — only in trusted, throwaway environments. Treat its terminal commands like a junior dev running things on your machine.</p>
+    </div>
+  </section>
+
+  <!-- 5 — parallel agents -->
+  <section>
+    <div class="sec-h"><span class="num">05</span><h2>Parallel & background agents</h2></div>
+    <p class="sec-sub">The "I merge PRs from my phone" moment. Show the Agents Window running several at once.</p>
+    <p>Beyond a single interactive agent, Cursor runs <strong>subagents</strong> (parallel explorers, each with its own context window), <strong>background agents</strong> (cloud VM, separate branch, opens a PR when done), and full <strong>Cloud Agents</strong> (isolated VMs with terminal, browser, and desktop access, across multiple repos). Commands like <span class="inline">/worktree</span> isolate an agent's edits in a separate git checkout, and <span class="inline">/best-of-n</span> runs the same task across multiple models and lets you pick the winner.</p>
+    <div class="snap">
+      <div class="bar"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span>
+        <span class="ttl">Cursor — Agents Window</span></div>
+      <div class="body agw">
+        <div class="item"><span class="st run"></span><span class="nm">Refactor auth module</span><span class="br">⎇ agent/auth</span><span class="pct">running · 64%</span></div>
+        <div class="item"><span class="st run"></span><span class="nm">Add e2e tests for checkout</span><span class="br">⎇ agent/tests</span><span class="pct">running · 41%</span></div>
+        <div class="item"><span class="st done"></span><span class="nm">Fix dark-mode contrast bug</span><span class="br">⎇ agent/ui-fix</span><span class="pct">✓ PR opened</span></div>
+        <div class="item"><span class="st done"></span><span class="nm">Update API docs from routes</span><span class="br">⎇ agent/docs</span><span class="pct">✓ ready</span></div>
+        <div class="item"><span class="st wait"></span><span class="nm">Migrate to pnpm</span><span class="br">⎇ agent/pnpm</span><span class="pct">queued</span></div>
+      </div>
+    </div>
+    <div class="cap">Illustrative mockup — multiple agents on isolated branches/worktrees, tracked from one window.</div>
+    <div class="callout tip">
+      <div class="ct">💡 The rule that makes parallelism pay off</div>
+      <p>Give each agent a <strong>clear, narrow deliverable and its own branch/worktree</strong>. Unscoped parallel agents produce overlapping, conflicting changes — the scope-per-task is what turns chaos into throughput.</p>
+    </div>
+  </section>
+
+  <!-- 6 — context -->
+  <section>
+    <div class="sec-h"><span class="num">06</span><h2>Context: rules, MCP, checkpoints</h2></div>
+    <p class="sec-sub">Quick but worth showing — these are what make results consistent instead of lucky.</p>
+    <div class="tablewrap">
+      <table>
+        <thead><tr><th style="width:26%">Feature</th><th>What to say</th></tr></thead>
+        <tbody>
+          <tr><td><span class="k">.cursor/rules/</span></td><td>Glob-scoped rule files (2026 format). Standing conventions, banned patterns, architecture notes — loaded only when relevant to the files in play.</td></tr>
+          <tr><td><span class="k">MCP</span></td><td>Connect external tools/data (issue trackers, browsers, internal APIs) so the agent pulls live context instead of you pasting it. Shared across IDE and CLI.</td></tr>
+          <tr><td><span class="k">Checkpoints</span></td><td>Local snapshots auto-saved before significant agent changes. Click any point in the timeline to preview and restore. Separate from Git — use Git for real version control.</td></tr>
+          <tr><td><span class="k">@-mentions</span></td><td>Pull specific files, symbols, or past chats into context precisely, instead of hoping indexing catches them.</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <!-- 7 — gotchas -->
+  <section>
+    <div class="sec-h"><span class="num">07</span><h2>Gotchas worth flagging</h2></div>
+    <div class="grid">
+      <div class="tile"><h4>⚠️ Run the app first</h4><p>Browser & Design Mode need the repo running locally — deps installed, env vars set, dev server healthy. No server, no browser demo.</p></div>
+      <div class="tile"><h4>⚠️ Review parallel PRs</h4><p>Multi-file and parallel agents can produce messy diffs. Budget human review time; don't auto-merge.</p></div>
+      <div class="tile"><h4>⚠️ Long sessions drift</h4><p>Reasoning quality degrades in very long agent chats. Use <span class="inline">/summarize</span>, fresh chats, or element-scoped chats to reset.</p></div>
+      <div class="tile"><h4>⚠️ Index large repos</h4><p>Monorepos without a <span class="inline">.cursorignore</span> hammer the indexer. Exclude build output and vendored code.</p></div>
+    </div>
+    <div class="callout tip">
+      <div class="ct">💬 Closing line</div>
+      <p>"The mental shift: stop driving every keystroke. Plan in Ask, let Agent build and check itself in the browser, run routine work through the CLI or background agents — and spend your attention on review and architecture."</p>
+    </div>
+  </section>
+
+  <footer>
+    Cursor details current as of June 2026 (3.x era) · features ship weekly — verify at cursor.com/docs · snapshots are illustrative mockups, not real screenshots
+  </footer>
+
+</div>
+</body>
+</html>

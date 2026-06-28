@@ -1,0 +1,60 @@
+[2026-06-28T03:21:49.981Z] [error] Failed to load resource: the server responded with a status of 401 ()
+[2026-06-28T03:21:50.159Z] [warning] Failed to execute 'write' on 'Document': It isn't possible to write into a document from an asynchronously-loaded external script unless it is explicitly opened.
+[2026-06-28T03:21:50.859Z] [warning] [GPT] Slot.setTargeting is deprecated, use Slot.setConfig({targeting: ...}) instead.
+https://goo.gle/gpt-message#171
+[2026-06-28T03:21:51.779Z] [warning] Can not detect viewport width.
+[2026-06-28T03:21:51.851Z] [warning] Can not detect viewport width.
+[2026-06-28T03:21:51.995Z] [info] Powered by AMP ⚡ HTML – Version 2605071401000 https://www.prothomalo.com/
+[2026-06-28T03:21:52.247Z] [warning] [amp-analytics/transport] Response unparseable or failed to send image request https://securepubads.g.doubleclick.net/btr/view?ai=CcminT5NAaqCSIrye88EPgOW1wQyjxM-CiAHb2sr86RWxp5DbBRABILKp7yZgM6ABuKi70CjIAQLgAgCoAwHIAwiqBKECT9CbqiiqJbARWuFzLenw5HSfE1_yRMRP6fZ4Q3ueE8ZySvOpEdCo1vkIoFJwBhy-6ZMoIar4aN9KYkPIehE4yPutgYZj3Oi6jx2t4x5_IW8he9mKNkjvbL6w458_PCJuU2RBcQyXxi_EG-K1X7_zo4QWzg-RZvtoHj3xa9sK2RGeC2CoQiLNQOyKVR6QE-nIh_o8IBe6FkIq26sfD4WXnCyxqBTb0Jtt7dPvudsp94XrB7UCOlRCDRCMTvLs2chxziftjRjWXfdx6-DoOWEP20t3vAiUSNMe-E66vhjdrGbLt_XbCQtLywGqADFIbgBKteII3dnjb73SpMIL_KQyoq06sRuUzi8cYJhM8lGNpbeTGlh3rUqR5zZ1IxD14qpV_MAE9aXb1eAF4AQBiAWzoqGqWaAGAoAHuOCLsAOoB6fMsQKoB-LYsQKoB6a-G6gHzM6xAqgH89EbqAeW2BuoB6qbsQKoB47OG6gHk9gbqAfw4BuoB-6WsQKoB_6esQKoB6--sQKoB9XJG6gH2baxAqgH98KxAtgHAfIHBBCZuQjSCDMIgGEQARidATIIioKAgICAgAg6D4BAgMCAgICAqIACqIOAEEi9_cE6WIClob79qJUDYAGACgPICwGiDCJiAgoAahQKEmNvbS5tY2MucHJvdGhvbWFsb3gBiAEBkAEBqg0CQkTiDRMItNqhvv2olQMVPM88Ah2Aci3I6g0TCIC0or79qJUDFTzPPAIdgHItyIgO____________AdgTA9AVAZgWAcoWAgoA-BYBgBcBshcuChwIABIUcHViLTUzODQ3MzgwODQ3Njk5MDEY4qwWGAEqCjczOTQ1Njc0NzlQBroXAjgBqhgXCQAAAADI5ABBEgo3Mzk0NTY3NDc5GAGyGAkSAqpQGAIiAQDQGAHCGQIIAQ&sigh=-cWOLneN7iA&uach_m=%5B%5D&cid=CAQS8wEAEQoqgTbAd1bpGEE1F_tzgBQJsADCFwEcsj9cN_EciNlS6iXENVIKrabcTMvIVRztnSuxB6g3Lud6I2VUHy9xWMYa4syj9H1T50guQRDAZAK1HktrB5Cd_x0w0xQaVMPtoFDTNOTGTRIghzP12S-6a5mh0XKdMY0wfbMIutIGA3kOIV57CD1ORonnllvus0nxXamyaNSiRHWzimBVrn_QmDPhDt_mS3ENObqfy0f3-JkJdw3mfqbLRJRQO9hqUqHz5-Iw_JNSvUM87EQ9SGm11jVHsMc8Da-Ax-7oEvd7tmDFidq5vl2jCCP6EtReohRZZ_IYAQ&ibtr=1
+[2026-06-28T03:21:54.139Z] [warning] [GSI_LOGGER]: google.accounts.id.initialize() is called multiple times. This could cause unexpected behavior and only the last initialized instance will be used.
+[2026-06-28T03:21:54.142Z] [error] [GSI_LOGGER]: FedCM get() rejects with NotAllowedError: Only one navigator.credentials.get request may be outstanding at one time.
+[2026-06-28T03:21:54.142Z] [error] Only one navigator.credentials.get request may be outstanding at one time.
+[2026-06-28T03:21:54.824Z] [error] Provider's accounts list is empty.
+[2026-06-28T03:21:57.745Z] [error] [GSI_LOGGER]: FedCM get() rejects with NetworkError: Error retrieving a token.
+[2026-06-28T03:22:21.842Z] [warning] Can not detect viewport width.
+[2026-06-28T03:22:21.908Z] [warning] Can not detect viewport width.
+[2026-06-28T03:22:39.533Z] [warning] Deprecated API for given entry type.
+[2026-06-28T03:22:39.646Z] [warning] Deprecated API for given entry type.
+[2026-06-28T03:30:21.826Z] [warning] Can not detect viewport width.
+[2026-06-28T03:30:21.842Z] [warning] Can not detect viewport width.
+[2026-06-28T03:31:50.371Z] [warning] Failed to execute 'write' on 'Document': It isn't possible to write into a document from an asynchronously-loaded external script unless it is explicitly opened.
+[2026-06-28T03:31:50.532Z] [warning] [GPT] Slot.setTargeting is deprecated, use Slot.setConfig({targeting: ...}) instead.
+https://goo.gle/gpt-message#171
+[2026-06-28T03:31:50.551Z] [error] Failed to load resource: the server responded with a status of 401 ()
+[2026-06-28T03:31:51.047Z] [warning] Can not detect viewport width.
+[2026-06-28T03:31:51.093Z] [warning] Can not detect viewport width.
+[2026-06-28T03:31:53.971Z] [warning] [GSI_LOGGER]: google.accounts.id.initialize() is called multiple times. This could cause unexpected behavior and only the last initialized instance will be used.
+[2026-06-28T03:31:53.974Z] [error] Not signed in with the identity provider.
+[2026-06-28T03:31:53.974Z] [error] Only one navigator.credentials.get request may be outstanding at one time.
+[2026-06-28T03:31:53.974Z] [error] [GSI_LOGGER]: FedCM get() rejects with NotAllowedError: Only one navigator.credentials.get request may be outstanding at one time.
+[2026-06-28T03:31:57.277Z] [error] [GSI_LOGGER]: FedCM get() rejects with NetworkError: Error retrieving a token.
+[2026-06-28T03:34:20.918Z] [warning] Can not detect viewport width.
+[2026-06-28T03:34:20.971Z] [warning] Can not detect viewport width.
+[2026-06-28T03:41:50.805Z] [warning] Some critical font are not available: TypeError: Cannot read properties of null (reading 'style') 
+[2026-06-28T03:41:50.877Z] [warning] Failed to execute 'write' on 'Document': It isn't possible to write into a document from an asynchronously-loaded external script unless it is explicitly opened.
+[2026-06-28T03:41:50.984Z] [warning] [GPT] Slot.setTargeting is deprecated, use Slot.setConfig({targeting: ...}) instead.
+https://goo.gle/gpt-message#171
+[2026-06-28T03:41:51.007Z] [error] Failed to load resource: the server responded with a status of 401 ()
+[2026-06-28T03:41:51.405Z] [warning] Can not detect viewport width.
+[2026-06-28T03:41:51.558Z] [warning] Can not detect viewport width.
+[2026-06-28T03:41:54.439Z] [warning] [GSI_LOGGER]: google.accounts.id.initialize() is called multiple times. This could cause unexpected behavior and only the last initialized instance will be used.
+[2026-06-28T03:41:54.441Z] [error] Not signed in with the identity provider.
+[2026-06-28T03:41:54.442Z] [error] [GSI_LOGGER]: FedCM get() rejects with NotAllowedError: Only one navigator.credentials.get request may be outstanding at one time.
+[2026-06-28T03:41:54.442Z] [error] Only one navigator.credentials.get request may be outstanding at one time.
+[2026-06-28T03:42:05.967Z] [error] [GSI_LOGGER]: FedCM get() rejects with NetworkError: Error retrieving a token.
+[2026-06-28T03:44:21.506Z] [warning] Can not detect viewport width.
+[2026-06-28T03:44:21.874Z] [warning] Can not detect viewport width.
+[2026-06-28T03:50:21.434Z] [warning] Can not detect viewport width.
+[2026-06-28T03:50:21.829Z] [warning] Can not detect viewport width.
+[2026-06-28T03:51:51.260Z] [warning] Some critical font are not available: TypeError: Cannot read properties of null (reading 'style') 
+[2026-06-28T03:51:51.375Z] [warning] Failed to execute 'write' on 'Document': It isn't possible to write into a document from an asynchronously-loaded external script unless it is explicitly opened.
+[2026-06-28T03:51:51.529Z] [warning] [GPT] Slot.setTargeting is deprecated, use Slot.setConfig({targeting: ...}) instead.
+https://goo.gle/gpt-message#171
+[2026-06-28T03:51:51.565Z] [error] Failed to load resource: the server responded with a status of 401 ()
+[2026-06-28T03:51:51.984Z] [warning] Can not detect viewport width.
+[2026-06-28T03:51:52.184Z] [warning] Can not detect viewport width.
+[2026-06-28T03:51:55.344Z] [warning] [GSI_LOGGER]: google.accounts.id.initialize() is called multiple times. This could cause unexpected behavior and only the last initialized instance will be used.
+[2026-06-28T03:51:55.346Z] [error] Not signed in with the identity provider.
+[2026-06-28T03:51:55.347Z] [error] [GSI_LOGGER]: FedCM get() rejects with NotAllowedError: Only one navigator.credentials.get request may be outstanding at one time.
+[2026-06-28T03:51:55.347Z] [error] Only one navigator.credentials.get request may be outstanding at one time.
+[2026-06-28T03:51:58.724Z] [error] [GSI_LOGGER]: FedCM get() rejects with NetworkError: Error retrieving a token.

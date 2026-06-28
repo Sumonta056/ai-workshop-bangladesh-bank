@@ -1,0 +1,2 @@
+Neighbor        V     AS  State/PfxRcd
+10.50.0.2       4  65010  Established
