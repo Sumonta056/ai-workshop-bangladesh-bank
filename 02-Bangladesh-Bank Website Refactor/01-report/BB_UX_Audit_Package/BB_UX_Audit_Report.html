@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+<title>Bangladesh Bank — UX/UI Audit Report 2026</title>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Segoe UI',system-ui,Arial,sans-serif;background:#f0f4f9;color:#1a1a2e;line-height:1.7;font-size:15px}
+a{color:#006644}
+header{background:linear-gradient(135deg,#003366 0%,#006644 100%);color:#fff;padding:52px 64px}
+header h1{font-size:2.2rem;font-weight:800;letter-spacing:-0.5px;margin-bottom:8px}
+header p.sub{font-size:1.05rem;opacity:.85;margin-bottom:24px}
+.meta{display:flex;gap:10px;flex-wrap:wrap}
+.meta span{background:rgba(255,255,255,.15);padding:5px 15px;border-radius:20px;font-size:.82rem;font-weight:500}
+main{max-width:1180px;margin:0 auto;padding:52px 32px}
+.toc{background:#fff;border-radius:12px;padding:28px 36px;box-shadow:0 2px 16px rgba(0,0,0,.07);margin-bottom:44px;border-left:4px solid #006644}
+.toc h3{font-size:.85rem;font-weight:700;color:#006644;margin-bottom:14px;text-transform:uppercase;letter-spacing:1px}
+.toc ol{padding-left:18px;line-height:2}
+.toc li{color:#333;font-size:.93rem}
+.toc a{color:#003366;text-decoration:none;font-weight:500}
+.toc ol ol{margin-top:4px}
+section{margin-bottom:60px}
+h2{font-size:1.6rem;font-weight:800;color:#003366;margin-bottom:28px;padding-bottom:14px;border-bottom:3px solid #006644}
+.exec-scores{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:18px;margin-bottom:28px}
+.sc{background:#fff;border-radius:12px;padding:22px 20px;text-align:center;box-shadow:0 2px 12px rgba(0,0,0,.07);border-top:4px solid #e74c3c}
+.sc.g{border-top-color:#27ae60}.sc.m{border-top-color:#f39c12}
+.sc .v{font-size:2.2rem;font-weight:900;color:#e74c3c;line-height:1.1}.sc.g .v{color:#27ae60}.sc.m .v{color:#f39c12}
+.sc .lb{font-size:.72rem;font-weight:700;color:#888;margin-top:6px;text-transform:uppercase;letter-spacing:.8px}
+.exec-text{background:#fff;border-radius:12px;padding:32px;box-shadow:0 2px 12px rgba(0,0,0,.07);color:#333;line-height:1.85}
+.exec-text p{margin-bottom:16px}.exec-text p:last-child{margin-bottom:0}
+.ic{background:#fff;border-radius:12px;margin-bottom:30px;box-shadow:0 2px 16px rgba(0,0,0,.08);overflow:hidden}
+.ic.H{border-left:6px solid #e74c3c}.ic.M{border-left:6px solid #f39c12}.ic.L{border-left:6px solid #3498db}
+.ih{padding:18px 24px;display:flex;align-items:center;gap:14px;background:#fafafa;border-bottom:1px solid #ededf5;flex-wrap:wrap}
+.in{width:34px;height:34px;border-radius:50%;background:#e74c3c;color:#fff;font-weight:900;font-size:.9rem;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.M .in{background:#f39c12}.L .in{background:#3498db}
+.it{font-size:1.05rem;font-weight:700;flex:1;color:#1a1a2e;min-width:200px}
+.badge{padding:3px 10px;border-radius:12px;font-size:.72rem;font-weight:700;text-transform:uppercase;letter-spacing:.5px;white-space:nowrap}
+.bH{background:#fdecea;color:#c0392b}.bM{background:#fef8e7;color:#d68910}.bL{background:#ebf5fb;color:#2471a3}
+.ib{padding:22px 24px}
+.ib p{color:#444;margin-bottom:14px;line-height:1.8}
+.ct{background:#edf2fb;color:#2c4e91;font-size:.7rem;font-weight:700;padding:2px 9px;border-radius:9px;margin-right:5px;white-space:nowrap}
+.snap{width:100%;max-width:860px;display:block;border-radius:8px;margin:18px 0;border:1px solid #dde4ee;box-shadow:0 3px 14px rgba(0,0,0,.1);background:#f8faff}
+.fb{background:#eafaf1;border-radius:8px;padding:18px 22px;margin-top:14px;border:1px solid #a9dfbf}
+.fb strong{color:#1e8449;display:block;margin-bottom:8px;font-size:.92rem}
+.fb p{color:#1a5c34;font-size:.91rem;margin-bottom:0;line-height:1.75}
+.ig{display:grid;grid-template-columns:repeat(auto-fit,minmax(320px,1fr));gap:22px}
+.imp{background:#fff;border-radius:12px;padding:24px;box-shadow:0 2px 12px rgba(0,0,0,.07);border-top:4px solid #006644}
+.imp h3{color:#006644;margin-bottom:10px;font-size:1rem;font-weight:700}
+.imp p{color:#444;font-size:.9rem;line-height:1.75}
+.pt{font-size:.7rem;font-weight:800;padding:3px 10px;border-radius:9px;margin-bottom:10px;display:inline-block}
+.ptC{background:#fdecea;color:#c0392b}.ptH{background:#fef8e7;color:#d68910}.ptM{background:#eaf4fb;color:#2471a3}
+.divider{height:1px;background:#e4eaf2;margin:44px 0}
+footer{background:#003366;color:#fff;text-align:center;padding:32px;font-size:.88rem}
+footer p+p{margin-top:8px;opacity:.65;font-size:.78rem}
+</style>
+</head>
+<body>
+<header>
+  <h1>&#127758; Bangladesh Bank — UX/UI Audit Report</h1>
+  <p class="sub">A rigorous, expert-level investigation of the refactored homepage from an end-user perspective</p>
+  <div class="meta">
+    <span>&#128205; bb.org.bd / en / index.php</span>
+    <span>&#128197; 28 June 2026</span>
+    <span>&#128269; Expert UI/UX &amp; QA Analysis</span>
+    <span>&#128203; Scope: Homepage</span>
+    <span>&#9888;&#65039; 9 Issues Found</span>
+    <span>&#9888;&#65039; 3 WCAG Failures</span>
+  </div>
+</header>
+<main>
+<div class="toc">
+  <h3>&#128196; Table of Contents</h3>
+  <ol>
+    <li><a href="#exec">1. Executive Summary</a></li>
+    <li><a href="#issues">2. Identified Issues (9 Found)</a>
+      <ol>
+        <li><a href="#i1">1. No Persistent Navigation Bar [HIGH]</a></li>
+        <li><a href="#i2">2. Fixed Narrow Page Width [HIGH]</a></li>
+        <li><a href="#i3">3. Auto-Rotating Banner — WCAG Failure [HIGH]</a></li>
+        <li><a href="#i4">4. Inconsistent Card Border Colors [HIGH]</a></li>
+        <li><a href="#i5">5. Governor Section Wasted Space [MEDIUM]</a></li>
+        <li><a href="#i6">6. Card Icon/Border Misalignment [MEDIUM]</a></li>
+        <li><a href="#i7">7. Inaccessible Social Media Icons [MEDIUM]</a></li>
+        <li><a href="#i8">8. Hotline Numbers as Bitmap Images [HIGH]</a></li>
+        <li><a href="#i9">9. Oversized Decorative Header [LOW]</a></li>
+      </ol>
+    </li>
+    <li><a href="#improve">3. Proposed Improvements (9 Actions)</a></li>
+  </ol>
+</div>
+<section id="exec">
+  <h2>&#128202; 1. Executive Summary</h2>
+  <div class="exec-scores">
+    <div class="sc"><div class="v">D+</div><div class="lb">Overall UX Grade</div></div>
+    <div class="sc"><div class="v">4.5</div><div class="lb">Usability /10</div></div>
+    <div class="sc m"><div class="v">5.2</div><div class="lb">Accessibility /10</div></div>
+    <div class="sc"><div class="v">3.8</div><div class="lb">Visual Hierarchy /10</div></div>
+    <div class="sc m"><div class="v">5.0</div><div class="lb">Responsiveness /10</div></div>
+    <div class="sc g"><div class="v">7.0</div><div class="lb">Content Coverage /10</div></div>
+  </div>
+  <div class="exec-text">
+    <p>The Bangladesh Bank website has undergone a visual refresh introducing a teal/green-gradient branding scheme, icon-based content cards, and a hamburger-menu navigation. While the refactoring shows intent to modernise the portal, the execution reveals <strong>significant UX debt</strong> that undermines the experience for all users — especially first-time visitors, those with disabilities, and mobile users.</p>
+    <p>The three most critical problems: <strong>(1)</strong> loss of persistent top navigation replaced by a hidden hamburger menu that buries the entire site structure; <strong>(2)</strong> a fixed narrow page width (~843px) that wastes ~40% of screen real estate on desktop; <strong>(3)</strong> inconsistent color semantics (red and green on identical card components) that creates false urgency and confuses visual hierarchy.</p>
+    <p>Content shows 15+ sections in a single vertical scroll with no grouping logic, extreme cognitive load. Missing: skip-navigation links, ARIA labels, auto-rotating banner pause control (WCAG failure), and emergency hotline numbers are non-tappable bitmap images.</p>
+    <p><strong>Positives:</strong> Professional brand palette, comprehensive footer contact info, useful Recent News ticker, valuable Policy Rates and Exchange Rate widgets. The hamburger drawer itself is visually clean.</p>
+  </div>
+</section>
+<section id="issues">
+  <h2>&#128270; 2. Identified Issues</h2>
+  <div class="ic H" id="i1"><div class="ih"><div class="in">1</div><div class="it">No Persistent Navigation Bar — All Navigation Hidden Behind Hamburger</div><span class="badge bH">HIGH</span><span class="ct">Usability</span><span class="ct">Navigation</span></div><div class="ib"><p>On page load, only a hamburger icon, search field, and language toggle are visible. Zero persistent navigation links. All 10+ major sections are invisible until the user clicks the hamburger menu. No skip-to-content link, no breadcrumbs, no secondary navigation. On desktop, this is a severe discoverability failure — users cannot build a mental model of the site's information architecture.</p><img src="images/snap_01_img.png" alt="Snapshot: Hamburger-only navigation with no persistent nav links on page load" class="snap"/><div class="fb"><strong>&#10003; Fix</strong><p>Sticky horizontal navbar on desktop (768px+) with all 8 primary sections visible as dropdown nav items. Reserve hamburger for mobile only. Add skip-to-content link as first focusable element. Add role="navigation" ARIA landmark.</p></div></div></div>
+  <div class="ic H" id="i2"><div class="ih"><div class="in">2</div><div class="it">Fixed Narrow Page Width (~843px) — Massive Wasted White Space on Desktop</div><span class="badge bH">HIGH</span><span class="ct">Responsiveness</span><span class="ct">Layout</span></div><div class="ib"><p>All content constrained to ~843px on a 1440px desktop. ~300px blank white margin on each side (~40% wasted). 15 content sections stacked in a single column requiring 8+ full-page scrolls. Fixed-width anti-pattern from the pre-2010 era.</p><img src="images/snap_02_img.png" alt="Snapshot: Fixed narrow content column with large empty margins on wide desktop viewport" class="snap"/><div class="fb"><strong>&#10003; Fix</strong><p>Fluid responsive layout (max-width: 1400px). CSS Grid: 3-col desktop / 2-col tablet / 1-col mobile. Reduces scroll depth by ~60%. All 15 sections become scannable in ~3 viewport heights.</p></div></div></div>
+  <div class="ic H" id="i3"><div class="ih"><div class="in">3</div><div class="it">Auto-Rotating Banner with No Pause Control (WCAG 2.1 SC 2.2.2 Failure)</div><span class="badge bH">HIGH</span><span class="ct">Accessibility</span><span class="ct">WCAG</span></div><div class="ib"><p>Hero carousel auto-advances through official government notices (fraud alerts, investment notices) with no pause/stop control and no slide indicator dots. Direct violation of WCAG 2.1 SC 2.2.2 (Pause, Stop, Hide) at Level AA. Complex Bangla-language government content cannot be read before cycling. Users with cognitive disabilities, attention disorders, or low vision are particularly impacted.</p><img src="images/snap_03_img.png" alt="Snapshot: Auto-rotating banner with no pause button or slide indicators" class="snap"/><div class="fb"><strong>&#10003; Fix</strong><p>Add visible play/pause toggle (aria-label="Pause banner rotation"). Add dot indicators for manual navigation. Set minimum 8-second interval. Consider replacing with a static pinned notice board — government notices are better as scannable lists than timed slideshows.</p></div></div></div>
+  <div class="ic H" id="i4"><div class="ih"><div class="in">4</div><div class="it">Inconsistent Card Border Colors — Red and Green Used Without Semantic Meaning</div><span class="badge bH">HIGH</span><span class="ct">Visual Hierarchy</span><span class="ct">Consistency</span></div><div class="ib"><p>Category cards alternate between red and green border accents with no discernible pattern. Red universally signals danger/error — applying it to neutral cards like "Media &amp; Press Release" creates false urgency. Violates WCAG 1.4.1 (Use of Color as sole differentiator). Creates visual noise and undermines information hierarchy.</p><img src="images/snap_04_img.png" alt="Snapshot: Adjacent cards with Monetary Policy using green border and Media Release using red border" class="snap"/><div class="fb"><strong>&#10003; Fix</strong><p>Standardize all category cards to a single accent: teal #006644 left-border only. Reserve red exclusively for actual alerts, warnings, error states. If grouping desired, use background shading or section labels — not border color variation on identical components.</p></div></div></div>
+  <div class="ic M" id="i5"><div class="ih"><div class="in">5</div><div class="it">Governor Section: Insufficient Content — Large Blank White Space</div><span class="badge bM">MEDIUM</span><span class="ct">Visual Hierarchy</span><span class="ct">Content</span></div><div class="ib"><p>Full-width ~200px homepage section but right ~65% is entirely blank. Contains only portrait, name, title, and a vague "more...." link. "more...." provides zero context for screen readers. Prime homepage real estate severely underutilized. No welcome message, no institutional statement, no descriptive CTA.</p><img src="images/snap_05_img.png" alt="Snapshot: Governor section with large blank white space on right and vague 'more....' link" class="snap"/><div class="fb"><strong>&#10003; Fix</strong><p>Add 2-3 sentence institutional statement. Replace "more...." with: &lt;a href="..." aria-label="Read Governor's Message"&gt;Read Governor's Message &rarr;&lt;/a&gt;. Use empty space for a key indicators widget (policy rate, exchange rate, latest press release).</p></div></div></div>
+  <div class="ic M" id="i6"><div class="ih"><div class="in">6</div><div class="it">Content Cards: Icon Placement Misaligned — Border Styles Inconsistent</div><span class="badge bM">MEDIUM</span><span class="ct">Visual Design</span><span class="ct">Consistency</span></div><div class="ib"><p>Icons are top-vertically-aligned (align-items: flex-start) while link lists extend 4-5 items below, creating visual disconnection. Some cards: red top-border + left pipe; others: only green left-border. Different chevron characters across sections. No unified Card component applied consistently — accumulated design inconsistencies.</p><img src="images/snap_06_img.png" alt="Snapshot: Card icon top-aligned with link list extending below, adjacent cards with different border treatments" class="snap"/><div class="fb"><strong>&#10003; Fix</strong><p>CSS Flexbox align-items: center on card container. Standardize: one border style (teal left, 4px), one consistent chevron, max 5 links + "View all" overflow. Create a single Card design token/component definition applied to all 15 blocks.</p></div></div></div>
+  <div class="ic M" id="i7"><div class="ih"><div class="in">7</div><div class="it">Footer Social Icons: No Accessible Labels — LinkedIn Missing</div><span class="badge bM">MEDIUM</span><span class="ct">Accessibility</span><span class="ct">Content</span></div><div class="ib"><p>Three icon-only social buttons have NO aria-labels — screen reader announces "link, link, link" with zero context. LinkedIn absent from a professional financial regulatory body. Twitter may show outdated bird logo. Circular border treatment clashes with flat design language used elsewhere on the page.</p><img src="images/snap_07_img.png" alt="Snapshot: Footer social icon buttons with no visible text labels or ARIA attributes" class="snap"/><div class="fb"><strong>&#10003; Fix</strong><p>Add aria-label to every social icon. Add LinkedIn as fourth social channel. Consider visible text labels beneath icons (icon+label outperforms icon-only). Update to X/Twitter logo if applicable. Remove circular borders to align with flat design.</p></div></div></div>
+  <div class="ic H" id="i8"><div class="ih"><div class="in">8</div><div class="it">Emergency Hotline Numbers Rendered as Non-Tappable Bitmap Images</div><span class="badge bH">HIGH</span><span class="ct">Accessibility</span><span class="ct">Mobile UX</span></div><div class="ib"><p>Emergency numbers (333, 999, 109, 106, 1090) are static bitmap images. Mobile users cannot tap to call. Screen readers cannot announce them. Search engines cannot index them. Pixelate on Retina displays. Do not scale with text-zoom accessibility settings. Emergency information with the worst possible accessibility implementation — legally and ethically problematic for a public government service.</p><img src="images/snap_08_img.png" alt="Snapshot: Emergency hotline numbers displayed as non-tappable bitmap images with Bangla text" class="snap"/><div class="fb"><strong>&#10003; Fix</strong><p>Replace with HTML: &lt;a href="tel:999" aria-label="National Emergency 999"&gt;999&lt;/a&gt;. SVG icons for service logos. Bangla text via Unicode web font (Noto Sans Bengali). role="region" aria-label="Emergency Hotlines" on container. Bilingual EN/BN labels for each service.</p></div></div></div>
+  <div class="ic L" id="i9"><div class="ih"><div class="in">9</div><div class="it">Header Banner Disproportionate — Pure Decoration Above the Fold</div><span class="badge bL">LOW</span><span class="ct">Visual Hierarchy</span><span class="ct">Information Architecture</span></div><div class="ib"><p>150px-tall hero header contains only logo and decorative building illustration. No CTA, no embedded search, no quick-links. Meanwhile the functional nav bar is only ~35px. Search placeholder "Search" has ~2.8:1 contrast on dark teal background (WCAG AA requires 4.5:1 minimum for normal text — SC 1.4.3). 150px of above-fold real estate wasted on decoration.</p><img src="images/snap_09_img.png" alt="Snapshot: Large decorative teal header with no interactive elements and narrow nav bar with low-contrast search" class="snap"/><div class="fb"><strong>&#10003; Fix</strong><p>Reduce header height to ~90px. Embed: prominent search bar (white, high-contrast), 4 quick-access CTAs (Exchange Rates / E-Services / File Complaint / Latest Circulars). Fix search placeholder contrast to white (#fff) on dark teal. Move language toggle into header.</p></div></div></div>
+</section>
+<div class="divider"></div>
+<section id="improve">
+  <h2>&#128161; 3. Proposed Improvements</h2>
+  <div class="ig">
+    <div class="imp"><span class="pt ptC">&#128308; Critical</span><h3>Persistent Horizontal Navigation</h3><p>Sticky navbar for desktop (768px+) with all 8 primary sections visible as dropdown nav items. Skip-to-content link as first focusable element. ARIA landmarks. Reserve hamburger exclusively for mobile. Highest single-impact improvement possible.</p></div>
+    <div class="imp"><span class="pt ptC">&#128308; Critical</span><h3>Fluid Responsive Grid Layout</h3><p>Abandon fixed 843px container. CSS Grid: 3-col desktop / 2-col tablet / 1-col mobile. max-width: 1400px. Reduces scroll depth from 8+ screens to ~3. Makes all 15 sections scannable. Zero content lost.</p></div>
+    <div class="imp"><span class="pt ptC">&#128308; Critical</span><h3>WCAG 2.1 Level AA Compliance</h3><p>(1) Pause/stop control for rotating banner. (2) aria-labels on all icon-only links. (3) HTML tel: links for hotline numbers. (4) Fix search placeholder contrast to white. (5) All touch targets &ge;44x44px. (6) Add skip-nav link.</p></div>
+    <div class="imp"><span class="pt ptH">&#128993; High Priority</span><h3>Semantic Color Token System</h3><p>--color-brand: #006644 (all category card borders and interactive elements). --color-alert: #e74c3c (warnings ONLY). --color-heading: #003366. --color-success: #27ae60. Apply strictly — color must carry consistent semantic meaning site-wide.</p></div>
+    <div class="imp"><span class="pt ptH">&#128993; High Priority</span><h3>Header with Real Interactive Value</h3><p>Shrink decorative banner to ~90px. Add: prominent search bar, 4 quick-access CTAs (Exchange Rates / E-Services / File Complaint / Circulars), language toggle. Expand Governor section with message excerpt and descriptive CTA link button.</p></div>
+    <div class="imp"><span class="pt ptH">&#128993; High Priority</span><h3>Hotline Section Rebuilt as HTML</h3><p>Every number: &lt;a href="tel:XXX" aria-label="Service Name: XXX"&gt;. SVG icons. Noto Sans Bengali font for Bangla text. Bilingual labels. role="region" aria-label="Emergency Hotlines". Enables tap-to-call, screen reader access, and search indexing simultaneously.</p></div>
+    <div class="imp"><span class="pt ptM">&#128309; Medium Priority</span><h3>Enhanced Recent News Ticker</h3><p>Expand to 4-item card list with: date stamp, category badge (Policy/Alert/Publication), headline truncated at 2 lines. Prev/next buttons &ge;44px touch targets. "View All News" CTA button. Full keyboard support for carousel navigation.</p></div>
+    <div class="imp"><span class="pt ptM">&#128309; Medium Priority</span><h3>Unified Card Component Standard</h3><p>One Card definition: teal left-border (4px, #006644), icon centered (align-items: center), consistent chevron (&gt;), max 5 links + "View all". Applied to all 15 category blocks. Eliminates the accumulated inconsistencies found across the page.</p></div>
+    <div class="imp"><span class="pt ptM">&#128309; Medium Priority</span><h3>Site Architecture Discovery Page</h3><p>With hidden nav and 15+ sections, users lack site mental model. Build "Explore BB.org.bd": visual grid of all sections with 1-line descriptions and direct links. Link from footer, hamburger menu header, and search results. Significantly improves information scent.</p></div>
+  </div>
+</section>
+</main>
+<footer>
+  <p><strong>Bangladesh Bank UX/UI Audit Report &mdash; 28 June 2026</strong></p>
+  <p>Produced through systematic visual inspection, WCAG 2.1 evaluation, and UX heuristic analysis of the live homepage at www.bb.org.bd &mdash; 9 issues identified across 5 UX dimensions. Snapshots in images/ folder are real screenshots captured from the live homepage at www.bb.org.bd on 28 June 2026.</p>
+</footer>
+</body>
+</html>
