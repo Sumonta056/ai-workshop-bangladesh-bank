@@ -1,0 +1,21 @@
+{
+  "mcpServers": {
+    "memory": {
+      "command": "sh",
+      "args": [
+        "-c",
+        "MEMORY_FILE_PATH=\"$(pwd)/.memory/memory_doctor_patient.jsonl\" npx -y @modelcontextprotocol/server-memory"
+      ]
+    },
+    "mongodb": {
+      "command": "npx",
+      "args": [
+        "-y",
+        "mongodb-mcp-server",
+        "--connectionString",
+        "mongodb://localhost:27017",
+        "--readOnly"
+      ]
+    }
+  }
+}

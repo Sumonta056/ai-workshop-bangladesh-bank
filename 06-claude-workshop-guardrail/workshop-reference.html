@@ -1,0 +1,2742 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Claude Workshop – Quick Reference</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    /* ══════════════════════════════════════
+       CSS VARIABLES — light (default)
+    ══════════════════════════════════════ */
+    :root {
+      --bg:            #f5f5f5;
+      --surface:       #ffffff;
+      --surface2:      #fafafa;
+      --border:        #e5e5e5;
+      --border2:       #f0f0f0;
+      --text:          #1a1a1a;
+      --text2:         #444;
+      --text3:         #666;
+      --text4:         #888;
+      --text5:         #aaa;
+      --accent:        #4f6ef7;
+      --accent-bg:     #f0f4ff;
+      --accent-text:   #2a3fcf;
+      --prompt-bg:     #f8f9ff;
+      --prompt-border: #dde2ff;
+      --prompt-hdr:    #f0f3ff;
+      --prompt-label:  #7080c0;
+      --prompt-text:   #333;
+      --outcome-bg:    #f0faf5;
+      --outcome-bdr:   #b7e8ce;
+      --outcome-text:  #1a5c36;
+      --outcome-code:  #d0f0e0;
+      --tip-bg:        #fffbeb;
+      --tip-border:    #fcd34d;
+      --tip-text:      #78350f;
+      --tip-code:      #fef3c7;
+      --info-bg:       #fafafa;
+      --info-border:   #e8e8e8;
+      --info-title:    #333;
+      --badge-bg:      #e8eeff;
+      --badge-text:    #4f6ef7;
+      --code-inline:   #f0f0f0;
+      --code-text:     #333;
+      --steps-bullet:  #4f6ef7;
+      --sidebar-w:     220px;
+    }
+
+    /* ══════════════════════════════════════
+       DARK MODE
+    ══════════════════════════════════════ */
+    body.dark {
+      --bg:            #0f0f17;
+      --surface:       #1a1a28;
+      --surface2:      #14141f;
+      --border:        #2a2a40;
+      --border2:       #22223a;
+      --text:          #e2e2f0;
+      --text2:         #b0b0cc;
+      --text3:         #8888aa;
+      --text4:         #6666aa;
+      --text5:         #4a4a6a;
+      --accent:        #7b93ff;
+      --accent-bg:     #1e2040;
+      --accent-text:   #a0b0ff;
+      --prompt-bg:     #1a1e38;
+      --prompt-border: #2e3460;
+      --prompt-hdr:    #151830;
+      --prompt-label:  #7080c0;
+      --prompt-text:   #c8c8e0;
+      --outcome-bg:    #0f2018;
+      --outcome-bdr:   #1a4030;
+      --outcome-text:  #6bcf94;
+      --outcome-code:  #1a3828;
+      --tip-bg:        #1e1808;
+      --tip-border:    #5a4a10;
+      --tip-text:      #e0c060;
+      --tip-code:      #2a2010;
+      --info-bg:       #16162a;
+      --info-border:   #2a2a40;
+      --info-title:    #c0c0e0;
+      --badge-bg:      #1e2040;
+      --badge-text:    #7b93ff;
+      --code-inline:   #2a2a40;
+      --code-text:     #c0c0e0;
+      --steps-bullet:  #7b93ff;
+    }
+
+    /* ══════════════════════════════════════
+       READER MODE
+    ══════════════════════════════════════ */
+    body.reader {
+      --bg:            #f5efe0;
+      --surface:       #fdf6e3;
+      --surface2:      #f8f0d8;
+      --border:        #ddd0b0;
+      --border2:       #e8ddc8;
+      --text:          #2c2418;
+      --text2:         #4a3c28;
+      --text3:         #6a5840;
+      --text4:         #8a7858;
+      --text5:         #a89878;
+      --accent:        #8b6914;
+      --accent-bg:     #f0e8d0;
+      --accent-text:   #6b4c0a;
+      --prompt-bg:     #faf0dc;
+      --prompt-border: #d8c898;
+      --prompt-hdr:    #f0e4c8;
+      --prompt-label:  #8a6830;
+      --prompt-text:   #3c2c18;
+      --outcome-bg:    #eaf5e8;
+      --outcome-bdr:   #b0d8a0;
+      --outcome-text:  #2a5020;
+      --outcome-code:  #d0ecc8;
+      --tip-bg:        #fdf0d8;
+      --tip-border:    #e0c060;
+      --tip-text:      #6a4808;
+      --tip-code:      #f0e0b8;
+      --info-bg:       #f8f0e0;
+      --info-border:   #ddd0b0;
+      --info-title:    #3c2c18;
+      --badge-bg:      #ede0c8;
+      --badge-text:    #7a5010;
+      --code-inline:   #ede0c8;
+      --code-text:     #3c2c18;
+      --steps-bullet:  #8b6914;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+      transition: background .2s, color .2s;
+    }
+
+    /* ── Toolbar (mode switcher) ── */
+    .toolbar {
+      position: fixed;
+      top: 12px; right: 16px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      z-index: 200;
+    }
+
+    .mode-btn {
+      display: flex;
+      align-items: center;
+      gap: 5px;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      color: var(--text3);
+      font-size: 11.5px;
+      font-weight: 600;
+      padding: 5px 11px;
+      border-radius: 20px;
+      cursor: pointer;
+      transition: background .15s, color .15s, border-color .15s;
+      font-family: inherit;
+    }
+
+    .mode-btn:hover { color: var(--text); border-color: var(--accent); }
+    .mode-btn.active { background: var(--accent-bg); color: var(--accent); border-color: var(--accent); }
+
+    /* ── Sidebar ── */
+    .sidebar {
+      position: fixed;
+      top: 0; left: 0;
+      width: var(--sidebar-w);
+      height: 100vh;
+      background: var(--surface);
+      border-right: 1px solid var(--border);
+      overflow-y: auto;
+      z-index: 100;
+      transition: width .2s, background .2s, border-color .2s;
+    }
+
+    .sidebar.collapsed {
+      width: 48px;
+    }
+
+    .sidebar-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 18px 14px 12px;
+      border-bottom: 1px solid var(--border2);
+    }
+
+    .sidebar-title {
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: .08em;
+      text-transform: uppercase;
+      color: var(--text4);
+      white-space: nowrap;
+      overflow: hidden;
+      transition: opacity .15s;
+    }
+
+    .sidebar.collapsed .sidebar-title { opacity: 0; pointer-events: none; }
+
+    .collapse-btn {
+      flex-shrink: 0;
+      background: none;
+      border: 1px solid var(--border);
+      color: var(--text4);
+      width: 24px; height: 24px;
+      border-radius: 6px;
+      cursor: pointer;
+      display: flex; align-items: center; justify-content: center;
+      transition: background .15s, color .15s;
+      font-size: 12px;
+    }
+
+    .collapse-btn:hover { background: var(--accent-bg); color: var(--accent); border-color: var(--accent); }
+
+    .sidebar nav a {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 9px 14px;
+      font-size: 13px;
+      color: var(--text2);
+      text-decoration: none;
+      border-left: 3px solid transparent;
+      white-space: nowrap;
+      overflow: hidden;
+      transition: background .15s, border-color .15s, color .15s;
+    }
+
+    .sidebar nav a:hover,
+    .sidebar nav a.active {
+      background: var(--accent-bg);
+      border-left-color: var(--accent);
+      color: var(--accent-text);
+    }
+
+    .sidebar nav a .chapter-num {
+      flex-shrink: 0;
+      width: 22px; height: 22px;
+      background: var(--accent-bg);
+      color: var(--accent);
+      border-radius: 5px;
+      font-size: 10px;
+      font-weight: 700;
+      display: flex; align-items: center; justify-content: center;
+    }
+
+    .sidebar nav a.active .chapter-num {
+      background: var(--accent);
+      color: #fff;
+    }
+
+    .sidebar nav a .link-label {
+      overflow: hidden;
+      text-overflow: ellipsis;
+      transition: opacity .15s;
+    }
+
+    .sidebar.collapsed nav a .link-label { opacity: 0; width: 0; }
+    .sidebar.collapsed nav a { padding: 9px 12px; justify-content: center; }
+    .sidebar.collapsed nav a .chapter-num { margin: 0; }
+
+    /* ── Main ── */
+    .main {
+      margin-left: var(--sidebar-w);
+      padding: 48px 40px;
+      max-width: 900px;
+      transition: margin-left .2s;
+    }
+
+    .main.expanded { margin-left: 48px; }
+
+    .page-header { margin-bottom: 44px; }
+
+    .page-header h1 {
+      font-size: 26px;
+      font-weight: 700;
+      color: var(--text);
+    }
+
+    .page-header p {
+      margin-top: 6px;
+      font-size: 14px;
+      color: var(--text3);
+    }
+
+    /* ── Chapter card ── */
+    .chapter {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      margin-bottom: 32px;
+      overflow: hidden;
+      transition: background .2s, border-color .2s;
+    }
+
+    .chapter-header {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      padding: 20px 24px;
+      border-bottom: 1px solid var(--border2);
+      background: var(--surface2);
+    }
+
+    .chapter-badge {
+      flex-shrink: 0;
+      width: 34px; height: 34px;
+      border-radius: 8px;
+      background: var(--accent);
+      color: #fff;
+      font-size: 12px;
+      font-weight: 700;
+      display: flex; align-items: center; justify-content: center;
+    }
+
+    .chapter-title {
+      font-size: 16px;
+      font-weight: 700;
+      color: var(--text);
+    }
+
+    .chapter-subtitle {
+      font-size: 12.5px;
+      color: var(--text4);
+      margin-top: 2px;
+    }
+
+    .chapter-body {
+      padding: 24px;
+      display: grid;
+      gap: 20px;
+    }
+
+    /* ── Section label ── */
+    .section-label {
+      font-size: 10.5px;
+      font-weight: 700;
+      letter-spacing: .08em;
+      text-transform: uppercase;
+      color: var(--text5);
+      margin-bottom: 8px;
+    }
+
+    /* ── Command block ── */
+    .cmd-block {
+      background: #1e1e2e;
+      border-radius: 8px;
+      overflow: hidden;
+    }
+
+    .cmd-block-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 8px 14px;
+      background: #16162a;
+      border-bottom: 1px solid #2a2a40;
+    }
+
+    .cmd-block-header span {
+      font-size: 11px;
+      font-weight: 600;
+      color: #666;
+      font-family: monospace;
+    }
+
+    .copy-btn {
+      display: flex;
+      align-items: center;
+      gap: 5px;
+      background: none;
+      border: 1px solid #3a3a55;
+      color: #999;
+      font-size: 11px;
+      padding: 3px 10px;
+      border-radius: 5px;
+      cursor: pointer;
+      transition: background .15s, color .15s;
+      font-family: inherit;
+    }
+
+    .copy-btn:hover { background: #2a2a40; color: #ccc; }
+    .copy-btn.copied { border-color: #3ecf8e; color: #3ecf8e; }
+
+    .cmd-block pre {
+      margin: 0;
+      padding: 14px 16px;
+      font-family: "SF Mono", "Fira Code", "Cascadia Code", Consolas, monospace;
+      font-size: 13.5px;
+      line-height: 1.7;
+      color: #e2e2f0;
+      overflow-x: auto;
+      white-space: pre-wrap;
+      word-break: break-word;
+    }
+
+    .cmd-block pre .comment { color: #5c6370; }
+    .cmd-block pre .prompt  { color: #abb2bf; }
+    .cmd-block pre .cmd     { color: #82aaff; }
+    .cmd-block pre .slash   { color: #c792ea; }
+
+    /* ── Prompt block ── */
+    .prompt-block {
+      background: var(--prompt-bg);
+      border: 1px solid var(--prompt-border);
+      border-radius: 8px;
+      overflow: hidden;
+    }
+
+    .prompt-block-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 8px 14px;
+      background: var(--prompt-hdr);
+      border-bottom: 1px solid var(--prompt-border);
+    }
+
+    .prompt-block-header span {
+      font-size: 11px;
+      font-weight: 600;
+      color: var(--prompt-label);
+    }
+
+    .prompt-block p {
+      margin: 0;
+      padding: 14px 16px;
+      font-size: 13.5px;
+      line-height: 1.65;
+      color: var(--prompt-text);
+    }
+
+    /* ── Outcome ── */
+    .outcome-box {
+      display: flex;
+      gap: 12px;
+      background: var(--outcome-bg);
+      border: 1px solid var(--outcome-bdr);
+      border-radius: 8px;
+      padding: 14px 16px;
+    }
+
+    .outcome-icon {
+      flex-shrink: 0;
+      font-size: 18px;
+      line-height: 1;
+      margin-top: 1px;
+    }
+
+    .outcome-box p {
+      font-size: 13.5px;
+      line-height: 1.6;
+      color: var(--outcome-text);
+    }
+
+    .outcome-box code {
+      background: var(--outcome-code);
+      padding: 1px 6px;
+      border-radius: 4px;
+      font-family: monospace;
+      font-size: 12.5px;
+    }
+
+    /* ── Steps list ── */
+    .steps-list {
+      list-style: none;
+      counter-reset: steps;
+    }
+
+    .steps-list li {
+      counter-increment: steps;
+      display: flex;
+      align-items: flex-start;
+      gap: 12px;
+      padding: 6px 0;
+      font-size: 13.5px;
+      color: var(--text2);
+      line-height: 1.5;
+    }
+
+    .steps-list li::before {
+      content: counter(steps);
+      flex-shrink: 0;
+      width: 22px; height: 22px;
+      background: var(--steps-bullet);
+      color: #fff;
+      border-radius: 50%;
+      font-size: 11px;
+      font-weight: 700;
+      display: flex; align-items: center; justify-content: center;
+      margin-top: 1px;
+    }
+
+    .steps-list li code {
+      background: var(--code-inline);
+      padding: 1px 6px;
+      border-radius: 4px;
+      font-family: monospace;
+      font-size: 12.5px;
+      color: var(--code-text);
+    }
+
+    /* ── Divider ── */
+    .divider {
+      border: none;
+      border-top: 1px solid var(--border2);
+    }
+
+    /* ── Agent tag ── */
+    .agent-tag {
+      display: inline-block;
+      background: var(--accent-bg);
+      border: 1px solid var(--prompt-border);
+      color: var(--accent-text);
+      font-size: 11.5px;
+      font-weight: 700;
+      font-family: monospace;
+      padding: 2px 8px;
+      border-radius: 5px;
+    }
+
+    /* ── Tip box ── */
+    .tip-box {
+      display: flex;
+      gap: 12px;
+      background: var(--tip-bg);
+      border: 1px solid var(--tip-border);
+      border-radius: 8px;
+      padding: 14px 16px;
+    }
+
+    .tip-box p {
+      font-size: 13px;
+      line-height: 1.6;
+      color: var(--tip-text);
+    }
+
+    .tip-box code {
+      background: var(--tip-code);
+      padding: 1px 6px;
+      border-radius: 4px;
+      font-family: monospace;
+      font-size: 12px;
+      color: var(--tip-text);
+    }
+
+    /* ── Sub-label ── */
+    .sub-label {
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--text4);
+      margin-bottom: 6px;
+    }
+
+    .sub-block + .sub-block { margin-top: 12px; }
+
+    /* ── Info grid ── */
+    .info-grid { display: grid; gap: 12px; }
+
+    .info-card {
+      background: var(--info-bg);
+      border: 1px solid var(--info-border);
+      border-radius: 8px;
+      padding: 14px 16px;
+    }
+
+    .info-card-title {
+      font-size: 12.5px;
+      font-weight: 700;
+      color: var(--info-title);
+      margin-bottom: 8px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .info-card-title .badge {
+      font-size: 10px;
+      background: var(--badge-bg);
+      color: var(--badge-text);
+      border-radius: 4px;
+      padding: 1px 7px;
+      font-weight: 700;
+      letter-spacing: .03em;
+    }
+
+    .info-card p {
+      font-size: 13px;
+      color: var(--text3);
+      line-height: 1.6;
+      margin-bottom: 8px;
+    }
+
+    .info-card p:last-child { margin-bottom: 0; }
+
+    .info-card pre {
+      background: #1e1e2e;
+      color: #e2e2f0;
+      border-radius: 6px;
+      padding: 10px 14px;
+      font-family: "SF Mono", "Fira Code", Consolas, monospace;
+      font-size: 12.5px;
+      line-height: 1.7;
+      overflow-x: auto;
+      white-space: pre-wrap;
+      word-break: break-word;
+      margin-top: 8px;
+    }
+
+    .info-card pre .key { color: #c792ea; }
+    .info-card pre .val { color: #c3e88d; }
+    .info-card pre .cmd { color: #82aaff; }
+
+    /* ── OS Tabs ── */
+    .os-tabs {
+      display: flex;
+      gap: 4px;
+      margin-bottom: 8px;
+    }
+
+    .os-tab {
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      color: var(--text4);
+      font-size: 11.5px;
+      font-weight: 600;
+      padding: 4px 14px;
+      border-radius: 6px 6px 0 0;
+      cursor: pointer;
+      font-family: inherit;
+      transition: background .15s, color .15s;
+      border-bottom: none;
+    }
+
+    .os-tab:hover { color: var(--text2); }
+    .os-tab.active { background: #16162a; color: #e2e2f0; border-color: #2a2a40; }
+
+    /* ── Toast ── */
+    #toast {
+      position: fixed;
+      bottom: 24px; right: 24px;
+      background: #1e1e2e;
+      color: #e2e2f0;
+      font-size: 13px;
+      padding: 10px 18px;
+      border-radius: 8px;
+      box-shadow: 0 4px 16px rgba(0,0,0,.2);
+      opacity: 0;
+      transform: translateY(8px);
+      transition: opacity .2s, transform .2s;
+      pointer-events: none;
+      z-index: 300;
+    }
+
+    #toast.show { opacity: 1; transform: translateY(0); }
+
+    @media (max-width: 700px) {
+      .sidebar { display: none; }
+      .main { margin-left: 0 !important; padding: 24px 16px; }
+      .toolbar { top: 8px; right: 8px; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- Toolbar -->
+<div class="toolbar">
+  <button class="mode-btn" id="btn-light" onclick="setMode('light')" title="Light mode">☀️ Light</button>
+  <button class="mode-btn" id="btn-dark"  onclick="setMode('dark')"  title="Dark mode">🌙 Dark</button>
+  <button class="mode-btn" id="btn-reader" onclick="setMode('reader')" title="Reader mode">📖 Reader</button>
+</div>
+
+<!-- Sidebar -->
+<aside class="sidebar" id="sidebar">
+  <div class="sidebar-header">
+    <span class="sidebar-title">Claude Workshop</span>
+    <button class="collapse-btn" id="collapse-btn" onclick="toggleSidebar()" title="Toggle sidebar">‹</button>
+  </div>
+  <nav>
+    <a href="#ch0">
+      <span class="chapter-num">00</span><span class="link-label">Setup Project</span>
+    </a>
+    <a href="#ch1" class="active">
+      <span class="chapter-num">01</span><span class="link-label">Initialize with CLAUDE.md</span>
+    </a>
+    <a href="#ch2">
+      <span class="chapter-num">02</span><span class="link-label">Claude Skills</span>
+    </a>
+    <a href="#ch3">
+      <span class="chapter-num">03</span><span class="link-label">Custom Agents</span>
+    </a>
+    <a href="#ch4">
+      <span class="chapter-num">04</span><span class="link-label">Agent Tuneup</span>
+    </a>
+    <a href="#ch5">
+      <span class="chapter-num">05</span><span class="link-label">Claude Hooks</span>
+    </a>
+    <a href="#ch6">
+      <span class="chapter-num">06</span><span class="link-label">Claude Settings</span>
+    </a>
+    <a href="#ch7">
+      <span class="chapter-num">07</span><span class="link-label">MCP Server</span>
+    </a>
+    <a href="#ch8">
+      <span class="chapter-num">08</span><span class="link-label">Combining Features</span>
+    </a>
+    <a href="#ch9">
+      <span class="chapter-num">09</span><span class="link-label">Claude Commands</span>
+    </a>
+    <a href="#ch10">
+      <span class="chapter-num">10</span><span class="link-label">Spec-Driven Dev</span>
+    </a>
+    <a href="#ch11">
+      <span class="chapter-num">11</span><span class="link-label">Frontend Design</span>
+    </a>
+    <a href="#ch12">
+      <span class="chapter-num">12</span><span class="link-label">Browser Automation</span>
+    </a>
+  </nav>
+</aside>
+
+<!-- Main content -->
+<main class="main">
+  <div class="page-header">
+    <h1>Workshop Quick Reference</h1>
+    <p>Commands to run &amp; outcomes to expect — click any block to copy.</p>
+  </div>
+
+  <!-- ════════════════════════════════════ CHAPTER 0 ════════ -->
+  <section class="chapter" id="ch0">
+    <div class="chapter-header">
+      <div class="chapter-badge" style="background:#555;">00</div>
+      <div>
+        <div class="chapter-title">Setup Project</div>
+        <div class="chapter-subtitle">Get the doctor-patient-app running locally after cloning</div>
+      </div>
+    </div>
+
+    <div class="chapter-body">
+
+      <!-- Env setup -->
+      <div>
+        <div class="section-label">Environment setup</div>
+        <div class="info-card">
+          <p>The project includes a <code style="background:var(--code-inline);padding:1px 5px;border-radius:4px;font-size:12px;color:var(--code-text);">.env.example</code> file. Rename it to <code style="background:var(--code-inline);padding:1px 5px;border-radius:4px;font-size:12px;color:var(--code-text);">.env</code> before starting. No additional environment setup required for local development.</p>
+          <pre><span class="cmd">cp</span> .env.example .env</pre>
+          <pre style="margin-top:8px;"><span class="key">DATABASE_URL</span>=<span class="val">"file:./dev.db"</span></pre>
+        </div>
+      </div>
+
+      <hr class="divider" />
+
+      <!-- Setup commands -->
+      <div>
+        <div class="section-label">Setup commands after cloning</div>
+        <div class="cmd-block">
+          <div class="cmd-block-header">
+            <span>terminal</span>
+            <button class="copy-btn" onclick="copyBlock(this, 'ch0-setup')">
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
+              Copy
+            </button>
+          </div>
+          <pre id="ch0-setup"><span class="comment"># 1. Navigate to project directory</span>
+<span class="cmd">cd</span> doctor-patient-app
+
+<span class="comment"># 2. Install dependencies</span>
+<span class="cmd">pnpm</span> install
+
+<span class="comment"># 3. Generate Prisma client</span>
+<span class="cmd">pnpm</span> exec prisma generate
+
+<span class="comment"># 4. Run database migrations</span>
+<span class="cmd">pnpm</span> exec prisma migrate dev
+
+<span class="comment"># 5. Seed the database (optional - for sample data)</span>
+<span class="cmd">pnpm</span> exec prisma db seed
+
+<span class="comment"># 6. Start development server</span>
+<span class="cmd">pnpm</span> dev</pre>
+        </div>
+      </div>
+
+      <div class="outcome-box">
+        <div class="outcome-icon">✅</div>
+        <p>The app will be available at <code>http://localhost:3000</code></p>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- ════════════════════════════════════ CHAPTER 1 ════════ -->
+  <section class="chapter" id="ch1">
+    <div class="chapter-header">
+      <div class="chapter-badge">01</div>
+      <div>
+        <div class="chapter-title">Initialize project with CLAUDE.md</div>
+        <div class="chapter-subtitle">Set up Claude for your project in one command</div>
+      </div>
+    </div>
+
+    <div class="chapter-body">
+
+      <!-- Setup steps -->
+      <div>
+        <div class="section-label">Setup steps</div>
+        <ol class="steps-list">
+          <li>Open project <code>CLAUDE-WORKSHOP</code> in your terminal</li>
+          <li>Navigate into the app directory</li>
+          <li>Launch Claude, then run <code>/init</code></li>
+          <li>Close the terminal window when done</li>
+        </ol>
+      </div>
+
+      <hr class="divider" />
+
+      <!-- Commands to run -->
+      <div>
+        <div class="section-label">Commands to run</div>
+        <div class="cmd-block">
+          <div class="cmd-block-header">
+            <span>terminal</span>
+            <button class="copy-btn" onclick="copyBlock(this, 'ch1-cmd')">
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
+              Copy
+            </button>
+          </div>
+          <pre id="ch1-cmd"><span class="cmd">cd</span> doctor-patient-app
+<span class="cmd">claude</span>
+<span class="slash">/init</span></pre>
+        </div>
+      </div>
+
+      <!-- Outcome -->
+      <div>
+        <div class="section-label">Expected outcome</div>
+        <div class="outcome-box">
+          <div class="outcome-icon">✅</div>
+          <p>A <code>CLAUDE.md</code> file will be generated in your project root. This file tells Claude about your project so it can give you better, context-aware help.</p>
+        </div>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- ════════════════════════════════════ CHAPTER 2 ════════ -->
+  <section class="chapter" id="ch2">
+    <div class="chapter-header">
+      <div class="chapter-badge">02</div>
+      <div>
+        <div class="chapter-title">Claude Skills</div>
+        <div class="chapter-subtitle">Create a reusable skill and invoke it two ways</div>
+      </div>
+    </div>
+
+    <div class="chapter-body">
+
+      <!-- Setup steps -->
+      <div>
+        <div class="section-label">Before you start</div>
+        <ol class="steps-list">
+          <li>Make sure you are in the <code>CLAUDE-WORKSHOP</code> directory</li>
+          <li>Open Claude in your terminal</li>
+        </ol>
+      </div>
+
+      <hr class="divider" />
+
+      <!-- Create skill prompt -->
+      <div>
+        <div class="section-label">Prompt — create the skill</div>
+        <div class="prompt-block">
+          <div class="prompt-block-header">
+            <span>paste into Claude</span>
+            <button class="copy-btn" onclick="copyBlock(this, 'ch2-prompt')">
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
+              Copy
+            </button>
+          </div>
+          <p id="ch2-prompt">Create a skill called "explain-code" that helps developers understand unfamiliar code.</p>
+        </div>
+      </div>
+
+      <hr class="divider" />
+
+      <!-- Test prompts -->
+      <div>
+        <div class="section-label">Test invocations</div>
+
+        <!-- Direct -->
+        <div style="margin-bottom: 12px;">
+          <div style="font-size:12px; color:#888; margin-bottom:6px; font-weight:600;">① Direct invocation (slash command)</div>
+          <div class="cmd-block">
+            <div class="cmd-block-header">
+              <span>terminal</span>
+              <button class="copy-btn" onclick="copyBlock(this, 'ch2-direct')">
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
+                Copy
+              </button>
+            </div>
+            <pre id="ch2-direct"><span class="slash">/explain-code</span> doctor-patient-app/src</pre>
+          </div>
+        </div>
+
+        <!-- Description invocation -->
+        <div>
+          <div style="font-size:12px; color:#888; margin-bottom:6px; font-weight:600;">② Invocation by description (natural language)</div>
+          <div class="prompt-block">
+            <div class="prompt-block-header">
+              <span>paste into Claude</span>
+              <button class="copy-btn" onclick="copyBlock(this, 'ch2-desc')">
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
+                Copy
+              </button>
+            </div>
+            <p id="ch2-desc">Explain our codebase for better understanding</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Outcome -->
+      <div>
+        <div class="section-label">Expected outcome</div>
+        <div class="outcome-box">
+          <div class="outcome-icon">✅</div>
+          <p>A new folder <code>explain-code</code> will appear inside <code>.claude &gt; skills</code> in your project. This is your new reusable skill, ready to use any time.</p>
+        </div>
+      </div>
+
+    </div>
+  </section>
+
+
+  <!-- ════════════════════════════════════ CHAPTER 3 ════════ -->
+  <section class="chapter" id="ch3">
+    <div class="chapter-header">
+      <div class="chapter-badge">03</div>
+      <div>
+        <div class="chapter-title">Creating Custom Agents &amp; Sub-agents</div>
+        <div class="chapter-subtitle">Specialized agents for code quality, docs, testing, and security</div>
+      </div>
+    </div>
+
+    <div class="chapter-body">
+
+      <!-- What are agents -->
+      <div>
+        <div class="section-label">What you'll create</div>
+        <p style="font-size:13.5px; color:#444; line-height:1.6;">Four specialized agents — each with a dedicated role — plus a pattern for running them in parallel to dramatically speed up large reviews.</p>
+      </div>
+
+      <hr class="divider" />
+
+      <!-- Agent 1: Code Quality -->
+      <div>
+        <div class="section-label">Agent 1 — Senior Code Quality Auditor</div>
+
+        <div class="sub-block">
+          <div class="sub-label">① Create the agent</div>
+          <div class="prompt-block">
+            <div class="prompt-block-header">
+              <span>paste into Claude</span>
+              <button class="copy-btn" onclick="copyBlock(this, 'ch3-a1-create')">
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
+                Copy
+              </button>
+            </div>
+            <p id="ch3-a1-create">We need to create a Senior Code Quality Auditor agent with expertise in multiple programming languages and deep knowledge of software engineering best practices. Your role is to proactively review code changes and provide actionable feedback to maintain high code quality standards.</p>
+          </div>
+        </div>
+
+        <div class="sub-block">
+          <div class="sub-label">② Trigger prompt</div>
+          <div class="prompt-block">
+            <div class="prompt-block-header">
+              <span>paste into Claude</span>
+              <button class="copy-btn" onclick="copyBlock(this, 'ch3-a1-trigger')">
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
+                Copy
+              </button>
+            </div>
+            <p id="ch3-a1-trigger">@code-quality-auditor Review the API route handlers in doctor-patient-app/src/app/api/ (auth, doctors, patients, stats) and the React components in doctor-patient-app/src/components/ for code quality issues, anti-patterns, and adherence to Next.js best practices. Focus on maintainability, readability, and performance.</p>
+          </div>
+        </div>
+
+        <div class="sub-block">
+          <div class="sub-label">③ Running sub-agent</div>
+          <div class="prompt-block">
+            <div class="prompt-block-header">
+              <span>paste into Claude</span>
+              <button class="copy-btn" onclick="copyBlock(this, 'ch3-a1-sub')">
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
+                Copy
+              </button>
+            </div>
+            <p id="ch3-a1-sub">Spawn 3 sub-agents to check code quality for doctor-patient-app/src.</p>
+          </div>
+        </div>
+      </div>
+
+      <hr class="divider" />
+
+      <!-- Agent 2: Docs -->
+      <div>
+        <div class="section-label">Agent 2 — Code Documentation Specialist</div>
+
+        <div class="sub-block">
+          <div class="sub-label">① Create the agent</div>
+          <div class="prompt-block">
+            <div class="prompt-block-header">
+              <span>paste into Claude</span>
+              <button class="copy-btn" onclick="copyBlock(this, 'ch3-a2-create')">
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
+                Copy
+              </button>
+            </div>
+            <p id="ch3-a2-create">We need to create a comprehensive code documentation specialist agent with expertise in generating clear, maintainable documentation across multiple programming languages and frameworks. Your primary responsibility is to ensure all code is thoroughly documented with clear comments, docstrings, and documentation that enhances code understanding and maintainability.</p>
+          </div>
+        </div>
+
+        <div class="sub-block">
+          <div class="sub-label">② Trigger prompt</div>
+          <div class="prompt-block">
+            <div class="prompt-block-header">
+              <span>paste into Claude</span>
+              <button class="copy-btn" onclick="copyBlock(this, 'ch3-a2-trigger')">
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
+                Copy
+              </button>
+            </div>
+            <p id="ch3-a2-trigger">@doc-specialist Generate comprehensive documentation for the utility modules in doctor-patient-app/src/lib/ (auth.ts, prisma.ts, theme.tsx) and the middleware in doctor-patient-app/src/middleware.ts. Add JSDoc comments for all exported functions, interfaces, and type definitions.</p>
+          </div>
+        </div>
+
+        <div class="sub-block">
+          <div class="sub-label">③ Running sub-agent</div>
+          <div class="prompt-block">
+            <div class="prompt-block-header">
+              <span>paste into Claude</span>
+              <button class="copy-btn" onclick="copyBlock(this, 'ch3-a2-sub')">
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
+                Copy
+              </button>
+            </div>
+            <p id="ch3-a2-sub">Spawn 3 sub-agents to generate documentation for doctor-patient-app/src/lib.</p>
+          </div>
+        </div>
+      </div>
+
+      <hr class="divider" />
+
+      <!-- Agent 3: Tests -->
+      <div>
+        <div class="section-label">Agent 3 — Unit Test Generation Specialist</div>
+
+        <div class="sub-block">
+          <div class="sub-label">① Create the agent</div>
+          <div class="prompt-block">
+            <div class="prompt-block-header">
+              <span>paste into Claude</span>
+              <button class="copy-btn" onclick="copyBlock(this, 'ch3-a3-create')">
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
+                Copy
+              </button>
+            </div>
+            <p id="ch3-a3-create">We need to create an expert unit test generation specialist agent with deep knowledge of testing frameworks, best practices, and comprehensive test coverage strategies. Your primary responsibility is to analyze existing code and generate high-quality, maintainable unit tests that thoroughly validate functionality.</p>
+          </div>
+        </div>
+
+        <div class="sub-block">
+          <div class="sub-label">② Trigger prompt</div>
+          <div class="prompt-block">
+            <div class="prompt-block-header">
+              <span>paste into Claude</span>
+              <button class="copy-btn" onclick="copyBlock(this, 'ch3-a3-trigger')">
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
+                Copy
+              </button>
+            </div>
+            <p id="ch3-a3-trigger">@test-generator Analyze the API route handlers in doctor-patient-app/src/app/api/doctors/route.ts and doctor-patient-app/src/app/api/patients/route.ts and generate comprehensive unit tests covering GET, POST, PUT, and DELETE operations with edge cases, error handling, and mocking for Prisma database calls.</p>
+          </div>
+        </div>
+
+        <div class="sub-block">
+          <div class="sub-label">③ Running sub-agent</div>
+          <div class="prompt-block">
+            <div class="prompt-block-header">
+              <span>paste into Claude</span>
+              <button class="copy-btn" onclick="copyBlock(this, 'ch3-a3-sub')">
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
+                Copy
+              </button>
+            </div>
+            <p id="ch3-a3-sub">Spawn 3 sub-agents to generate unit tests for doctor-patient-app/src/app/api.</p>
+          </div>
+        </div>
+      </div>
+
+      <hr class="divider" />
+
+      <!-- Agent 4: Security -->
+      <div>
+        <div class="section-label">Agent 4 — Security Reviewer</div>
+
+        <div class="sub-block">
+          <div class="sub-label">① Create the agent</div>
+          <div class="prompt-block">
+            <div class="prompt-block-header">
+              <span>paste into Claude</span>
+              <button class="copy-btn" onclick="copyBlock(this, 'ch3-a4-create')">
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
+                Copy
+              </button>
+            </div>
+            <p id="ch3-a4-create">We need to create a vigilant security reviewer agent with expertise in identifying vulnerabilities and security risks across multiple programming languages and frameworks. Your primary responsibility is to proactively analyze code for potential security flaws, recommend security best practices, and ensure all code adheres to established security standards and compliance requirements.</p>
+          </div>
+        </div>
+
+        <div class="sub-block">
+          <div class="sub-label">② Trigger prompt</div>
+          <div class="prompt-block">
+            <div class="prompt-block-header">
+              <span>paste into Claude</span>
+              <button class="copy-btn" onclick="copyBlock(this, 'ch3-a4-trigger')">
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
+                Copy
+              </button>
+            </div>
+            <p id="ch3-a4-trigger">@security-reviewer Scan the doctor-patient-app codebase for security vulnerabilities — especially the auth flow in src/app/api/auth/ (plain-text password comparison in login/route.ts), session handling in src/lib/auth.ts, the middleware in src/middleware.ts, and the Prisma models in prisma/schema.prisma. Check for injection flaws, insecure session storage, missing input validation, and OWASP Top 10 risks. Provide remediation recommendations.</p>
+          </div>
+        </div>
+
+        <div class="sub-block">
+          <div class="sub-label">③ Running sub-agent</div>
+          <div class="prompt-block">
+            <div class="prompt-block-header">
+              <span>paste into Claude</span>
+              <button class="copy-btn" onclick="copyBlock(this, 'ch3-a4-sub')">
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
+                Copy
+              </button>
+            </div>
+            <p id="ch3-a4-sub">Spawn 3 sub-agents to scan doctor-patient-app for security vulnerabilities.</p>
+          </div>
+        </div>
+      </div>
+
+      <hr class="divider" />
+
+      <!-- Running sub-agents -->
+      <div>
+        <div class="section-label">Bonus — run 3 sub-agents in parallel</div>
+        <div style="margin-bottom:10px;">
+          <div class="sub-label">Spawn sub-agents prompt</div>
+          <div class="prompt-block">
+            <div class="prompt-block-header">
+              <span>paste into Claude</span>
+              <button class="copy-btn" onclick="copyBlock(this, 'ch3-parallel')">
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
+                Copy
+              </button>
+            </div>
+            <p id="ch3-parallel">I need you to run the following agents in parallel:
+
+1. @code-quality-auditor — Review the API routes in doctor-patient-app/src/app/api/ (doctors/route.ts, patients/route.ts, stats/route.ts) for code quality issues, missing error handling, and anti-patterns.
+2. @security-reviewer — Scan the auth flow in doctor-patient-app/src/app/api/auth/ and session management in doctor-patient-app/src/lib/auth.ts for security vulnerabilities including plain-text passwords, insecure cookies, and missing input validation.
+3. @test-generator — Generate unit tests for the API route handlers in doctor-patient-app/src/app/api/doctors/route.ts and doctor-patient-app/src/app/api/patients/route.ts covering all CRUD operations.
+
+Run all three agents at the same time since they are independent of each other. Summarize the combined findings when all agents complete.</p>
+          </div>
+        </div>
+
+        <div class="tip-box">
+          <div style="font-size:18px; line-height:1; flex-shrink:0; margin-top:1px;">💡</div>
+          <p>Always say <code>in parallel</code> or <code>at the same time</code> in your prompt — Claude Code only parallelizes agent calls when explicitly told to.</p>
+        </div>
+      </div>
+
+      <!-- Outcome -->
+      <div>
+        <div class="section-label">Expected outcome</div>
+        <div class="outcome-box">
+          <div class="outcome-icon">✅</div>
+          <p>Each agent will be created in <code>.claude/agents/</code> as a dedicated <code>.agent.md</code> file. Agents can be invoked individually via <code>@agent-name</code> or run in parallel for large-scale reviews.</p>
+        </div>
+      </div>
+
+    </div>
+  </section>
+
+
+  <!-- ════════════════════════════════════ CHAPTER 4 ════════ -->
+  <section class="chapter" id="ch4">
+    <div class="chapter-header">
+      <div class="chapter-badge">04</div>
+      <div>
+        <div class="chapter-title">Agent Tuneup</div>
+        <div class="chapter-subtitle">Configuration flags and options for fine-tuning agent behaviour</div>
+      </div>
+    </div>
+
+    <div class="chapter-body">
+
+      <div class="info-grid">
+
+        <!-- 1. Skills inheritance -->
+        <div class="info-card">
+          <div class="info-card-title">
+            Inherit skills
+            <span class="badge">YAML flag</span>
+          </div>
+          <p>Agents don't inherit skills by default. Use the <code style="background:#f0f0f0;padding:1px 5px;border-radius:4px;font-size:12px;">skills</code> flag to pass specific skills into an agent.</p>
+          <pre><span class="key">skills</span>:
+    - code-reviewer</pre>
+        </div>
+
+        <!-- 2. Effort & model -->
+        <div class="info-card">
+          <div class="info-card-title">
+            Effort &amp; model
+            <span class="badge">YAML flag</span>
+          </div>
+          <p>Control how much compute the agent uses and which model it runs on.</p>
+          <pre><span class="key">effort</span>: <span class="val">low</span> | <span class="val">medium</span> | <span class="val">high</span>
+<span class="key">model</span>: <span class="val">haiku</span></pre>
+        </div>
+
+        <!-- 3. Background -->
+        <div class="info-card">
+          <div class="info-card-title">
+            Always run in background
+            <span class="badge">YAML flag</span>
+          </div>
+          <p>Set <code style="background:#f0f0f0;padding:1px 5px;border-radius:4px;font-size:12px;">background: true</code> so the agent always runs without blocking your session.</p>
+          <pre><span class="key">background</span>: <span class="val">true</span></pre>
+        </div>
+
+        <!-- 4. Isolation -->
+        <div class="info-card">
+          <div class="info-card-title">
+            Isolated worktree
+            <span class="badge">YAML flag</span>
+          </div>
+          <p>Runs the agent in a separate git worktree — useful for experimental refactors that shouldn't touch your working branch.</p>
+          <pre><span class="key">isolation</span>: <span class="val">worktree</span></pre>
+        </div>
+
+        <!-- 5. /insights -->
+        <div class="info-card">
+          <div class="info-card-title">
+            /insights command
+            <span class="badge">Command</span>
+          </div>
+          <p>Use <code style="background:#f0f0f0;padding:1px 5px;border-radius:4px;font-size:12px;">/insights</code> inside Claude to find out where you are lacking — it surfaces usage patterns and suggestions to improve how you're working with Claude.</p>
+        </div>
+
+        <!-- 6. --agent flag -->
+        <div class="info-card">
+          <div class="info-card-title">
+            Launch a specific agent directly
+            <span class="badge">CLI flag</span>
+          </div>
+          <p>Start Claude pre-loaded with a named sub-agent so it doesn't have to be loaded on every invocation.</p>
+          <pre><span class="cmd">claude</span> --agent &lt;subagent-name&gt;</pre>
+        </div>
+
+        <!-- 7. Hooks inside agent -->
+        <div class="info-card">
+          <div class="info-card-title">
+            Hooks inside an agent
+            <span class="badge">YAML flag</span>
+          </div>
+          <p>You can define hooks directly inside an agent's config — for example, to run a shell command whenever a specific tool is used.</p>
+          <pre><span class="key">hooks</span>:
+    <span class="key">PostToolUse</span>:
+        - <span class="key">matcher</span>: <span class="val">"Read"</span>
+          <span class="key">hooks</span>:
+            - <span class="key">type</span>: <span class="val">"command"</span>
+              <span class="key">command</span>: <span class="val">"echo 'Read tool was used'"</span></pre>
+        </div>
+
+      </div>
+    </div>
+  </section>
+
+
+  <!-- ════════════════════════════════════ CHAPTER 5 ════════ -->
+  <section class="chapter" id="ch5">
+    <div class="chapter-header">
+      <div class="chapter-badge">05</div>
+      <div>
+        <div class="chapter-title">Claude Hooks</div>
+        <div class="chapter-subtitle">Automate tasks and enforce standards on every file write or command</div>
+      </div>
+    </div>
+
+    <div class="chapter-body">
+
+      <!-- Note -->
+      <div class="tip-box">
+        <div style="font-size:18px;line-height:1;flex-shrink:0;margin-top:1px;">📌</div>
+        <p><code>/hooks</code> no longer has an interactive mode — it now only lists your existing hooks. To add or edit hooks, use <code>settings.json</code> at the project or user level.</p>
+      </div>
+
+      <hr class="divider" />
+
+      <!-- Hook 1: Prettier auto-format -->
+      <div>
+        <div class="section-label">Hook 1 — Auto-format files with Prettier (PostToolUse)</div>
+
+        <div class="sub-block">
+          <div class="sub-label">① Open the settings file</div>
+          <div class="info-grid">
+            <div class="info-card">
+              <p style="margin:0;font-size:13px;color:#555;">Create or open one of these files:</p>
+              <pre style="margin-top:8px;"><span class="key"># Project-level (shared with team via git)</span>
+.claude/settings.json
+
+<span class="key"># User-level (applies to all projects)</span>
+~/.claude/settings.json</pre>
+            </div>
+          </div>
+        </div>
+
+        <div class="sub-block">
+          <div class="sub-label">② Add the hook configuration</div>
+
+          <!-- OS tabs -->
+          <div class="os-tabs">
+            <button class="os-tab active" onclick="switchTab(this, 'ch5-prettier-node')">node</button>
+            <button class="os-tab" onclick="switchTab(this, 'ch5-prettier-jq')">jq</button>
+          </div>
+
+          <!-- node -->
+          <div class="cmd-block" id="ch5-prettier-node-block">
+            <div class="cmd-block-header">
+              <span>settings.json</span>
+              <button class="copy-btn" onclick="copyBlock(this, 'ch5-prettier-node')">
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
+                Copy
+              </button>
+            </div>
+            <pre id="ch5-prettier-node">{
+  "hooks": {
+    "PostToolUse": [
+      {
+        "matcher": "Write|Edit",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node -e \"process.stdin.resume();let d='';process.stdin.on('data',c=>d+=c);process.stdin.on('end',()=>{const f=JSON.parse(d).tool_input?.file_path;if(f){require('child_process').spawnSync('npx',['prettier','--write',f],{stdio:'inherit',shell:true})}})\""
+          }
+        ]
+      }
+    ]
+  }
+}</pre>
+          </div>
+
+          <!-- jq -->
+          <div class="cmd-block" id="ch5-prettier-jq-block" style="display:none;">
+            <div class="cmd-block-header">
+              <span>settings.json</span>
+              <button class="copy-btn" onclick="copyBlock(this, 'ch5-prettier-jq')">
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
+                Copy
+              </button>
+            </div>
+            <pre id="ch5-prettier-jq">{
+  "hooks": {
+    "PostToolUse": [
+      {
+        "matcher": "Write|Edit",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "jq -r '.tool_input.file_path' | xargs npx prettier --write 2>/dev/null; exit 0"
+          }
+        ]
+      }
+    ]
+  }
+}</pre>
+          </div>
+        </div>
+
+        <div class="sub-block">
+          <div class="sub-label">③ Test it</div>
+          <div class="prompt-block">
+            <div class="prompt-block-header">
+              <span>paste into Claude</span>
+              <button class="copy-btn" onclick="copyBlock(this, 'ch5-prettier-test')">
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
+                Copy
+              </button>
+            </div>
+            <p id="ch5-prettier-test">Create a file called test.js with a poorly formatted function:
+function hello(  ){console.log(   "hello"  );return true}</p>
+          </div>
+        </div>
+
+        <div class="outcome-box" style="margin-top:4px;">
+          <div class="outcome-icon">✅</div>
+          <p>After Claude creates the file, check <code>git diff</code> — Prettier will have automatically cleaned up the formatting.</p>
+        </div>
+      </div>
+
+      <hr class="divider" />
+
+      <!-- Hook 2: Dangerous command blocker -->
+      <div>
+        <div class="section-label">Hook 2 — Block dangerous commands (PreToolUse) via Claude</div>
+
+        <div class="sub-block">
+          <div class="sub-label">① Ask Claude to add the hook</div>
+          <p style="font-size:13px;color:#666;margin-bottom:8px;">Option A — natural language only (Claude generates the hook for you):</p>
+          <div class="prompt-block">
+            <div class="prompt-block-header">
+              <span>paste into Claude</span>
+              <button class="copy-btn" onclick="copyBlock(this, 'ch5-blocker-nl')">
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
+                Copy
+              </button>
+            </div>
+            <p id="ch5-blocker-nl">Write a PreToolUse hook to block dangerous commands</p>
+          </div>
+        </div>
+
+        <div class="sub-block">
+          <div class="sub-label" style="margin-top:8px;">Option B — provide the config yourself:</div>
+          <div class="prompt-block">
+            <div class="prompt-block-header">
+              <span>paste into Claude</span>
+              <button class="copy-btn" onclick="copyBlock(this, 'ch5-blocker-ask')">
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
+                Copy
+              </button>
+            </div>
+            <p id="ch5-blocker-ask">Add following hook &amp; paste following code</p>
+          </div>
+        </div>
+
+        <div class="sub-block">
+          <div class="sub-label">② The hook config to paste</div>
+
+          <div class="os-tabs">
+            <button class="os-tab active" onclick="switchTab(this, 'ch5-blocker-node')">node</button>
+            <button class="os-tab" onclick="switchTab(this, 'ch5-blocker-jq')">jq</button>
+          </div>
+
+          <!-- node -->
+          <div class="cmd-block" id="ch5-blocker-node-block">
+            <div class="cmd-block-header">
+              <span>settings.json</span>
+              <button class="copy-btn" onclick="copyBlock(this, 'ch5-blocker-node')">
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
+                Copy
+              </button>
+            </div>
+            <pre id="ch5-blocker-node">{
+  "hooks": {
+    "PreToolUse": [
+      {
+        "matcher": "Bash",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node -e \"try { const cmd = JSON.parse(require('fs').readFileSync(0, 'utf-8')).tool_input.command; const patterns = ['rm -rf /', 'rm -rf ~', 'drop table', 'truncate', '--force', 'push.*--force']; const match = patterns.find(p => new RegExp(p, 'i').test(cmd)); if (match) { console.error(`Blocked: pattern '${match}' detected`); process.exit(2); } } catch (e) { console.error(`Hook Error: ${e.message}`); process.exit(1); }\""
+          }
+        ]
+      }
+    ]
+  }
+}</pre>
+          </div>
+
+          <!-- jq -->
+          <div class="cmd-block" id="ch5-blocker-jq-block" style="display:none;">
+            <div class="cmd-block-header">
+              <span>settings.json</span>
+              <button class="copy-btn" onclick="copyBlock(this, 'ch5-blocker-jq')">
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
+                Copy
+              </button>
+            </div>
+            <pre id="ch5-blocker-jq">{
+  "hooks": {
+    "PreToolUse": [
+      {
+        "matcher": "Bash",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash -c 'CMD=$(jq -r \".tool_input.command\" <<< \"$(cat)\"); for p in \"rm -rf /\" \"rm -rf ~\" \"drop table\" \"DROP TABLE\" \"truncate\" \"TRUNCATE\" \"--force\" \"push.*--force\"; do if echo \"$CMD\" | grep -qiE \"$p\"; then echo \"Blocked: pattern \\\"$p\\\" detected\" >&2; exit 2; fi; done; exit 0'"
+          }
+        ]
+      }
+    ]
+  }
+}</pre>
+          </div>
+        </div>
+
+        <div class="sub-block">
+          <div class="sub-label">③ Test it — all of these should be blocked</div>
+          <div style="display:grid;gap:8px;">
+            <div class="cmd-block">
+              <div class="cmd-block-header">
+                <span>paste into Claude</span>
+                <button class="copy-btn" onclick="copyBlock(this, 'ch5-test1')">
+                  <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
+                  Copy
+                </button>
+              </div>
+              <pre id="ch5-test1">Run this command: rm -rf /</pre>
+            </div>
+            <div class="cmd-block">
+              <div class="cmd-block-header">
+                <span>paste into Claude</span>
+                <button class="copy-btn" onclick="copyBlock(this, 'ch5-test2')">
+                  <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
+                  Copy
+                </button>
+              </div>
+              <pre id="ch5-test2">Run: git push --force</pre>
+            </div>
+            <div class="cmd-block">
+              <div class="cmd-block-header">
+                <span>paste into Claude</span>
+                <button class="copy-btn" onclick="copyBlock(this, 'ch5-test3')">
+                  <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
+                  Copy
+                </button>
+              </div>
+              <pre id="ch5-test3">Run: DROP TABLE users</pre>
+            </div>
+          </div>
+        </div>
+
+        <div class="outcome-box" style="margin-top:4px;">
+          <div class="outcome-icon">✅</div>
+          <p>The hook intercepts each command before execution and outputs: <code>BLOCKED: pattern "..." detected</code>. The command never actually runs.</p>
+        </div>
+      </div>
+
+      <hr class="divider" />
+
+      <!-- Tip -->
+      <div class="tip-box">
+        <div style="font-size:18px;line-height:1;flex-shrink:0;margin-top:1px;">💡</div>
+        <p>You don't need a hook command ready in advance. Just describe your intent to Claude and it will generate the hook configuration for you.</p>
+      </div>
+
+    </div>
+  </section>
+
+
+  <!-- ════════════════════════════════════ CHAPTER 6 ════════ -->
+  <section class="chapter" id="ch6">
+    <div class="chapter-header">
+      <div class="chapter-badge">06</div>
+      <div>
+        <div class="chapter-title">Claude Settings</div>
+        <div class="chapter-subtitle">Environment variables and global config for customising Claude's behaviour</div>
+      </div>
+    </div>
+
+    <div class="chapter-body">
+
+      <div class="info-grid">
+
+        <!-- Global settings file -->
+        <div class="info-card">
+          <div class="info-card-title">
+            Open global settings
+            <span class="badge">FILE</span>
+          </div>
+          <p>Applies across all your projects.</p>
+          <pre><span class="cmd">code</span> ~/.claude/settings.json</pre>
+          <p style="margin-top:8px;">Full reference:<br>
+            <a href="https://code.claude.com/docs/en/env-vars" target="_blank" style="color:#4f6ef7;font-size:12.5px;">Environment Variables Docs</a> &nbsp;·&nbsp;
+            <a href="https://code.claude.com/docs/en/settings#available-settings" target="_blank" style="color:#4f6ef7;font-size:12.5px;">Available Settings Docs</a>
+          </p>
+        </div>
+
+        <!-- cleanupPeriodDays -->
+        <div class="info-card">
+          <div class="info-card-title">
+            cleanupPeriodDays
+            <span class="badge">ENV VAR</span>
+          </div>
+          <p>Sessions inactive longer than this are deleted at startup. Default: <strong>30</strong> days. Set to <strong>0</strong> to disable session persistence entirely.</p>
+          <pre><span class="key">"cleanupPeriodDays"</span>: <span class="val">"120"</span></pre>
+        </div>
+
+        <!-- BASH_MAX_OUTPUT_LENGTH -->
+        <div class="info-card">
+          <div class="info-card-title">
+            BASH_MAX_OUTPUT_LENGTH
+            <span class="badge">ENV VAR</span>
+          </div>
+          <p>Max characters in bash output before middle-truncation kicks in. Default: <strong>30000</strong>.</p>
+          <pre><span class="key">"BASH_MAX_OUTPUT_LENGTH"</span>: <span class="val">"150000"</span></pre>
+        </div>
+
+        <!-- CLAUDE_CODE_FILE_READ_MAX_OUTPUT_TOKENS -->
+        <div class="info-card">
+          <div class="info-card-title">
+            CLAUDE_CODE_FILE_READ_MAX_OUTPUT_TOKENS
+            <span class="badge">ENV VAR</span>
+          </div>
+          <p>Override the token limit for file reads. Default: <strong>25000</strong>. Raise to <strong>100000</strong> when working with large files on 1M context models.</p>
+          <pre><span class="key">"CLAUDE_CODE_FILE_READ_MAX_OUTPUT_TOKENS"</span>: <span class="val">"100000"</span></pre>
+        </div>
+
+        <!-- CLAUDE_AUTOCOMPACT_PCT_OVERRIDE -->
+        <div class="info-card">
+          <div class="info-card-title">
+            CLAUDE_AUTOCOMPACT_PCT_OVERRIDE
+            <span class="badge">ENV VAR</span>
+          </div>
+          <p>Sets the context capacity % at which auto-compaction triggers. Default: <strong>95%</strong>. Use a lower value like <strong>75</strong> to compact earlier. Applies to main conversations and sub-agents.</p>
+          <pre><span class="key">"CLAUDE_AUTOCOMPACT_PCT_OVERRIDE"</span>: <span class="val">"75"</span></pre>
+        </div>
+
+        <!-- Agent Teams -->
+        <div class="info-card">
+          <div class="info-card-title">
+            Agent Teams (experimental)
+            <span class="badge">ENV VAR</span>
+          </div>
+          <p>Enables experimental agent teams feature. Disabled by default. More info: <a href="https://code.claude.com/docs/en/agent-teams" target="_blank" style="color:#4f6ef7;font-size:12.5px;">Agent Teams Docs</a></p>
+          <pre><span class="key">"CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS"</span>: <span class="val">"1"</span></pre>
+        </div>
+
+        <!-- Disable analytics -->
+        <div class="info-card">
+          <div class="info-card-title">
+            Disable analytics &amp; telemetry
+            <span class="badge">ENV VAR</span>
+          </div>
+          <p>Opt out of telemetry, error reporting, and feedback surveys.</p>
+          <pre><span class="key">"DISABLE_TELEMETRY"</span>: <span class="val">"1"</span>
+<span class="key">"DISABLE_ERROR_REPORTING"</span>: <span class="val">"1"</span>
+<span class="key">"CLAUDE_CODE_DISABLE_FEEDBACK_SURVEY"</span>: <span class="val">"1"</span></pre>
+        </div>
+
+        <!-- CLAUDE_CODE_NEW_INIT -->
+        <div class="info-card">
+          <div class="info-card-title">
+            CLAUDE_CODE_NEW_INIT
+            <span class="badge">ENV VAR</span>
+          </div>
+          <p>Interviews you, scans your codebase, and sets up <code style="background:var(--code-inline);padding:1px 5px;border-radius:4px;font-size:12px;color:var(--code-text);">CLAUDE.md</code>, skills, and hooks automatically.</p>
+          <pre><span class="key">"env"</span>: {
+  <span class="key">"CLAUDE_CODE_NEW_INIT"</span>: <span class="val">"1"</span>
+}</pre>
+          <p style="margin-top:8px;font-size:12px;color:var(--text4);">File location:</p>
+          <pre><span class="comment">CLAUDE-WORKSHOP/
+ └── doctor-patient-app/
+     └── .claude/
+         └── settings.local.json</span>  ← add env here</pre>
+        </div>
+
+        <!-- Auto mode -->
+        <div class="info-card">
+          <div class="info-card-title">
+            Auto mode
+            <span class="badge">CLI FLAG</span>
+          </div>
+          <p>A safer long-running alternative to <code style="background:var(--code-inline);padding:1px 5px;border-radius:4px;font-size:12px;color:var(--code-text);">--dangerously-skip-permissions</code>.</p>
+          <pre><span class="cmd">claude</span> --enable-auto-mode</pre>
+        </div>
+
+      </div>
+    </div>
+  </section>
+
+  <!-- ════════════════════════════════════ CHAPTER 7 ════════ -->
+  <section class="chapter" id="ch7">
+    <div class="chapter-header">
+      <div class="chapter-badge">07</div>
+      <div>
+        <div class="chapter-title">MCP Server</div>
+        <div class="chapter-subtitle">Connect Claude to external tools and data sources via Model Context Protocol</div>
+      </div>
+    </div>
+
+    <div class="chapter-body">
+
+      <!-- What is MCP -->
+      <div class="info-card" style="background:#f8f9ff;border-color:#dde2ff;">
+        <div class="info-card-title">What is MCP?</div>
+        <p>MCP (Model Context Protocol) is an open standard that lets Claude connect to external tools, data sources, and services. Think of MCP servers as <strong>plugins for Claude</strong> — each server exposes tools Claude can call just like any built-in tool.</p>
+        <p>MCP servers are configured in a <code style="background:#e8eeff;padding:1px 5px;border-radius:4px;font-size:12px;">.mcp.json</code> file at the project root. Claude Code reads this on startup.</p>
+      </div>
+
+      <hr class="divider" />
+
+      <!-- Memory MCP -->
+      <div>
+        <div class="section-label">Hands-on — Memory MCP Server</div>
+
+        <div class="sub-block">
+          <div class="sub-label">① Create .mcp.json — ask Claude</div>
+          <div class="prompt-block">
+            <div class="prompt-block-header">
+              <span>paste into Claude</span>
+              <button class="copy-btn" onclick="copyBlock(this, 'ch7-mem-ask')">
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
+                Copy
+              </button>
+            </div>
+            <p id="ch7-mem-ask">Create a .mcp.json file in the project root with the memory MCP server configured.
+Use npx to run @modelcontextprotocol/server-memory and store the memory file at .memory/memory_doctor_patient.jsonl</p>
+          </div>
+        </div>
+
+        <div class="sub-block">
+          <div class="sub-label">Or create it manually</div>
+          <div class="cmd-block">
+            <div class="cmd-block-header">
+              <span>.mcp.json</span>
+              <button class="copy-btn" onclick="copyBlock(this, 'ch7-mem-json')">
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
+                Copy
+              </button>
+            </div>
+            <pre id="ch7-mem-json">{
+  "mcpServers": {
+    "memory": {
+      "command": "npx",
+      "args": [
+        "-y",
+        "@modelcontextprotocol/server-memory"
+      ]
+    }
+  }
+}</pre>
+          </div>
+        </div>
+
+        <div class="sub-block">
+          <div class="sub-label">Or with a custom memory file path</div>
+          <div class="cmd-block">
+            <div class="cmd-block-header">
+              <span>.mcp.json</span>
+              <button class="copy-btn" onclick="copyBlock(this, 'ch7-mem-path')">
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
+                Copy
+              </button>
+            </div>
+            <pre id="ch7-mem-path">{
+  "mcpServers": {
+    "memory": {
+      "command": "npx",
+      "args": [
+        "-y",
+        "@modelcontextprotocol/server-memory"
+      ],
+      "env": {
+        "MEMORY_FILE_PATH": "/path/to/custom/memory.jsonl"
+      }
+    }
+  }
+}</pre>
+          </div>
+        </div>
+
+        <div class="sub-block">
+          <div class="sub-label">② Restart Claude Code, then verify</div>
+          <div class="cmd-block">
+            <div class="cmd-block-header">
+              <span>terminal</span>
+              <button class="copy-btn" onclick="copyBlock(this, 'ch7-mem-verify')">
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
+                Copy
+              </button>
+            </div>
+            <pre id="ch7-mem-verify"><span class="slash">/mcp</span></pre>
+          </div>
+        </div>
+
+        <div class="outcome-box">
+          <div class="outcome-icon">✅</div>
+          <p>You should see <code>memory</code> listed as a connected server with its available tools.</p>
+        </div>
+      </div>
+
+      <hr class="divider" />
+
+      <!-- Using memory -->
+      <div>
+        <div class="section-label">Using the Memory Server</div>
+        <div style="display:grid;gap:8px;">
+          <div class="prompt-block">
+            <div class="prompt-block-header">
+              <span>paste into Claude</span>
+              <button class="copy-btn" onclick="copyBlock(this, 'ch7-use1')">
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
+                Copy
+              </button>
+            </div>
+            <p id="ch7-use1">Use memory MCP to save the project context — this is a Doctor-Patient Management System built with Next.js 16, Prisma 7, SQLite, and Ant Design 6.</p>
+          </div>
+          <div class="prompt-block">
+            <div class="prompt-block-header">
+              <span>paste into Claude</span>
+              <button class="copy-btn" onclick="copyBlock(this, 'ch7-use2')">
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
+                Copy
+              </button>
+            </div>
+            <p id="ch7-use2">What do you remember about our tech stack?</p>
+          </div>
+          <div class="prompt-block">
+            <div class="prompt-block-header">
+              <span>paste into Claude</span>
+              <button class="copy-btn" onclick="copyBlock(this, 'ch7-use3')">
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
+                Copy
+              </button>
+            </div>
+            <p id="ch7-use3">Show me everything stored in the memory knowledge graph.</p>
+          </div>
+        </div>
+      </div>
+
+      <hr class="divider" />
+
+      <!-- Practice MCPs -->
+      <div>
+        <div class="section-label">Practice — Additional MCP Servers</div>
+
+        <!-- context7 -->
+        <div class="sub-block">
+          <div class="sub-label">context7 — live documentation lookup</div>
+          <div class="cmd-block">
+            <div class="cmd-block-header">
+              <span>.mcp.json</span>
+              <button class="copy-btn" onclick="copyBlock(this, 'ch7-ctx7-json')">
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
+                Copy
+              </button>
+            </div>
+            <pre id="ch7-ctx7-json">{
+  "mcpServers": {
+    "context7": {
+      "command": "npx",
+      "args": ["-y", "@upstash/context7-mcp"]
+    }
+  }
+}</pre>
+          </div>
+          <div style="display:grid;gap:8px;margin-top:10px;">
+            <div class="prompt-block">
+              <div class="prompt-block-header">
+                <span>test prompt</span>
+                <button class="copy-btn" onclick="copyBlock(this, 'ch7-ctx7-t1')">
+                  <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
+                  Copy
+                </button>
+              </div>
+              <p id="ch7-ctx7-t1">What is the latest way to define routes in Next.js App Router?</p>
+            </div>
+            <div class="prompt-block">
+              <div class="prompt-block-header">
+                <span>test prompt</span>
+                <button class="copy-btn" onclick="copyBlock(this, 'ch7-ctx7-t2')">
+                  <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
+                  Copy
+                </button>
+              </div>
+              <p id="ch7-ctx7-t2">How do I configure Ant Design's theme token in v5+?</p>
+            </div>
+          </div>
+          <div class="outcome-box" style="margin-top:10px;">
+            <div class="outcome-icon">✅</div>
+            <p>Claude should fetch live documentation via <code>context7</code> tools like <code>resolve-library-id</code> and <code>query-docs</code> before answering.</p>
+          </div>
+        </div>
+
+        <!-- sequential-thinking -->
+        <div class="sub-block">
+          <div class="sub-label">sequential-thinking — structured step-by-step reasoning</div>
+          <div class="cmd-block">
+            <div class="cmd-block-header">
+              <span>.mcp.json</span>
+              <button class="copy-btn" onclick="copyBlock(this, 'ch7-seq-json')">
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
+                Copy
+              </button>
+            </div>
+            <pre id="ch7-seq-json">{
+  "mcpServers": {
+    "sequential-thinking": {
+      "command": "npx",
+      "args": ["-y", "@modelcontextprotocol/server-sequential-thinking"]
+    }
+  }
+}</pre>
+          </div>
+          <div style="display:grid;gap:8px;margin-top:10px;">
+            <div class="prompt-block">
+              <div class="prompt-block-header">
+                <span>test prompt</span>
+                <button class="copy-btn" onclick="copyBlock(this, 'ch7-seq-t1')">
+                  <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
+                  Copy
+                </button>
+              </div>
+              <p id="ch7-seq-t1">Think step by step about how to design a role-based access control system for our Doctor-Patient app where admins can manage doctors, doctors can view their patients, and patients can only see their own records.</p>
+            </div>
+            <div class="prompt-block">
+              <div class="prompt-block-header">
+                <span>test prompt</span>
+                <button class="copy-btn" onclick="copyBlock(this, 'ch7-seq-t2')">
+                  <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
+                  Copy
+                </button>
+              </div>
+              <p id="ch7-seq-t2">Break down the tradeoffs between using JWT tokens vs session cookies for authentication in a Next.js app.</p>
+            </div>
+          </div>
+          <div class="outcome-box" style="margin-top:10px;">
+            <div class="outcome-icon">✅</div>
+            <p>Claude should use <code>sequentialthinking</code> tool calls to reason through the problem in structured steps before giving a final answer.</p>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </section>
+
+
+  <!-- ════════════════════════════════════ CHAPTER 8 ════════ -->
+  <section class="chapter" id="ch8">
+    <div class="chapter-header">
+      <div class="chapter-badge">08</div>
+      <div>
+        <div class="chapter-title">Combining Features</div>
+        <div class="chapter-subtitle">One command that orchestrates agents, skills, hooks, and CLAUDE.md together</div>
+      </div>
+    </div>
+
+    <div class="chapter-body">
+
+      <!-- What already exists -->
+      <div>
+        <div class="section-label">What already exists from previous chapters</div>
+        <div class="info-card">
+          <p style="margin:0;font-size:13px;color:#555;line-height:1.8;">
+            <code style="background:#f0f0f0;padding:1px 5px;border-radius:4px;font-size:12px;">code-quality-auditor</code> agent &nbsp;·&nbsp; Ch 3<br>
+            <code style="background:#f0f0f0;padding:1px 5px;border-radius:4px;font-size:12px;">code-reviewer</code> skill &nbsp;·&nbsp; Ch 4<br>
+            <code style="background:#f0f0f0;padding:1px 5px;border-radius:4px;font-size:12px;">Prettier</code> hook on save &nbsp;·&nbsp; Ch 5<br>
+            <code style="background:#f0f0f0;padding:1px 5px;border-radius:4px;font-size:12px;">CLAUDE.md</code> project context &nbsp;·&nbsp; Ch 1
+          </p>
+        </div>
+        <div class="tip-box" style="margin-top:10px;">
+          <div style="font-size:18px;line-height:1;flex-shrink:0;margin-top:1px;">💡</div>
+          <p>We don't need to recreate any of these. We just need <strong>one new command</strong> + <strong>one new skill</strong> to tie them all together.</p>
+        </div>
+      </div>
+
+      <hr class="divider" />
+
+      <!-- File 1: build-feature command -->
+      <div>
+        <div class="section-label">File 1 — Create the /build-feature command</div>
+
+        <div class="sub-block">
+          <div class="sub-label">Path</div>
+          <div class="cmd-block">
+            <div class="cmd-block-header">
+              <span>location</span>
+              <button class="copy-btn" onclick="copyBlock(this, 'ch8-cmd-path')">
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
+                Copy
+              </button>
+            </div>
+            <pre id="ch8-cmd-path">.claude/commands/build-feature.md</pre>
+          </div>
+          <div class="cmd-block" style="margin-top:8px;">
+            <div class="cmd-block-header"><span>folder structure</span></div>
+            <pre>CLAUDE-WORKSHOP/
+└── .claude/
+    └── commands/
+        └── <span class="slash">build-feature.md</span>  ← create this</pre>
+          </div>
+        </div>
+
+        <div class="sub-block">
+          <div class="sub-label">File contents</div>
+          <div class="cmd-block">
+            <div class="cmd-block-header">
+              <span>build-feature.md</span>
+              <button class="copy-btn" onclick="copyBlock(this, 'ch8-cmd-content')">
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
+                Copy
+              </button>
+            </div>
+            <pre id="ch8-cmd-content">---
+description: Plan, implement, and review a new feature end-to-end
+---
+
+## Feature Request
+$ARGUMENTS
+
+## Instructions
+
+Follow these steps in order:
+
+### Step 1: Plan
+Read the prisma schema at `prisma/schema.prisma`, existing API routes in
+`src/app/api/`, and pages in `src/app/(authenticated)/`.
+Create a short plan (max 5 bullet points) for this feature.
+Ask me to confirm before proceeding.
+
+### Step 2: Implement
+After I confirm, implement following these patterns:
+- Prisma model changes in `prisma/schema.prisma`
+- API routes in `src/app/api/{resource}/route.ts`
+- UI page in `src/app/(authenticated)/{resource}/page.tsx`
+- Reuse existing Ant Design components and layout patterns
+- Prettier hook will auto-format each file on save — do not format manually
+
+### Step 3: Quality Review
+After implementation, launch the `code-quality-auditor` agent to review
+all changed files for correctness, security, and best practices.
+
+### Step 4: Deep Bug Review
+Run the `/code-reviewer` skill on the most critical changed files
+(API routes and database logic).
+
+### Step 5: Verify
+Run the `/verify-feature` skill to confirm the project builds successfully,
+the Prisma client is in sync, and no TypeScript compilation errors remain.
+If verification fails, fix the issues before proceeding.
+
+### Step 6: Summary
+Show a short summary:
+- Files created/modified
+- Review findings from both the agent and skill
+- Verification result (build pass/fail)
+- What to test manually</pre>
+          </div>
+        </div>
+      </div>
+
+      <hr class="divider" />
+
+      <!-- File 2: verify-feature skill -->
+      <div>
+        <div class="section-label">File 2 — Create the /verify-feature skill</div>
+
+        <div class="sub-block">
+          <div class="sub-label">Path</div>
+          <div class="cmd-block">
+            <div class="cmd-block-header">
+              <span>location</span>
+              <button class="copy-btn" onclick="copyBlock(this, 'ch8-skill-path')">
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
+                Copy
+              </button>
+            </div>
+            <pre id="ch8-skill-path">.claude/skills/verify-feature/SKILL.md</pre>
+          </div>
+          <div class="cmd-block" style="margin-top:8px;">
+            <div class="cmd-block-header"><span>folder structure</span></div>
+            <pre>CLAUDE-WORKSHOP/
+└── .claude/
+    └── skills/
+        └── verify-feature/
+            └── <span class="slash">SKILL.md</span>  ← create this</pre>
+          </div>
+        </div>
+
+        <div class="sub-block">
+          <div class="sub-label">File contents</div>
+          <div class="cmd-block">
+            <div class="cmd-block-header">
+              <span>SKILL.md</span>
+              <button class="copy-btn" onclick="copyBlock(this, 'ch8-skill-content')">
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
+                Copy
+              </button>
+            </div>
+            <pre id="ch8-skill-content">---
+description: Verify that the project builds, Prisma is in sync, and there are no errors
+---
+
+# Verify Feature
+
+Run these checks in order. Stop on the first failure and report what broke.
+
+## Step 1: Regenerate Prisma Client
+Run `npx prisma generate` to ensure the generated client matches the schema.
+If this fails, report the Prisma error.
+
+## Step 2: Sync Database
+Run `npx prisma db push` to apply any pending schema changes.
+If this fails, report the migration error.
+
+## Step 3: Build the Project
+Run `npx next build` to compile the full application.
+If this fails, extract the first error from the build output and report it.
+
+## Step 4: Report
+If all steps pass, output:
+- Prisma: OK
+- Database: OK
+- Build: OK (with the route summary from the build output)
+
+If any step fails, output which step failed and the error message
+so the caller can fix it before proceeding.</pre>
+          </div>
+        </div>
+      </div>
+
+      <hr class="divider" />
+
+      <!-- Live demo -->
+      <div>
+        <div class="section-label">Live demo prompt</div>
+        <div class="prompt-block">
+          <div class="prompt-block-header">
+            <span>paste into Claude</span>
+            <button class="copy-btn" onclick="copyBlock(this, 'ch8-demo')">
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
+              Copy
+            </button>
+          </div>
+          <p id="ch8-demo">/build-feature Add a prescriptions page where doctors can create and view prescriptions for their patients</p>
+        </div>
+      </div>
+
+      <!-- Outcome -->
+      <div>
+        <div class="section-label">Expected outcome</div>
+        <div class="outcome-box">
+          <div class="outcome-icon">✅</div>
+          <p><code>build-feature.md</code> exists in <code>.claude/commands/</code></p>
+        </div>
+        <div class="outcome-box" style="margin-top:8px;">
+          <div class="outcome-icon">✅</div>
+          <p><code>SKILL.md</code> exists in <code>.claude/skills/verify-feature/</code></p>
+        </div>
+        <div class="outcome-box" style="margin-top:8px; background:#f5f5f5; border-color:#ddd;">
+          <div class="outcome-icon">🔵</div>
+          <p style="color:#555;">Optional — prescriptions page builds and runs successfully after running <code>/build-feature</code></p>
+        </div>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- ════════════════════════════════════ CHAPTER 9 ════════ -->
+  <section class="chapter" id="ch9">
+    <div class="chapter-header">
+      <div class="chapter-badge">09</div>
+      <div>
+        <div class="chapter-title">Claude Commands</div>
+        <div class="chapter-subtitle">Built-in commands for remote control, scheduling, and session automation</div>
+      </div>
+    </div>
+
+    <div class="chapter-body">
+      <div class="info-grid">
+
+        <!-- dispatch -->
+        <div class="info-card">
+          <div class="info-card-title">
+            dispatch
+            <span class="badge">COMMAND</span>
+          </div>
+          <p>Assign tasks to Claude from anywhere using the Cowork environment. Message Claude from your phone to trigger real work on your active desktop — Claude uses your local files, desktop apps, and connected plugins, then sends a push notification with the result when done.</p>
+          <p>Provides a single continuous persistent thread across mobile and desktop.</p>
+        </div>
+
+        <!-- remote -->
+        <div class="info-card">
+          <div class="info-card-title">
+            remote
+            <span class="badge">COMMAND</span>
+          </div>
+          <p>Continue a local Claude Code session from any device. Connects a web interface at <code style="background:#f0f0f0;padding:1px 5px;border-radius:4px;font-size:12px;">claude.ai/code</code> or the Claude mobile app to your machine's running session — Claude executes tasks locally with full access to your filesystem, MCP servers, and tools.</p>
+          <pre><span class="cmd">claude</span> remote-control
+<span class="comment"># or inside Claude:</span>
+<span class="slash">/remote-control</span></pre>
+        </div>
+
+        <!-- schedule -->
+        <div class="info-card">
+          <div class="info-card-title">
+            schedule
+            <span class="badge">COMMAND</span>
+          </div>
+          <p>Set up and manage recurring tasks. Runs persistently in Anthropic's cloud infrastructure (even when your computer is off) or on your local machine via Desktop scheduled tasks.</p>
+          <pre><span class="slash">/schedule</span></pre>
+          <p style="margin-top:8px;">Use cases: reviewing PRs every morning, checking CI failures, writing documentation summaries.</p>
+        </div>
+
+        <!-- loop -->
+        <div class="info-card">
+          <div class="info-card-title">
+            loop
+            <span class="badge">COMMAND</span>
+          </div>
+          <p>A bundled skill for scheduling a recurring prompt within your current session. Provide an interval and prompt — Claude repeats it for as long as your session stays running. Lightweight alternative to fully persistent scheduled tasks.</p>
+          <pre><span class="slash">/loop</span> 10m check if the deployment finished</pre>
+        </div>
+
+      </div>
+    </div>
+  </section>
+
+
+  <!-- ════════════════════════════════════ CHAPTER 10 ════════ -->
+  <section class="chapter" id="ch10">
+    <div class="chapter-header">
+      <div class="chapter-badge">10</div>
+      <div>
+        <div class="chapter-title">Spec-Driven Development</div>
+        <div class="chapter-subtitle">Use the Superpowers plugin to go from prompt to implementation automatically</div>
+      </div>
+    </div>
+
+    <div class="chapter-body">
+
+      <!-- Setup -->
+      <div>
+        <div class="section-label">Setup — Install Superpowers plugin</div>
+        <div style="display:grid;gap:8px;">
+          <div class="cmd-block">
+            <div class="cmd-block-header">
+              <span>terminal</span>
+              <button class="copy-btn" onclick="copyBlock(this, 'ch10-install1')">
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
+                Copy
+              </button>
+            </div>
+            <pre id="ch10-install1"><span class="slash">/plugin</span> marketplace add obra/superpowers-marketplace</pre>
+          </div>
+          <div class="cmd-block">
+            <div class="cmd-block-header">
+              <span>terminal</span>
+              <button class="copy-btn" onclick="copyBlock(this, 'ch10-install2')">
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
+                Copy
+              </button>
+            </div>
+            <pre id="ch10-install2"><span class="slash">/plugin</span> install superpowers@superpowers-marketplace</pre>
+          </div>
+        </div>
+      </div>
+
+      <hr class="divider" />
+
+      <!-- Exercise -->
+      <div>
+        <div class="section-label">Exercise — Add Medicine Management module</div>
+        <div class="prompt-block">
+          <div class="prompt-block-header">
+            <span>paste into Claude</span>
+            <button class="copy-btn" onclick="copyBlock(this, 'ch10-prompt')">
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
+              Copy
+            </button>
+          </div>
+          <p id="ch10-prompt">Use superpowers brainstorm to brainstorm this idea: Add a Medicine Management module to this clinic app. It should follow the exact same flow and patterns as the existing Doctors and Patients modules.
+
+The Medicine model should have: name, generic name, category (e.g. Antibiotic, Painkiller, Antihypertensive, Antidiabetic, Vitamin), manufacturer, dosage form (Tablet, Capsule, Syrup, Injection, Cream), strength (e.g. "500mg", "10mg/5ml"), price, stock quantity, requires prescription (boolean), and status (Available, Out of Stock, Discontinued).
+
+Add a "Medicines" link in the sidebar. The medicines listing page should show a searchable table with columns for name, category, dosage form, strength, stock quantity, and status. Include an "Add Medicine" button that opens a form page. Each medicine row should link to a detail page with all fields and an edit option.
+
+Seed the database with 15-20 medicines like Amoxicillin, Ibuprofen, Metformin, Lisinopril, Cetirizine, Omeprazole, Paracetamol, Azithromycin, Vitamin D3, Insulin Glargine, Salbutamol Inhaler, Diclofenac Gel, Metoprolol, Atorvastatin, and Folic Acid — with realistic dosage forms, strengths, prices, and stock quantities. Follow the same seed pattern used for doctors and patients in seed.ts.
+
+Use the existing tech stack and code patterns throughout.</p>
+        </div>
+      </div>
+
+      <hr class="divider" />
+
+      <!-- After implementation -->
+      <div>
+        <div class="section-label">After implementation</div>
+        <div style="display:grid;gap:8px;">
+          <div class="cmd-block">
+            <div class="cmd-block-header">
+              <span>terminal</span>
+              <button class="copy-btn" onclick="copyBlock(this, 'ch10-after1')">
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
+                Copy
+              </button>
+            </div>
+            <pre id="ch10-after1">pnpm exec prisma migrate dev</pre>
+          </div>
+          <div class="cmd-block">
+            <div class="cmd-block-header">
+              <span>terminal</span>
+              <button class="copy-btn" onclick="copyBlock(this, 'ch10-after2')">
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
+                Copy
+              </button>
+            </div>
+            <pre id="ch10-after2">pnpm exec prisma db seed</pre>
+          </div>
+          <div class="cmd-block">
+            <div class="cmd-block-header">
+              <span>terminal</span>
+              <button class="copy-btn" onclick="copyBlock(this, 'ch10-after3')">
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
+                Copy
+              </button>
+            </div>
+            <pre id="ch10-after3">pnpm dev</pre>
+          </div>
+        </div>
+      </div>
+
+      <div>
+        <div class="outcome-box">
+          <div class="outcome-icon">✅</div>
+          <p>Superpowers brainstorms → presents design for approval → creates task plan → implements → writes tests. Navigate to the Medicines section in the sidebar after seeding. Login: <code>admin@clinic.com</code> / <code>password123</code></p>
+        </div>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- ════════════════════════════════════ CHAPTER 11 ════════ -->
+  <section class="chapter" id="ch11">
+    <div class="chapter-header">
+      <div class="chapter-badge">11</div>
+      <div>
+        <div class="chapter-title">Frontend Design with Claude Code</div>
+        <div class="chapter-subtitle">Design-to-code workflows using Google Stitch MCP and Stitch Skills</div>
+      </div>
+    </div>
+
+    <div class="chapter-body">
+
+      <!-- Setup -->
+      <div>
+        <div class="section-label">Setup — Install Stitch MCP server</div>
+        <div class="tip-box" style="margin-bottom:12px;">
+          <div style="font-size:18px;line-height:1;flex-shrink:0;margin-top:1px;">📌</div>
+          <p>Replace <code>api-key</code> with your key from <a href="https://stitch.withgoogle.com" target="_blank" style="color:#4f6ef7;">stitch.withgoogle.com</a></p>
+        </div>
+        <div class="cmd-block">
+          <div class="cmd-block-header">
+            <span>terminal</span>
+            <button class="copy-btn" onclick="copyBlock(this, 'ch11-mcp')">
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
+              Copy
+            </button>
+          </div>
+          <pre id="ch11-mcp">claude mcp add stitch --transport http https://stitch.googleapis.com/mcp --header "X-Goog-Api-Key: api-key" -s project</pre>
+        </div>
+      </div>
+
+      <hr class="divider" />
+
+      <!-- Stitch Skills -->
+      <div>
+        <div class="section-label">List available Stitch skills</div>
+        <div class="cmd-block">
+          <div class="cmd-block-header">
+            <span>terminal</span>
+            <button class="copy-btn" onclick="copyBlock(this, 'ch11-skills')">
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
+              Copy
+            </button>
+          </div>
+          <pre id="ch11-skills">npx skills add google-labs-code/stitch-skills --list</pre>
+        </div>
+      </div>
+
+      <hr class="divider" />
+
+      <!-- References -->
+      <div class="info-card">
+        <div class="info-card-title">References</div>
+        <p>
+          <a href="https://stitch.withgoogle.com/docs/mcp/setup" target="_blank" style="color:#4f6ef7;">stitch.withgoogle.com/docs/mcp/setup</a><br>
+          <a href="https://github.com/google-labs-code/stitch-skills" target="_blank" style="color:#4f6ef7;">github.com/google-labs-code/stitch-skills</a>
+        </p>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- ════════════════════════════════════ CHAPTER 12 ════════ -->
+  <section class="chapter" id="ch12">
+    <div class="chapter-header">
+      <div class="chapter-badge">12</div>
+      <div>
+        <div class="chapter-title">Agent Browser Automation</div>
+        <div class="chapter-subtitle">Control a real browser with agent-browser to automate, test, and QA the app</div>
+      </div>
+    </div>
+
+    <div class="chapter-body">
+
+      <!-- Setup -->
+      <div>
+        <div class="section-label">Setup</div>
+
+        <div class="sub-block">
+          <div class="sub-label">① Install agent-browser</div>
+          <div class="cmd-block">
+            <div class="cmd-block-header">
+              <span>terminal</span>
+              <button class="copy-btn" onclick="copyBlock(this, 'ch12-install')">
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
+                Copy
+              </button>
+            </div>
+            <pre id="ch12-install">pnpm add -g agent-browser</pre>
+          </div>
+        </div>
+
+        <div class="sub-block">
+          <div class="sub-label">② Download browser</div>
+          <div class="cmd-block">
+            <div class="cmd-block-header">
+              <span>terminal</span>
+              <button class="copy-btn" onclick="copyBlock(this, 'ch12-browser')">
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
+                Copy
+              </button>
+            </div>
+            <pre id="ch12-browser">agent-browser install</pre>
+          </div>
+        </div>
+
+        <div class="sub-block">
+          <div class="sub-label">③ Install the Claude Code skill</div>
+          <div class="cmd-block">
+            <div class="cmd-block-header">
+              <span>terminal</span>
+              <button class="copy-btn" onclick="copyBlock(this, 'ch12-skill')">
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
+                Copy
+              </button>
+            </div>
+            <pre id="ch12-skill">npx skills add https://github.com/vercel-labs/agent-browser --skill agent-browser</pre>
+          </div>
+        </div>
+
+        <div class="sub-block">
+          <div class="sub-label">④ Verify installation</div>
+          <div class="cmd-block">
+            <div class="cmd-block-header">
+              <span>terminal</span>
+              <button class="copy-btn" onclick="copyBlock(this, 'ch12-verify')">
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
+                Copy
+              </button>
+            </div>
+            <pre id="ch12-verify">agent-browser open http://localhost:3000 && agent-browser snapshot</pre>
+          </div>
+        </div>
+      </div>
+
+      <hr class="divider" />
+
+      <!-- Prompts -->
+      <div>
+        <div class="section-label">Automation prompts</div>
+        <div class="tip-box" style="margin-bottom:12px;">
+          <div style="font-size:18px;line-height:1;flex-shrink:0;margin-top:1px;">📌</div>
+          <p>Make sure your app is running first: <code>cd doctor-patient-app && pnpm dev</code></p>
+        </div>
+
+        <div class="sub-block">
+          <div class="sub-label">Prompt 1 — Login flow (headed mode)</div>
+          <div class="cmd-block">
+            <div class="cmd-block-header">
+              <span>terminal</span>
+              <button class="copy-btn" onclick="copyBlock(this, 'ch12-p1')">
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
+                Copy
+              </button>
+            </div>
+            <pre id="ch12-p1">agent-browser close --all
+agent-browser --headed open http://localhost:3000/login && \
+agent-browser --headed snapshot -i && \
+agent-browser --headed fill @e8 "admin@clinic.com" && \
+agent-browser --headed wait 1000 && \
+agent-browser --headed fill @e9 "password123" && \
+agent-browser --headed wait 1000 && \
+agent-browser --headed click @e7 && \
+agent-browser --headed wait --load networkidle && \
+agent-browser --headed screenshot ./screenshots/login-success.png</pre>
+          </div>
+        </div>
+
+        <div class="sub-block">
+          <div class="sub-label">Prompt 2 — Dashboard visual QA</div>
+          <div class="prompt-block">
+            <div class="prompt-block-header">
+              <span>paste into Claude</span>
+              <button class="copy-btn" onclick="copyBlock(this, 'ch12-p2')">
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
+                Copy
+              </button>
+            </div>
+            <p id="ch12-p2">Using agent-browser, verify the dashboard page of our doctor-patient app:
+
+1. Open http://localhost:3000/login and log in with admin@clinic.com / password123
+2. Navigate to http://localhost:3000/dashboard
+3. Take a full-page screenshot and save to ./screenshots/dashboard-full.png
+4. Take a snapshot and extract: number of cards/widgets visible, any chart or graph components, sidebar menu items
+5. Report what you see on the dashboard</p>
+          </div>
+        </div>
+
+        <div class="sub-block">
+          <div class="sub-label">Prompt 3 — Doctors list CRUD walkthrough</div>
+          <div class="prompt-block">
+            <div class="prompt-block-header">
+              <span>paste into Claude</span>
+              <button class="copy-btn" onclick="copyBlock(this, 'ch12-p3')">
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
+                Copy
+              </button>
+            </div>
+            <p id="ch12-p3">Using agent-browser, test the Doctors List page (make sure to run this in headed mode to see the interactions):
+
+0. Always clear the Email and Password field before filling the new credential. As we might have auto fill enabled.
+1. Log in to http://localhost:3000/login (admin@clinic.com / password123)
+2. Navigate to http://localhost:3000/doctors
+3. Take a snapshot — list all doctors currently shown
+4. If there's an "Add Doctor" button, click it
+5. Fill in the form with test data:
+   - Name: "Dr. Test Browser"
+   - Specialization: "Automation"
+   - Email: "dr.test@clinic.com"
+6. Submit the form
+7. Take a snapshot to confirm the new doctor appears in the list
+8. Take a screenshot and save to ./screenshots/doctors-crud.png</p>
+          </div>
+        </div>
+
+        <div class="sub-block">
+          <div class="sub-label">Prompt 4 — Responsive design check</div>
+          <div class="prompt-block">
+            <div class="prompt-block-header">
+              <span>paste into Claude</span>
+              <button class="copy-btn" onclick="copyBlock(this, 'ch12-p4')">
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
+                Copy
+              </button>
+            </div>
+            <p id="ch12-p4">Using agent-browser, test responsive layouts of our doctor-patient app:
+
+1. Log in to the app
+2. Navigate to the dashboard
+3. Set viewport to desktop (1920x1080) and screenshot as ./screenshots/responsive-desktop.png
+4. Set viewport to tablet (768x1024) and screenshot as ./screenshots/responsive-tablet.png
+5. Set viewport to mobile (375x812) and screenshot as ./screenshots/responsive-mobile.png
+6. For each viewport, note: Is the sidebar collapsed or visible? Are charts/cards stacking properly? Any overflow or layout issues?
+7. Summarize responsive behavior across all breakpoints</p>
+          </div>
+        </div>
+      </div>
+
+      <hr class="divider" />
+
+      <!-- Quick reference table -->
+      <div>
+        <div class="section-label">Quick reference</div>
+        <div class="info-card">
+          <table style="width:100%;border-collapse:collapse;font-size:12.5px;">
+            <thead>
+              <tr style="border-bottom:2px solid #e8e8e8;">
+                <th style="text-align:left;padding:6px 10px;color:#333;">Command</th>
+                <th style="text-align:left;padding:6px 10px;color:#333;">Description</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr style="border-bottom:1px solid #f0f0f0;"><td style="padding:6px 10px;font-family:monospace;color:#4f6ef7;">agent-browser --headed open &lt;url&gt;</td><td style="padding:6px 10px;color:#555;">Open browser window (visible)</td></tr>
+              <tr style="border-bottom:1px solid #f0f0f0;"><td style="padding:6px 10px;font-family:monospace;color:#4f6ef7;">agent-browser open &lt;url&gt;</td><td style="padding:6px 10px;color:#555;">Navigate to a URL (headless)</td></tr>
+              <tr style="border-bottom:1px solid #f0f0f0;"><td style="padding:6px 10px;font-family:monospace;color:#4f6ef7;">agent-browser close --all</td><td style="padding:6px 10px;color:#555;">Close all sessions and restart fresh</td></tr>
+              <tr style="border-bottom:1px solid #f0f0f0;"><td style="padding:6px 10px;font-family:monospace;color:#4f6ef7;">agent-browser snapshot -i</td><td style="padding:6px 10px;color:#555;">Interactive elements only (with @refs)</td></tr>
+              <tr style="border-bottom:1px solid #f0f0f0;"><td style="padding:6px 10px;font-family:monospace;color:#4f6ef7;">agent-browser screenshot [path]</td><td style="padding:6px 10px;color:#555;">Capture screenshot</td></tr>
+              <tr style="border-bottom:1px solid #f0f0f0;"><td style="padding:6px 10px;font-family:monospace;color:#4f6ef7;">agent-browser click @e1</td><td style="padding:6px 10px;color:#555;">Click an element</td></tr>
+              <tr style="border-bottom:1px solid #f0f0f0;"><td style="padding:6px 10px;font-family:monospace;color:#4f6ef7;">agent-browser fill @e2 "text"</td><td style="padding:6px 10px;color:#555;">Clear and fill input</td></tr>
+              <tr style="border-bottom:1px solid #f0f0f0;"><td style="padding:6px 10px;font-family:monospace;color:#4f6ef7;">agent-browser wait --load networkidle</td><td style="padding:6px 10px;color:#555;">Wait for page load</td></tr>
+              <tr style="border-bottom:1px solid #f0f0f0;"><td style="padding:6px 10px;font-family:monospace;color:#4f6ef7;">agent-browser viewport 375 812</td><td style="padding:6px 10px;color:#555;">Set viewport size</td></tr>
+              <tr style="border-bottom:1px solid #f0f0f0;"><td style="padding:6px 10px;font-family:monospace;color:#4f6ef7;">agent-browser save-state login</td><td style="padding:6px 10px;color:#555;">Save auth session</td></tr>
+              <tr><td style="padding:6px 10px;font-family:monospace;color:#4f6ef7;">agent-browser load-state login</td><td style="padding:6px 10px;color:#555;">Restore auth session</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <hr class="divider" />
+
+      <!-- Tips -->
+      <div>
+        <div class="section-label">Tips</div>
+        <div class="info-card">
+          <p>Always <strong>snapshot after navigation</strong> — element refs invalidate after page changes.</p>
+          <p>Use <strong>--headed</strong> flag to watch automation happen in real time. Restart with <code>agent-browser close --all</code> before switching modes.</p>
+          <p>Save auth once with <code>save-state</code>, then use <code>load-state</code> to skip login in future runs.</p>
+          <p>Add <code>agent-browser wait 1000</code> pauses between interactions in headed mode for easier visual tracking.</p>
+        </div>
+      </div>
+
+      <hr class="divider" />
+
+      <!-- References -->
+      <div class="info-card">
+        <div class="info-card-title">References</div>
+        <p>
+          <a href="https://skills.sh/vercel-labs/agent-browser/agent-browser" target="_blank" style="color:#4f6ef7;">skills.sh/vercel-labs/agent-browser</a><br>
+          <a href="https://github.com/vercel-labs/agent-browser" target="_blank" style="color:#4f6ef7;">github.com/vercel-labs/agent-browser</a>
+        </p>
+      </div>
+
+    </div>
+  </section>
+
+</main>
+
+<!-- Toast -->
+<div id="toast">Copied to clipboard!</div>
+
+<script>
+  // ── Copy to clipboard ──
+  const COPY_SVG   = `<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>`;
+  const COPIED_SVG = `<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg>`;
+
+  function copyBlock(btn, id) {
+    const el = document.getElementById(id);
+    const text = (el.innerText || el.textContent).trim();
+
+    function onSuccess() {
+      btn.classList.add('copied');
+      btn.innerHTML = COPIED_SVG + ' Copied';
+      showToast();
+      setTimeout(() => {
+        btn.classList.remove('copied');
+        btn.innerHTML = COPY_SVG + ' Copy';
+      }, 2000);
+    }
+
+    // Modern API (works on https / localhost)
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      navigator.clipboard.writeText(text).then(onSuccess).catch(() => fallbackCopy(text, onSuccess));
+    } else {
+      fallbackCopy(text, onSuccess);
+    }
+  }
+
+  // Fallback: works on file:// and older browsers
+  function fallbackCopy(text, onSuccess) {
+    const ta = document.createElement('textarea');
+    ta.value = text;
+    ta.style.cssText = 'position:fixed;top:0;left:0;opacity:0;pointer-events:none';
+    document.body.appendChild(ta);
+    ta.focus();
+    ta.select();
+    try {
+      document.execCommand('copy');
+      onSuccess();
+    } catch (e) {
+      console.warn('Copy failed', e);
+    }
+    document.body.removeChild(ta);
+  }
+
+  function showToast() {
+    const t = document.getElementById('toast');
+    t.classList.add('show');
+    setTimeout(() => t.classList.remove('show'), 1800);
+  }
+
+  // ── OS Tab switcher ──
+  function switchTab(btn, id) {
+    const tabGroup = btn.closest('.sub-block');
+    tabGroup.querySelectorAll('.os-tab').forEach(t => t.classList.remove('active'));
+    btn.classList.add('active');
+    // hide all blocks in this sub-block, show the selected one
+    tabGroup.querySelectorAll('.cmd-block').forEach(b => b.style.display = 'none');
+    document.getElementById(id + '-block').style.display = 'block';
+  }
+
+  // ── Sidebar collapse ──
+  const sidebar = document.getElementById('sidebar');
+  const mainEl  = document.querySelector('.main');
+  const colBtn  = document.getElementById('collapse-btn');
+  let collapsed = false;
+
+  function toggleSidebar() {
+    collapsed = !collapsed;
+    sidebar.classList.toggle('collapsed', collapsed);
+    mainEl.classList.toggle('expanded', collapsed);
+    colBtn.textContent = collapsed ? '›' : '‹';
+    localStorage.setItem('sidebar-collapsed', collapsed);
+  }
+
+  if (localStorage.getItem('sidebar-collapsed') === 'true') toggleSidebar();
+
+  // ── Mode switcher ──
+  function setMode(mode) {
+    document.body.classList.remove('dark', 'reader');
+    if (mode !== 'light') document.body.classList.add(mode);
+    document.querySelectorAll('.mode-btn').forEach(b => b.classList.remove('active'));
+    document.getElementById('btn-' + mode).classList.add('active');
+    localStorage.setItem('color-mode', mode);
+  }
+
+  const savedMode = localStorage.getItem('color-mode') || 'light';
+  setMode(savedMode);
+
+  // ── Active sidebar link on scroll ──
+  const sections = document.querySelectorAll('section[id]');
+  const links    = document.querySelectorAll('.sidebar nav a');
+
+  const observer = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting) {
+        links.forEach(l => l.classList.remove('active'));
+        const active = document.querySelector(`.sidebar nav a[href="#${entry.target.id}"]`);
+        if (active) active.classList.add('active');
+      }
+    });
+  }, { threshold: 0.3 });
+
+  sections.forEach(s => observer.observe(s));
+</script>
+</body>
+</html>

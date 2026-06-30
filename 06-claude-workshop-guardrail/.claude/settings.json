@@ -1,0 +1,61 @@
+{
+  "permissions": {
+    "deny": [
+      "Read(./.env)",
+      "Read(./.env.*)",
+      "Read(./secrets/**)",
+      "Read(./customers/**)",
+      "Read(./config/credentials.json)",
+      "mcp__mongodb__insert-one",
+      "mcp__mongodb__insert-many",
+      "mcp__mongodb__update-one",
+      "mcp__mongodb__update-many",
+      "mcp__mongodb__delete-one",
+      "mcp__mongodb__delete-many",
+      "mcp__mongodb__drop-collection",
+      "mcp__mongodb__drop-database",
+      "mcp__mongodb__create-collection",
+      "mcp__mongodb__create-index",
+      "mcp__mongodb__rename-collection",
+      "Bash(mongosh:*)",
+      "Bash(mongo:*)",
+      "Bash(mongoimport:*)",
+      "Bash(mongorestore:*)",
+      "Bash(git commit:*)",
+      "Bash(git push:*)"
+    ]
+  },
+  "hooks": {
+    "PreToolUse": [
+      {
+        "matcher": "Read",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "\"$CLAUDE_PROJECT_DIR/.claude/hooks/block-secrets.sh\""
+          }
+        ]
+      },
+      {
+        "matcher": "Bash",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node -e \"let d='';process.stdin.on('data',c=>d+=c);process.stdin.on('end',()=>{try{const c=(JSON.parse(d).tool_input?.command)||'';const mongo=/(mongodb(\\\\+srv)?:\\\\/\\\\/|MongoClient|require\\\\(['\\\"]mongodb|from\\\\s+['\\\"]mongodb|pymongo|mongoose)/i.test(c);const write=/(insertOne|insertMany|updateOne|updateMany|deleteOne|deleteMany|replaceOne|bulkWrite|findOneAndUpdate|findOneAndDelete|findOneAndReplace|dropDatabase|dropCollection|createCollection|renameCollection|createIndex|\\\\$out|\\\\$merge|insert_one|insert_many|update_one|update_many|delete_one|delete_many|replace_one|bulk_write|drop_collection|create_collection|\\\\.drop\\\\(|\\\\.remove\\\\()/i.test(c);if(mongo&&write){console.log(JSON.stringify({hookSpecificOutput:{hookEventName:'PreToolUse',permissionDecision:'deny',permissionDecisionReason:'Database write/delete operations are blocked by policy (.claude/settings.json).'}}));}}catch(e){}});\""
+          }
+        ]
+      }
+    ],
+    "PostToolUse": [
+      {
+        "matcher": "Write|Edit",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node -e \"process.stdin.resume();let d='';process.stdin.on('data',c=>d+=c);process.stdin.on('end',()=>{const f=JSON.parse(d).tool_input?.file_path;if(f){require('child_process').spawnSync('npx',['prettier','--write',f],{stdio:'inherit',shell:true})}})\""
+          }
+        ]
+      }
+    ]
+  }
+}

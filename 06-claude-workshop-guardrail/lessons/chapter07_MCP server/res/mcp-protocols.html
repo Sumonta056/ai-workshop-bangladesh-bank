@@ -1,0 +1,442 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>MCP & Protocols — Interactive Guide</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Syne:wght@400;600;700;800&family=DM+Sans:wght@300;400;500&display=swap');
+  *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+  :root{
+    --bg:#0b0c0f;--surface:#13151a;--surface2:#1c1f28;
+    --border:rgba(255,255,255,0.07);--border2:rgba(255,255,255,0.13);
+    --text:#e8eaf0;--muted:#7a7f94;--accent:#6c63ff;--accent2:#00e5b4;
+    --rest:#4f9eff;--graphql:#e535ab;--grpc:#0dcaf0;--ws:#ffc107;
+    --soap:#6ea8fe;--tcp:#20c997;--mqtt:#fd7e14;--sse:#a78bfa;
+    --fs:#86efac;--cdp:#fb923c;
+  }
+  body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;line-height:1.6}
+  header{padding:3rem 2rem 2rem;text-align:center;border-bottom:1px solid var(--border);position:relative;overflow:hidden}
+  header::before{content:'';position:absolute;inset:0;background:radial-gradient(ellipse 80% 60% at 50% -10%,rgba(108,99,255,0.18) 0%,transparent 70%);pointer-events:none}
+  .eyebrow{font-family:'DM Mono',monospace;font-size:0.7rem;letter-spacing:0.2em;text-transform:uppercase;color:var(--accent2);margin-bottom:0.75rem}
+  h1{font-family:'Syne',sans-serif;font-size:clamp(2rem,5vw,3.5rem);font-weight:800;line-height:1.1;background:linear-gradient(135deg,#fff 30%,var(--accent) 100%);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;margin-bottom:1rem}
+  .subtitle{color:var(--muted);font-size:1rem;max-width:520px;margin:0 auto}
+  nav{display:flex;gap:0.25rem;justify-content:center;padding:1.25rem 2rem;flex-wrap:wrap;border-bottom:1px solid var(--border);position:sticky;top:0;background:rgba(11,12,15,0.94);backdrop-filter:blur(12px);z-index:100}
+  .tab{padding:0.45rem 1rem;border-radius:6px;border:1px solid var(--border);background:transparent;color:var(--muted);font-family:'DM Mono',monospace;font-size:0.75rem;cursor:pointer;transition:all 0.2s;letter-spacing:0.03em}
+  .tab:hover{border-color:var(--border2);color:var(--text)}
+  .tab.active{background:var(--accent);border-color:var(--accent);color:#fff}
+  main{max-width:1100px;margin:0 auto;padding:2rem}
+  section{display:none}
+  section.active{display:block}
+
+  /* proto cards */
+  .proto-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:1rem;margin-top:1.5rem}
+  .proto-card{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:1.5rem;cursor:pointer;transition:all 0.25s;position:relative;overflow:hidden}
+  .proto-card::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:var(--card-color,var(--accent));opacity:0;transition:opacity 0.25s}
+  .proto-card:hover{border-color:var(--border2);transform:translateY(-2px)}
+  .proto-card:hover::before,.proto-card.expanded::before{opacity:1}
+  .proto-card.expanded{border-color:var(--card-color,var(--accent));background:var(--surface2)}
+  .card-header{display:flex;align-items:center;gap:0.75rem;margin-bottom:0.75rem;flex-wrap:wrap}
+  .proto-badge{font-family:'DM Mono',monospace;font-size:0.65rem;font-weight:500;padding:0.2rem 0.5rem;border-radius:4px;background:color-mix(in srgb,var(--card-color,var(--accent)) 15%,transparent);color:var(--card-color,var(--accent));border:1px solid color-mix(in srgb,var(--card-color,var(--accent)) 30%,transparent);letter-spacing:0.05em;text-transform:uppercase;white-space:nowrap}
+  .proto-name{font-family:'Syne',sans-serif;font-size:0.9rem;font-weight:700;color:var(--text)}
+  .proto-desc{font-size:0.83rem;color:var(--muted);margin-bottom:1rem}
+  .proto-tags{display:flex;flex-wrap:wrap;gap:0.4rem;margin-bottom:0.75rem}
+  .tag{font-family:'DM Mono',monospace;font-size:0.63rem;padding:0.2rem 0.5rem;border-radius:4px;background:var(--surface2);color:var(--muted);border:1px solid var(--border)}
+  .proto-detail{display:none;margin-top:1rem;padding-top:1rem;border-top:1px solid var(--border)}
+  .proto-card.expanded .proto-detail{display:block}
+  .detail-row{display:flex;gap:0.75rem;margin-bottom:0.5rem;font-size:0.81rem}
+  .detail-label{font-family:'DM Mono',monospace;font-size:0.68rem;color:var(--muted);min-width:80px;padding-top:0.1rem}
+  .detail-val{color:var(--text)}
+  .mcp-how{margin-top:1rem;padding:0.75rem 1rem;border-radius:8px;background:color-mix(in srgb,var(--card-color,var(--accent)) 8%,transparent);border:1px solid color-mix(in srgb,var(--card-color,var(--accent)) 20%,transparent);font-size:0.81rem;color:var(--text)}
+  .mcp-how-label{font-family:'DM Mono',monospace;font-size:0.65rem;color:var(--card-color,var(--accent));text-transform:uppercase;letter-spacing:0.1em;margin-bottom:0.4rem}
+  .mcp-example{margin-top:0.6rem;font-family:'DM Mono',monospace;font-size:0.69rem;color:var(--muted);line-height:1.6;background:var(--bg);padding:0.6rem 0.75rem;border-radius:6px;border:1px solid var(--border)}
+
+  /* flows */
+  .flow-picker{display:flex;gap:0.5rem;flex-wrap:wrap;margin-bottom:1.5rem}
+  .flow-btn{padding:0.4rem 0.9rem;border-radius:6px;border:1px solid var(--border);background:transparent;color:var(--muted);font-family:'DM Mono',monospace;font-size:0.72rem;cursor:pointer;transition:all 0.2s}
+  .flow-btn:hover{border-color:var(--border2);color:var(--text)}
+  .flow-btn.active{background:var(--flow-color,var(--accent));border-color:transparent;color:#fff}
+  .flow-diagram{display:none;background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:2rem}
+  .flow-diagram.active{display:block}
+  .flow-title{font-family:'Syne',sans-serif;font-size:1.1rem;font-weight:700;margin-bottom:0.3rem}
+  .flow-subtitle{font-size:0.82rem;color:var(--muted);margin-bottom:2rem}
+  .flow-nodes{display:flex;flex-direction:column;align-items:center}
+  .flow-node{width:100%;max-width:580px;padding:0.9rem 1.2rem;border-radius:8px;border:1px solid var(--border2);background:var(--surface2)}
+  .flow-node.highlight{border-color:var(--flow-color,var(--accent));background:color-mix(in srgb,var(--flow-color,var(--accent)) 10%,var(--surface2))}
+  .node-label{font-family:'DM Mono',monospace;font-size:0.63rem;text-transform:uppercase;letter-spacing:0.1em;color:var(--flow-color,var(--accent));margin-bottom:0.2rem}
+  .node-title{font-family:'Syne',sans-serif;font-size:0.92rem;font-weight:600;margin-bottom:0.15rem}
+  .node-sub{font-family:'DM Mono',monospace;font-size:0.7rem;color:var(--muted);line-height:1.5}
+  .flow-arrow{display:flex;flex-direction:column;align-items:center;padding:0.25rem 0;gap:2px}
+  .arrow-line{width:1px;height:16px;background:var(--border2)}
+  .arrow-label{font-family:'DM Mono',monospace;font-size:0.63rem;color:var(--muted);background:var(--surface);padding:0.1rem 0.5rem;border-radius:4px;border:1px solid var(--border);white-space:nowrap}
+  .arrow-head{width:0;height:0;border-left:5px solid transparent;border-right:5px solid transparent;border-top:7px solid var(--border2)}
+
+  /* table */
+  .compare-wrap{margin-top:1.5rem;overflow-x:auto}
+  table{width:100%;border-collapse:collapse;font-size:0.81rem;min-width:750px}
+  th{font-family:'DM Mono',monospace;font-size:0.67rem;text-transform:uppercase;letter-spacing:0.08em;color:var(--muted);padding:0.75rem 1rem;text-align:left;border-bottom:1px solid var(--border2);font-weight:500}
+  td{padding:0.7rem 1rem;border-bottom:1px solid var(--border);vertical-align:top}
+  tr:last-child td{border-bottom:none}
+  tr:hover td{background:var(--surface2)}
+  .proto-pill{display:inline-block;font-family:'DM Mono',monospace;font-size:0.65rem;padding:0.15rem 0.5rem;border-radius:4px;font-weight:500;text-transform:uppercase;letter-spacing:0.05em}
+  .dot-yes{color:var(--accent2)}
+  .dot-no{color:#ff6b6b}
+
+  /* transport */
+  .transport-cards{display:grid;grid-template-columns:1fr 1fr;gap:1rem;margin-top:1.5rem}
+  @media(max-width:600px){.transport-cards{grid-template-columns:1fr}}
+  .transport-card{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:1.5rem}
+  .transport-card h3{font-family:'Syne',sans-serif;font-size:1rem;font-weight:700;margin-bottom:0.5rem}
+  .transport-card p{font-size:0.81rem;color:var(--muted);margin-bottom:1rem}
+  .code-block{font-family:'DM Mono',monospace;font-size:0.7rem;background:var(--bg);border:1px solid var(--border);border-radius:6px;padding:0.75rem 1rem;color:var(--accent2);overflow-x:auto;white-space:pre;line-height:1.6}
+
+  /* shared */
+  .section-head{margin-bottom:1.25rem}
+  .section-head h2{font-family:'Syne',sans-serif;font-size:1.4rem;font-weight:700}
+  .section-head p{font-size:0.84rem;color:var(--muted);margin-top:0.3rem}
+  .callout{background:color-mix(in srgb,var(--accent) 8%,transparent);border:1px solid color-mix(in srgb,var(--accent) 25%,transparent);border-radius:10px;padding:1rem 1.25rem;font-size:0.84rem;margin-bottom:1.5rem}
+  .callout strong{color:var(--accent2);font-weight:500}
+  .overview-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(130px,1fr));gap:0.6rem;margin-top:1.5rem}
+  .ov-chip{padding:0.65rem 0.75rem;border-radius:8px;border:1px solid var(--border);text-align:center;background:var(--surface2);cursor:pointer;transition:all 0.2s}
+  .ov-chip:hover{border-color:var(--border2);transform:translateY(-1px)}
+  .ov-chip-proto{font-family:'DM Mono',monospace;font-size:0.65rem;margin-bottom:0.2rem}
+  .ov-chip-ex{font-size:0.72rem;color:var(--muted)}
+</style>
+</head>
+<body>
+
+<header>
+  <div class="eyebrow">Interactive Reference</div>
+  <h1>MCP &amp; Every Protocol</h1>
+  <p class="subtitle">How the Model Context Protocol connects Claude to systems that speak REST, TCP, WebSocket, gRPC, GraphQL, MQTT, and more.</p>
+</header>
+
+<nav>
+  <button class="tab active" onclick="show('overview')">Overview</button>
+  <button class="tab" onclick="show('protocols')">All Protocols</button>
+  <button class="tab" onclick="show('flows')">Connection Flows</button>
+  <button class="tab" onclick="show('compare')">Compare Table</button>
+  <button class="tab" onclick="show('transport')">MCP Transport</button>
+</nav>
+
+<main>
+
+<!-- OVERVIEW -->
+<section id="overview" class="active">
+  <div class="section-head">
+    <h2>How MCP fits in</h2>
+    <p>MCP is not a replacement for protocols — it's a translation layer on top of them.</p>
+  </div>
+  <div class="callout">
+    <strong>Key insight:</strong> Claude always speaks one thing — JSON-RPC 2.0 over stdio or HTTP. The MCP server is a bridge that translates that into whatever protocol the target system speaks: REST, raw TCP, WebSocket, gRPC, or even a local file read.
+  </div>
+  <div style="background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:2rem;">
+    <div style="display:flex;flex-direction:column;align-items:center;gap:0.5rem;margin-bottom:2rem;">
+      <div style="padding:0.75rem 2rem;border-radius:8px;background:color-mix(in srgb,#6c63ff 15%,transparent);border:1px solid color-mix(in srgb,#6c63ff 35%,transparent);text-align:center;">
+        <div style="font-family:'DM Mono',monospace;font-size:0.63rem;color:#6c63ff;margin-bottom:0.2rem;">YOU</div>
+        <div style="font-family:'Syne',sans-serif;font-weight:700;">Natural language</div>
+      </div>
+      <div style="color:var(--muted);font-size:1.1rem;">↕</div>
+      <div style="padding:0.75rem 2rem;border-radius:8px;background:color-mix(in srgb,#6c63ff 15%,transparent);border:1px solid color-mix(in srgb,#6c63ff 35%,transparent);text-align:center;">
+        <div style="font-family:'DM Mono',monospace;font-size:0.63rem;color:#6c63ff;margin-bottom:0.2rem;">CLAUDE</div>
+        <div style="font-family:'Syne',sans-serif;font-weight:700;">JSON-RPC 2.0</div>
+      </div>
+      <div style="color:var(--muted);font-size:1.1rem;">↕</div>
+      <div style="padding:0.75rem 2rem;border-radius:8px;background:color-mix(in srgb,#00e5b4 12%,transparent);border:1px solid color-mix(in srgb,#00e5b4 30%,transparent);text-align:center;">
+        <div style="font-family:'DM Mono',monospace;font-size:0.63rem;color:#00e5b4;margin-bottom:0.2rem;">MCP SERVER</div>
+        <div style="font-family:'Syne',sans-serif;font-weight:700;">Translation layer</div>
+      </div>
+      <div style="color:var(--muted);font-size:1.1rem;">↕</div>
+    </div>
+    <div class="overview-grid" id="overviewChips"></div>
+  </div>
+</section>
+
+<!-- PROTOCOLS -->
+<section id="protocols">
+  <div class="section-head">
+    <h2>All protocol types</h2>
+    <p>Click any card to expand and see how MCP connects to it.</p>
+  </div>
+  <div class="proto-grid" id="protoGrid"></div>
+</section>
+
+<!-- FLOWS -->
+<section id="flows">
+  <div class="section-head">
+    <h2>Connection flows</h2>
+    <p>Step-by-step: what actually happens when Claude calls a tool on each system.</p>
+  </div>
+  <div class="flow-picker" id="flowPicker"></div>
+  <div id="flowDiagrams"></div>
+</section>
+
+<!-- COMPARE -->
+<section id="compare">
+  <div class="section-head">
+    <h2>Protocol comparison</h2>
+    <p>Every protocol across the dimensions that matter for MCP integrations.</p>
+  </div>
+  <div class="compare-wrap"><table id="compareTable"></table></div>
+</section>
+
+<!-- TRANSPORT -->
+<section id="transport">
+  <div class="section-head">
+    <h2>MCP's own transport layer</h2>
+    <p>How Claude talks to MCP servers — separate from how MCP servers talk to the world.</p>
+  </div>
+  <div class="callout">
+    <strong>Two layers:</strong> (1) Claude ↔ MCP server uses JSON-RPC over stdio or HTTP+SSE. (2) MCP server ↔ 3rd party system uses whatever that system speaks. These are completely independent.
+  </div>
+  <div class="transport-cards">
+    <div class="transport-card" style="border-color:color-mix(in srgb,#00e5b4 30%,transparent)">
+      <div style="font-family:'DM Mono',monospace;font-size:0.63rem;color:#00e5b4;margin-bottom:0.5rem;text-transform:uppercase;letter-spacing:0.1em">Transport 1</div>
+      <h3>stdio (local)</h3>
+      <p>Claude spawns the MCP server as a subprocess. They communicate via stdin/stdout pipes using newline-delimited JSON-RPC 2.0. No network involved.</p>
+      <div class="code-block">Claude → MCP stdin:
+{"jsonrpc":"2.0","id":1,
+ "method":"tools/call",
+ "params":{"name":"query",
+  "arguments":{"sql":"SELECT *"}}}
+
+MCP stdout → Claude:
+{"jsonrpc":"2.0","id":1,
+ "result":{"rows":[...]}}</div>
+      <div style="margin-top:0.75rem;font-size:0.75rem;color:var(--muted)">Used by: Memory, Filesystem, Playwright, PostgreSQL, GitHub (local)</div>
+    </div>
+    <div class="transport-card" style="border-color:color-mix(in srgb,#6c63ff 30%,transparent)">
+      <div style="font-family:'DM Mono',monospace;font-size:0.63rem;color:#6c63ff;margin-bottom:0.5rem;text-transform:uppercase;letter-spacing:0.1em">Transport 2</div>
+      <h3>Streamable HTTP</h3>
+      <p>MCP server runs independently or in the cloud. Claude sends HTTP POST requests. Server can stream back responses via SSE. Enables remote MCP servers.</p>
+      <div class="code-block">POST https://mcp.example.com/mcp
+MCP-Protocol-Version: 2025-06-18
+Content-Type: application/json
+
+{"jsonrpc":"2.0","id":1,
+ "method":"tools/call",
+ "params":{...}}
+
+← HTTP 200 or SSE stream</div>
+      <div style="margin-top:0.75rem;font-size:0.75rem;color:var(--muted)">Used by: Sentry MCP, hosted Figma MCP, remote services</div>
+    </div>
+  </div>
+  <div style="margin-top:1.5rem;background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:1.5rem;">
+    <div style="font-family:'Syne',sans-serif;font-weight:700;font-size:1rem;margin-bottom:1rem;">The two-layer model visualized</div>
+    <div style="display:grid;grid-template-columns:1fr auto 1fr;gap:1rem;align-items:center;">
+      <div style="text-align:center">
+        <div style="padding:1rem;border-radius:8px;background:color-mix(in srgb,#6c63ff 12%,transparent);border:1px solid color-mix(in srgb,#6c63ff 25%,transparent);margin-bottom:0.5rem">
+          <div style="font-family:'DM Mono',monospace;font-size:0.63rem;color:#6c63ff">Claude ↔ MCP</div>
+          <div style="font-family:'Syne',sans-serif;font-weight:700;margin-top:0.2rem">JSON-RPC 2.0</div>
+        </div>
+        <div style="font-size:0.75rem;color:var(--muted)">Always stdio or HTTP<br>Always the same format</div>
+      </div>
+      <div style="font-size:1.5rem;color:var(--muted);text-align:center">vs</div>
+      <div style="text-align:center">
+        <div style="padding:1rem;border-radius:8px;background:color-mix(in srgb,#00e5b4 10%,transparent);border:1px solid color-mix(in srgb,#00e5b4 25%,transparent);margin-bottom:0.5rem">
+          <div style="font-family:'DM Mono',monospace;font-size:0.63rem;color:#00e5b4">MCP ↔ 3rd party</div>
+          <div style="font-family:'Syne',sans-serif;font-weight:700;margin-top:0.2rem">Any protocol</div>
+        </div>
+        <div style="font-size:0.75rem;color:var(--muted)">REST, TCP, gRPC, WS…<br>Depends on the system</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+</main>
+
+<script>
+const protocols=[
+  {id:'rest',name:'REST',full:'Representational State Transfer',color:'#4f9eff',transport:'HTTP/1.1 or HTTP/2',format:'JSON or XML',auth:'API key, OAuth, Bearer token',realtime:false,streaming:false,binary:false,desc:'The most widely used API style. Each request is independent, uses HTTP verbs (GET, POST, PUT, DELETE), and URLs identify resources.',examples:['GitHub API','Figma API','Stripe','Twitter/X','Slack REST'],tags:['Stateless','HTTP','JSON','CRUD'],mcp:'The MCP server uses Node.js fetch() or axios to call HTTPS endpoints. Your API token is stored in .mcp.json env vars and injected as Authorization: Bearer on every request.',mcpExample:'GitHub MCP: Claude calls list_issues → MCP sends GET https://api.github.com/repos/{owner}/{repo}/issues?state=open with Bearer token → returns JSON array'},
+  {id:'tcp',name:'TCP Wire',full:'Raw TCP / Database Wire Protocol',color:'#20c997',transport:'TCP socket (raw binary)',format:'Binary framed messages',auth:'Username + password in connection string',realtime:true,streaming:true,binary:true,desc:'Databases like PostgreSQL and MySQL speak their own binary protocol directly over TCP. No REST, no HTTP — just a raw socket on port 5432 or 3306.',examples:['PostgreSQL','MySQL','Redis','MongoDB'],tags:['Binary','TCP','Stateful','Wire Protocol'],mcp:'The MCP server uses a native database client library (node-postgres) that implements the wire protocol. The connection string is an env var. The library manages the TCP socket, auth handshake, query serialization, and result deserialization.',mcpExample:'Postgres MCP: Claude calls query({sql}) → node-postgres serializes to binary → TCP socket :5432 → binary rows deserialized to JSON for Claude'},
+  {id:'graphql',name:'GraphQL',full:'Graph Query Language',color:'#e535ab',transport:'HTTP (POST to /graphql)',format:'JSON with typed schema',auth:'Bearer token, API key',realtime:false,streaming:false,binary:false,desc:'A query language for APIs. One endpoint, client specifies exactly what fields it needs. No over-fetching or under-fetching.',examples:['GitHub v4 API','Shopify','Contentful','Hasura'],tags:['Schema','Single endpoint','HTTP','Type-safe'],mcp:'The MCP server sends HTTP POST to /graphql with a JSON body containing the query string and variables. Tool call parameters become GraphQL variables.',mcpExample:'GitHub MCP (GraphQL): Claude calls search_issues → MCP posts {"query":"query{search(query:\\"bug\\",type:ISSUE){nodes{...}}}"} to api.github.com/graphql'},
+  {id:'grpc',name:'gRPC',full:'Google Remote Procedure Call',color:'#0dcaf0',transport:'HTTP/2 (binary frames)',format:'Protocol Buffers (binary)',auth:'TLS, OAuth2, API keys',realtime:true,streaming:true,binary:true,desc:'High-performance RPC using HTTP/2 and Protocol Buffers. Faster than REST due to binary serialization. Services defined in .proto files with strict typing.',examples:['Google Cloud APIs','Kubernetes','etcd','TensorFlow Serving'],tags:['Binary','HTTP/2','Protobuf','Streaming','Type-safe'],mcp:'MCP server uses a generated gRPC client from the service .proto file. Tool parameters map to protobuf message fields, serialized to binary and sent over HTTP/2. Binary response is deserialized to JSON for Claude.',mcpExample:'Google Cloud MCP: Claude calls translate_text → MCP serializes to protobuf → HTTP/2 to translation.googleapis.com → deserializes protobuf response → JSON to Claude'},
+  {id:'ws',name:'WebSocket',full:'WebSocket Protocol (RFC 6455)',color:'#ffc107',transport:'TCP (upgraded from HTTP)',format:'Text or binary frames',auth:'Token in headers or first message',realtime:true,streaming:true,binary:false,desc:'Persistent bidirectional connection. Both server and client can send messages at any time without a new request. Used for real-time apps.',examples:['Slack RTM','Notion sync','Figma multiplayer','Discord'],tags:['Persistent','Bidirectional','Real-time','TCP'],mcp:'MCP server opens a persistent WebSocket connection on startup. Tool calls send JSON frames over this open connection. Server listens for responses asynchronously and resolves when the matching reply arrives.',mcpExample:'Slack MCP: Claude calls send_message → MCP sends JSON frame over existing ws://slack.com connection → listens for ack frame with matching reply_to ID'},
+  {id:'soap',name:'SOAP',full:'Simple Object Access Protocol',color:'#6ea8fe',transport:'HTTP POST or SMTP',format:'XML envelope (strict)',auth:'WS-Security, Basic Auth',realtime:false,streaming:false,binary:false,desc:'Older enterprise XML-based protocol. Verbose but has built-in standards for security, transactions, and error handling. Common in banking and government.',examples:['SAP','FedEx tracking','Government APIs','PayPal legacy'],tags:['XML','HTTP','Enterprise','Verbose'],mcp:'MCP server constructs XML SOAP envelopes from Claude tool parameters, POSTs to the WSDL endpoint, then parses the XML response back into JSON using node-soap or similar libraries.',mcpExample:'SAP MCP: Claude calls get_inventory → MCP wraps params in XML SOAP envelope → POST to SAP endpoint → parses XML → returns clean JSON to Claude'},
+  {id:'sse',name:'SSE',full:'Server-Sent Events',color:'#a78bfa',transport:'HTTP (long-lived GET)',format:'text/event-stream',auth:'Bearer token in headers',realtime:true,streaming:true,binary:false,desc:'One-way streaming over HTTP. Server pushes events to client over a long-lived connection. Simpler than WebSocket when you only need server→client push.',examples:['OpenAI streaming','Anthropic streaming','GitHub event stream'],tags:['Streaming','HTTP','Server push','One-way'],mcp:'MCP server makes a GET request and keeps it open. Events stream in as text/event-stream. Also used by MCP itself for Streamable HTTP transport mode, letting MCP servers stream responses back to Claude.',mcpExample:'OpenAI MCP: Claude calls stream_completion → MCP opens SSE GET to api.openai.com → receives data: chunks → aggregates and returns full response to Claude'},
+  {id:'mqtt',name:'MQTT',full:'Message Queuing Telemetry Transport',color:'#fd7e14',transport:'TCP or WebSocket',format:'Binary payload',auth:'Username/password, TLS certs',realtime:true,streaming:true,binary:true,desc:'Lightweight pub/sub for IoT. A broker distributes messages between publishers and subscribers on topics. Very low overhead — designed for constrained devices.',examples:['AWS IoT','Home Assistant','Mosquitto','HiveMQ'],tags:['IoT','Pub/Sub','Lightweight','Broker'],mcp:'MCP server connects to an MQTT broker, subscribes to relevant topics, and publishes messages. Tool calls map to publish operations; subscriptions allow the server to surface device state to Claude on demand.',mcpExample:'IoT MCP: Claude calls get_temperature → MCP publishes to sensors/request on broker → device publishes response to sensors/temp → MCP reads value → returns to Claude'},
+  {id:'fs',name:'File I/O',full:'Local Filesystem / OS Calls',color:'#86efac',transport:'OS syscalls (no network)',format:'Text / JSONL / bytes',auth:'OS file permissions',realtime:false,streaming:false,binary:false,desc:'No network at all. MCP server reads and writes local files using OS APIs. Used by Memory MCP, Filesystem MCP, and any server working with local data.',examples:['Memory MCP (memory.jsonl)','Filesystem MCP','SQLite','Local configs'],tags:['Local','No network','OS API','Sync'],mcp:'MCP server calls Node.js fs module (readFile, writeFile, appendFile) directly. No HTTP, no TCP. MEMORY_FILE_PATH env var tells the server where to read/write. Tool calls translate to direct fs operations.',mcpExample:'Memory MCP: Claude calls create_entity → fs.appendFile(\'memory.jsonl\', JSON.stringify(entity)+"\\n") → done. Read: fs.readFile → parse JSONL lines → JSON to Claude'},
+  {id:'cdp',name:'CDP',full:'Chrome DevTools Protocol',color:'#fb923c',transport:'WebSocket (to browser process)',format:'JSON over WebSocket',auth:'None (local process)',realtime:true,streaming:true,binary:false,desc:'Protocol to control Chromium browsers programmatically. Playwright uses CDP under the hood. Full control: navigate, click, screenshot, intercept network.',examples:['Playwright MCP','Puppeteer','Chrome DevTools','Lighthouse'],tags:['Browser','WebSocket','Automation','Local'],mcp:'Playwright MCP launches a Chromium subprocess, connects via WebSocket on its CDP port, and sends JSON commands. Accessibility snapshots (not screenshots) are returned — much smaller and easier for Claude to parse.',mcpExample:'Playwright MCP: Claude calls navigate({url}) → {"method":"Page.navigate","params":{"url":"..."}} over CDP WebSocket → browser navigates → returns accessibility tree as JSON'}
+];
+
+const flows=[
+  {id:'postgres',name:'PostgreSQL',color:'#20c997',subtitle:'Direct TCP wire protocol — no REST API involved',nodes:[
+    {label:'You',title:'Natural language prompt',sub:'"List users who signed up this week"',h:false},
+    {label:'Claude',title:'Decides which tool to call',sub:'query({ sql: "SELECT * FROM users WHERE created_at > now() - \'7 days\'" })',h:false},
+    {label:'MCP — JSON-RPC 2.0',title:'Sends tool call via stdio',sub:'{"method":"tools/call","params":{"name":"query","arguments":{...}}}',h:false},
+    {label:'PostgreSQL MCP server',title:'node-postgres client library',sub:'Reads POSTGRES_CONNECTION_STRING env var, creates a connection pool',h:true},
+    {label:'TCP Socket — Port 5432',title:'PostgreSQL binary wire protocol',sub:'Not HTTP. Raw binary frames: authentication, query, data rows, command complete',h:true},
+    {label:'PostgreSQL database',title:'Executes SQL, returns binary rows',sub:'node-postgres deserializes binary result set → JavaScript objects',h:false},
+    {label:'Claude',title:'Receives JSON rows from MCP',sub:'Formats and summarizes in natural language for you',h:false}
+  ],arrows:['natural language','JSON-RPC 2.0 via stdio','pg.query(sql)','TCP :5432 binary protocol','binary rows → JSON','clean JSON result']},
+
+  {id:'figma',name:'Figma',color:'#e535ab',subtitle:'HTTPS REST API — cloud service with personal access token',nodes:[
+    {label:'You',title:'Natural language prompt',sub:'"Get the design tokens from my Figma file"',h:false},
+    {label:'Claude',title:'Decides which tool to call',sub:'get_file({ file_key: "abc123xyz" })',h:false},
+    {label:'MCP — JSON-RPC 2.0',title:'Sends tool call via stdio',sub:'{"method":"tools/call","params":{"name":"get_file","arguments":{...}}}',h:false},
+    {label:'Figma MCP server',title:'HTTP client using fetch()',sub:'Reads FIGMA_PERSONAL_ACCESS_TOKEN env var, builds Authorization header',h:true},
+    {label:'HTTPS — api.figma.com',title:'GET /v1/files/abc123xyz',sub:'Authorization: Bearer YOUR_TOKEN — standard REST over HTTPS port 443',h:true},
+    {label:'Figma Cloud API',title:'Returns file structure as JSON',sub:'Nodes, styles, components, design tokens, variants',h:false},
+    {label:'Claude',title:'Receives Figma JSON',sub:'Extracts tokens, summarizes design structure for you',h:false}
+  ],arrows:['natural language','JSON-RPC 2.0 via stdio','fetch() HTTPS call','GET api.figma.com/v1/files/:key','JSON response','clean JSON result']},
+
+  {id:'playwright',name:'Playwright',color:'#fb923c',subtitle:'Chrome DevTools Protocol over WebSocket to a local browser process',nodes:[
+    {label:'You',title:'Natural language prompt',sub:'"Test the login form on localhost:3000"',h:false},
+    {label:'Claude',title:'Decides which tool to call',sub:'browser_navigate({ url: "http://localhost:3000/login" })',h:false},
+    {label:'MCP — JSON-RPC 2.0',title:'Sends tool call via stdio',sub:'{"method":"tools/call","params":{"name":"browser_navigate",...}}',h:false},
+    {label:'Playwright MCP server',title:'Playwright library (not HTTP)',sub:'On first call: spawns Chromium subprocess. Connects via CDP WebSocket.',h:true},
+    {label:'CDP WebSocket — local port',title:'Chrome DevTools Protocol',sub:'JSON commands: Page.navigate, DOM.querySelector, Input.dispatchMouseEvent',h:true},
+    {label:'Chromium browser process',title:'Renders page, executes navigation',sub:'Returns accessibility snapshot (not screenshot) — much smaller for Claude',h:false},
+    {label:'Claude',title:'Receives accessibility tree',sub:'Reads elements, decides next action: fill form, click button, etc.',h:false}
+  ],arrows:['natural language','JSON-RPC 2.0 via stdio','playwright.navigate()','CDP JSON over WebSocket','accessibility tree JSON','structured page data']},
+
+  {id:'github',name:'GitHub',color:'#4f9eff',subtitle:'HTTPS REST API with personal access token',nodes:[
+    {label:'You',title:'Natural language prompt',sub:'"Find all open issues labeled bug"',h:false},
+    {label:'Claude',title:'Decides which tool to call',sub:'list_issues({ state: "open", labels: "bug" })',h:false},
+    {label:'MCP — JSON-RPC 2.0',title:'Sends tool call via stdio',sub:'{"method":"tools/call","params":{"name":"list_issues",...}}',h:false},
+    {label:'GitHub MCP server',title:'Octokit client / fetch()',sub:'Reads GITHUB_PERSONAL_ACCESS_TOKEN env var',h:true},
+    {label:'HTTPS — api.github.com',title:'GET /repos/{owner}/{repo}/issues',sub:'Authorization: Bearer ghp_yourtoken  ?state=open&labels=bug',h:true},
+    {label:'GitHub Cloud API',title:'Returns issues JSON array',sub:'Title, body, labels, assignees, created_at for each issue',h:false},
+    {label:'Claude',title:'Receives issues array',sub:'Lists and summarizes open bugs in natural language',h:false}
+  ],arrows:['natural language','JSON-RPC 2.0 via stdio','octokit.request()','GET api.github.com/...','JSON array response','clean JSON result']},
+
+  {id:'memory',name:'Memory MCP',color:'#86efac',subtitle:'Local file I/O — no network at all, just JSONL on disk',nodes:[
+    {label:'You',title:'Natural language prompt',sub:'"Remember that we use Zustand not Redux in this project"',h:false},
+    {label:'Claude',title:'Decides which tool to call',sub:'create_entities([{ name: "StateManagement", observations: ["Use Zustand, not Redux"] }])',h:false},
+    {label:'MCP — JSON-RPC 2.0',title:'Sends tool call via stdio',sub:'{"method":"tools/call","params":{"name":"create_entities",...}}',h:false},
+    {label:'Memory MCP server',title:'Knowledge graph manager',sub:'Reads MEMORY_FILE_PATH env var. Default: memory.jsonl in npx cache.',h:true},
+    {label:'Node.js fs module — no network',title:'fs.appendFile() OS syscall',sub:'Direct write to local disk. No TCP, no HTTP, no sockets whatsoever.',h:true},
+    {label:'memory.jsonl on disk',title:'JSONL knowledge graph file',sub:'{"type":"entity","name":"StateManagement","observations":["Use Zustand, not Redux"]}',h:false},
+    {label:'Claude',title:'Confirms stored',sub:'Will recall this in future sessions via search_nodes() reading the same file',h:false}
+  ],arrows:['natural language','JSON-RPC 2.0 via stdio','graph.addEntity()','fs.appendFile() OS syscall','disk write confirmed','success result']}
+];
+
+const compareRows=[
+  {name:'REST',color:'#4f9eff',transport:'HTTP/1.1, HTTP/2',format:'JSON / XML',stateful:false,realtime:false,binary:false,mcpUses:'fetch() HTTPS calls',examples:'GitHub, Figma, Stripe'},
+  {name:'TCP Wire',color:'#20c997',transport:'Raw TCP socket',format:'Binary frames',stateful:true,realtime:true,binary:true,mcpUses:'DB client lib (pg, mysql2)',examples:'PostgreSQL, MySQL, Redis'},
+  {name:'GraphQL',color:'#e535ab',transport:'HTTP POST',format:'JSON + schema',stateful:false,realtime:false,binary:false,mcpUses:'fetch() to /graphql',examples:'GitHub v4, Shopify'},
+  {name:'gRPC',color:'#0dcaf0',transport:'HTTP/2 binary',format:'Protobuf binary',stateful:true,realtime:true,binary:true,mcpUses:'Generated gRPC client stubs',examples:'Google Cloud, Kubernetes'},
+  {name:'WebSocket',color:'#ffc107',transport:'TCP (upgraded)',format:'JSON / binary frames',stateful:true,realtime:true,binary:false,mcpUses:'ws lib, persistent conn',examples:'Slack RTM, Notion, Discord'},
+  {name:'SOAP',color:'#6ea8fe',transport:'HTTP POST',format:'XML envelope',stateful:false,realtime:false,binary:false,mcpUses:'node-soap, XML builder',examples:'SAP, FedEx, govt APIs'},
+  {name:'SSE',color:'#a78bfa',transport:'HTTP long-lived GET',format:'text/event-stream',stateful:false,realtime:true,binary:false,mcpUses:'fetch() + streaming reader',examples:'OpenAI, Anthropic stream'},
+  {name:'MQTT',color:'#fd7e14',transport:'TCP or WebSocket',format:'Binary payload',stateful:true,realtime:true,binary:true,mcpUses:'mqtt.js broker client',examples:'AWS IoT, Home Assistant'},
+  {name:'File I/O',color:'#86efac',transport:'OS syscalls (no network)',format:'Text / JSONL / bytes',stateful:false,realtime:false,binary:false,mcpUses:'Node.js fs module',examples:'Memory MCP, Filesystem MCP'},
+  {name:'CDP',color:'#fb923c',transport:'WebSocket (local)',format:'JSON commands',stateful:true,realtime:true,binary:false,mcpUses:'Playwright library',examples:'Playwright MCP, Puppeteer'}
+];
+
+const overviewChips=[
+  {proto:'REST',ex:'GitHub, Figma',color:'#4f9eff'},
+  {proto:'TCP Wire',ex:'PostgreSQL',color:'#20c997'},
+  {proto:'GraphQL',ex:'Shopify, GitHub v4',color:'#e535ab'},
+  {proto:'gRPC',ex:'Google Cloud',color:'#0dcaf0'},
+  {proto:'WebSocket',ex:'Slack, Discord',color:'#ffc107'},
+  {proto:'SOAP',ex:'SAP, FedEx',color:'#6ea8fe'},
+  {proto:'SSE',ex:'OpenAI stream',color:'#a78bfa'},
+  {proto:'MQTT',ex:'AWS IoT',color:'#fd7e14'},
+  {proto:'File I/O',ex:'Memory, FS MCP',color:'#86efac'},
+  {proto:'CDP',ex:'Playwright',color:'#fb923c'}
+];
+
+function show(id){
+  document.querySelectorAll('section').forEach(s=>s.classList.remove('active'));
+  document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+  event.currentTarget.classList.add('active');
+}
+
+// Overview chips
+const oc=document.getElementById('overviewChips');
+overviewChips.forEach(c=>{
+  const d=document.createElement('div');
+  d.className='ov-chip';
+  d.onclick=()=>{show('protocols');setTimeout(()=>{const el=document.querySelector('[data-id="'+c.proto.toLowerCase().replace(' ','')+'-card"]');if(el){el.scrollIntoView({behavior:'smooth'});el.click();}},100)};
+  d.innerHTML=`<div class="ov-chip-proto" style="color:${c.color}">${c.proto}</div><div class="ov-chip-ex">${c.ex}</div>`;
+  oc.appendChild(d);
+});
+
+// Protocol cards
+const pg=document.getElementById('protoGrid');
+protocols.forEach(p=>{
+  const card=document.createElement('div');
+  card.className='proto-card';
+  card.dataset.id=p.id+'-card';
+  card.style.setProperty('--card-color',p.color);
+  card.innerHTML=`
+    <div class="card-header">
+      <span class="proto-badge">${p.name}</span>
+      <span class="proto-name">${p.full}</span>
+    </div>
+    <p class="proto-desc">${p.desc}</p>
+    <div class="proto-tags">${p.tags.map(t=>`<span class="tag">${t}</span>`).join('')}</div>
+    <div class="proto-detail">
+      <div class="detail-row"><span class="detail-label">Transport</span><span class="detail-val">${p.transport}</span></div>
+      <div class="detail-row"><span class="detail-label">Format</span><span class="detail-val">${p.format}</span></div>
+      <div class="detail-row"><span class="detail-label">Auth</span><span class="detail-val">${p.auth}</span></div>
+      <div class="detail-row"><span class="detail-label">Examples</span><span class="detail-val">${p.examples.join(', ')}</span></div>
+      <div class="mcp-how">
+        <div class="mcp-how-label">How MCP connects</div>
+        <div>${p.mcp}</div>
+        <div class="mcp-example">${p.mcpExample}</div>
+      </div>
+    </div>`;
+  card.addEventListener('click',()=>card.classList.toggle('expanded'));
+  pg.appendChild(card);
+});
+
+// Flows
+const fp=document.getElementById('flowPicker');
+const fd=document.getElementById('flowDiagrams');
+flows.forEach((f,i)=>{
+  const btn=document.createElement('button');
+  btn.className='flow-btn'+(i===0?' active':'');
+  btn.textContent=f.name;
+  btn.style.setProperty('--flow-color',f.color);
+  btn.onclick=function(){
+    document.querySelectorAll('.flow-btn').forEach(b=>b.classList.remove('active'));
+    document.querySelectorAll('.flow-diagram').forEach(d=>d.classList.remove('active'));
+    btn.classList.add('active');
+    document.getElementById('flow-'+f.id).classList.add('active');
+  };
+  fp.appendChild(btn);
+
+  const diag=document.createElement('div');
+  diag.className='flow-diagram'+(i===0?' active':'');
+  diag.id='flow-'+f.id;
+  diag.style.setProperty('--flow-color',f.color);
+
+  let html=`<div class="flow-title" style="color:${f.color}">${f.name}</div><div class="flow-subtitle">${f.subtitle}</div><div class="flow-nodes">`;
+  f.nodes.forEach((n,idx)=>{
+    if(idx>0){
+      html+=`<div class="flow-arrow"><div class="arrow-line"></div><div class="arrow-label">${f.arrows[idx-1]||''}</div><div class="arrow-line"></div><div class="arrow-head"></div></div>`;
+    }
+    html+=`<div class="flow-node${n.h?' highlight':''}"><div class="node-label">${n.label}</div><div class="node-title">${n.title}</div><div class="node-sub">${n.sub}</div></div>`;
+  });
+  html+='</div>';
+  diag.innerHTML=html;
+  fd.appendChild(diag);
+});
+
+// Compare table
+const ct=document.getElementById('compareTable');
+const headers=['Protocol','Transport','Format','Stateful','Real-time','Binary','MCP uses','Examples'];
+const thead=document.createElement('thead');
+thead.innerHTML='<tr>'+headers.map(h=>`<th>${h}</th>`).join('')+'</tr>';
+ct.appendChild(thead);
+const tbody=document.createElement('tbody');
+compareRows.forEach(r=>{
+  const tr=document.createElement('tr');
+  tr.innerHTML=`
+    <td><span class="proto-pill" style="background:color-mix(in srgb,${r.color} 15%,transparent);color:${r.color};border:1px solid color-mix(in srgb,${r.color} 30%,transparent)">${r.name}</span></td>
+    <td>${r.transport}</td>
+    <td>${r.format}</td>
+    <td class="${r.stateful?'dot-yes':'dot-no'}">${r.stateful?'Yes':'No'}</td>
+    <td class="${r.realtime?'dot-yes':'dot-no'}">${r.realtime?'Yes':'No'}</td>
+    <td class="${r.binary?'dot-yes':'dot-no'}">${r.binary?'Yes':'No'}</td>
+    <td style="font-family:'DM Mono',monospace;font-size:0.7rem;color:#00e5b4">${r.mcpUses}</td>
+    <td style="color:var(--muted)">${r.examples}</td>`;
+  tbody.appendChild(tr);
+});
+ct.appendChild(tbody);
+</script>
+</body>
+</html>
