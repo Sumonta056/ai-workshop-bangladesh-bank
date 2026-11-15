@@ -1,375 +1,924 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Bangladesh Bank — Migration Plan</title>
-<link rel="preconnect" href="https://rsms.me/">
-<link rel="stylesheet" href="https://rsms.me/inter/inter.css">
+<title>BB Migration Plan</title>
+<meta name="description" content="Bangladesh Bank website: prototype HTML to Nuxt 4 SSG migration plan in 12 checkpoints.">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
 <style>
-  :root{
-    --bb-green:#006A4E; --bb-green-dark:#0A3D2C; --bb-green-deep:#00543E;
-    --bb-red:#F42A41; --bb-mint:#E4F1EC; --bb-mint-soft:#F7FAF8;
-    --bb-bg:#F4F6F8; --bb-border:#E0E4E8; --bb-border-soft:#EDF0F3;
-    --bb-ink:#0A0A0A; --bb-ink-soft:#4A4A4A; --bb-muted:#9aa39e;
-    --bb-amber-bg:#FFF8E1; --bb-amber-border:#F2E2A8; --bb-amber-ink:#7A5A00;
-    --bb-max:1080px;
-    --bb-font:'Inter',system-ui,sans-serif; --bb-mono:'JetBrains Mono',monospace;
+:root{
+  --green:#006A4E;
+  --green-deep:#0A3D2C;
+  --red:#F42A41;
+  --mint:#5FBE9E;
+  --soft:#E4F1EC;
+  --soft-2:#DCEFE6;
+  --paper:#F7FAF8;
+  --bg:#FFFFFF;
+  --surface:#FFFFFF;
+  --surface-2:#F7FAF8;
+  --line:#E0E4E8;
+  --text:#4A4A4A;
+  --heading:#0A3D2C;
+  --muted:#6B7570;
+  --accent:#006A4E;
+  --accent-ink:#FFFFFF;
+  --chip-bg:#E4F1EC;
+  --to-bg:#F1F8F4;
+  --chip-ink:#0A3D2C;
+  --hero-bg:#0A3D2C;
+  --hero-ink:#F7FAF8;
+  --hero-muted:#B9D6CA;
+  --med-bg:#0A3D2C;
+  --med-ink:#FFFFFF;
+  --low-bg:#DCEFE6;
+  --low-ink:#0A3D2C;
+  --shadow:0 1px 2px rgba(10,61,44,.06),0 8px 24px -12px rgba(10,61,44,.18);
+  --font:"Inter",system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;
+  --mono:"JetBrains Mono",ui-monospace,SFMono-Regular,Menlo,monospace;
+  --max:1240px;
+  --gutter:clamp(16px,4vw,40px);
+  --radius:14px;
+  color-scheme:light;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --bg:#08130E;
+    --surface:#0F1F18;
+    --surface-2:#132820;
+    --line:#22392F;
+    --text:#D5E1DB;
+    --heading:#F2F8F5;
+    --muted:#9BB0A6;
+    --accent:#5FBE9E;
+    --accent-ink:#06140E;
+    --chip-bg:#163126;
+    --to-bg:#12271E;
+    --chip-ink:#DCEFE6;
+    --hero-bg:#0A2A1F;
+    --hero-ink:#F2F8F5;
+    --hero-muted:#9FC4B4;
+    --med-bg:#DCEFE6;
+    --med-ink:#0A3D2C;
+    --low-bg:#163126;
+    --low-ink:#DCEFE6;
+    --red:#FF5267;
+    --shadow:0 1px 2px rgba(0,0,0,.3),0 10px 30px -14px rgba(0,0,0,.6);
+    color-scheme:dark;
   }
-  *{box-sizing:border-box;}
-  html,body{margin:0;padding:0;}
-  body{background:var(--bb-bg);color:var(--bb-ink);font-family:var(--bb-font);-webkit-font-smoothing:antialiased;line-height:1.6;}
-  ::selection{background:var(--bb-mint);color:var(--bb-green);}
-  a{color:var(--bb-green);text-decoration:none;}
-  a:hover{color:var(--bb-red);}
+}
+:root[data-theme="dark"]{
+  --bg:#08130E;
+  --surface:#0F1F18;
+  --surface-2:#132820;
+  --line:#22392F;
+  --text:#D5E1DB;
+  --heading:#F2F8F5;
+  --muted:#9BB0A6;
+  --accent:#5FBE9E;
+  --accent-ink:#06140E;
+  --chip-bg:#163126;
+  --to-bg:#12271E;
+  --chip-ink:#DCEFE6;
+  --hero-bg:#0A2A1F;
+  --hero-ink:#F2F8F5;
+  --hero-muted:#9FC4B4;
+  --med-bg:#DCEFE6;
+  --med-ink:#0A3D2C;
+  --low-bg:#163126;
+  --low-ink:#DCEFE6;
+  --red:#FF5267;
+  --shadow:0 1px 2px rgba(0,0,0,.3),0 10px 30px -14px rgba(0,0,0,.6);
+  color-scheme:dark;
+}
+*,*::before,*::after{box-sizing:border-box}
+html{font-size:17px;scroll-behavior:smooth;-webkit-text-size-adjust:100%}
+@media (min-width:1100px){html{font-size:19px}}
+@media (min-width:1600px){html{font-size:21px}}
+body{margin:0;background:var(--bg);color:var(--text);font-family:var(--font);line-height:1.6;overflow-x:hidden;-webkit-font-smoothing:antialiased}
+h1,h2,h3,h4{color:var(--heading);line-height:1.15;margin:0;letter-spacing:-.02em}
+p{margin:0}
+a{color:var(--accent)}
+code,.mono{font-family:var(--mono);font-size:.86em}
+code{background:var(--chip-bg);color:var(--chip-ink);padding:.08em .38em;border-radius:6px;overflow-wrap:anywhere}
+:focus-visible{outline:3px solid var(--mint);outline-offset:3px;border-radius:6px}
+.skip{position:absolute;left:-9999px;top:8px;background:var(--green);color:#fff;padding:.6rem 1rem;border-radius:8px;z-index:100}
+.skip:focus{left:16px}
+.wrap{max-width:var(--max);margin:0 auto;padding:0 var(--gutter)}
 
-  /* ---- masthead ---- */
-  header.masthead{background:var(--bb-green);color:#fff;border-bottom:3px solid var(--bb-red);}
-  .masthead .wrap{max-width:var(--bb-max);margin:0 auto;padding:26px 40px;}
-  .masthead .eyebrow{font:600 11px/1.2 var(--bb-font);letter-spacing:.14em;text-transform:uppercase;color:rgba(255,255,255,.82);}
-  .masthead h1{font:700 30px/1.1 var(--bb-font);letter-spacing:-0.02em;margin:8px 0 6px;}
-  .masthead p{font:400 14.5px/1.55 var(--bb-font);color:rgba(255,255,255,.85);margin:0;max-width:70ch;}
+.topbar{position:sticky;top:0;z-index:50;background:color-mix(in srgb,var(--bg) 88%,transparent);backdrop-filter:saturate(1.4) blur(10px);-webkit-backdrop-filter:saturate(1.4) blur(10px);border-bottom:1px solid var(--line)}
+.topbar .wrap{display:flex;align-items:center;gap:1.25rem;height:60px}
+.brand{display:flex;align-items:center;gap:.6rem;font-weight:700;color:var(--heading);text-decoration:none;font-size:.95rem;white-space:nowrap}
+.brand-mark{width:30px;height:30px;flex:none}
+.topnav{display:flex;gap:.2rem;margin-left:auto}
+.topnav a{color:var(--muted);text-decoration:none;font-size:.8rem;font-weight:500;padding:.4rem .6rem;border-radius:8px}
+.topnav a:hover,.topnav a.is-current{color:var(--heading);background:var(--chip-bg)}
+.theme-btn{border:1px solid var(--line);background:var(--surface);color:var(--heading);width:38px;height:38px;border-radius:10px;display:grid;place-items:center;cursor:pointer;flex:none}
+.theme-btn svg{width:18px;height:18px}
+@media (max-width:980px){.topnav{display:none}.theme-btn{margin-left:auto}}
 
-  .container{max-width:var(--bb-max);margin:0 auto;padding:36px 40px 80px;}
+.hero{background:var(--hero-bg);color:var(--hero-ink);position:relative;overflow:hidden;isolation:isolate}
+.hero::before{content:"";position:absolute;inset:0;z-index:-1;background-image:linear-gradient(rgba(95,190,158,.09) 1px,transparent 1px),linear-gradient(90deg,rgba(95,190,158,.09) 1px,transparent 1px);background-size:44px 44px;mask-image:radial-gradient(ellipse 80% 70% at 75% 30%,#000 20%,transparent 75%);-webkit-mask-image:radial-gradient(ellipse 80% 70% at 75% 30%,#000 20%,transparent 75%)}
+.hero::after{content:"";position:absolute;width:620px;height:620px;right:-180px;top:-260px;border-radius:50%;background:radial-gradient(circle,rgba(0,106,78,.55),transparent 65%);z-index:-1}
+.hero .wrap{padding-top:clamp(2.5rem,7vw,5.5rem);padding-bottom:clamp(2.5rem,6vw,4.5rem)}
+.eyebrow{font-family:var(--mono);font-size:.74rem;letter-spacing:.14em;text-transform:uppercase;color:var(--mint);display:flex;align-items:center;gap:.6rem;flex-wrap:wrap}
+.eyebrow .pill{border:1px solid rgba(95,190,158,.4);padding:.15rem .55rem;border-radius:999px;letter-spacing:.06em}
+.hero h1{color:#fff;font-size:clamp(2.1rem,5.4vw,4.1rem);font-weight:800;margin-top:1.1rem;max-width:18ch;letter-spacing:-.035em}
+.hero h1 em{font-style:normal;color:var(--mint)}
+.hero-lede{margin-top:1.25rem;font-size:clamp(1.05rem,1.6vw,1.25rem);color:var(--hero-muted);max-width:60ch}
+.ft{display:grid;grid-template-columns:minmax(0,1fr) auto minmax(0,1fr);gap:1rem;align-items:stretch;margin-top:2.5rem}
+.ft-card{border-radius:var(--radius);padding:1.25rem 1.35rem;border:1px solid rgba(255,255,255,.12);background:rgba(255,255,255,.04)}
+.ft-card.to{background:rgba(95,190,158,.12);border-color:rgba(95,190,158,.45)}
+.ft-label{font-family:var(--mono);font-size:.7rem;letter-spacing:.14em;text-transform:uppercase;color:var(--hero-muted)}
+.ft-title{font-size:1.25rem;font-weight:700;color:#fff;margin-top:.35rem}
+.ft-card p{color:var(--hero-muted);font-size:.92rem;margin-top:.45rem}
+.ft-card code{background:rgba(255,255,255,.08);color:#E4F1EC}
+.ft-arrow{display:grid;place-items:center;color:var(--mint)}
+.ft-arrow svg{width:56px;height:56px}
+.ft-arrow path{stroke-dasharray:6 6;animation:dash 1.4s linear infinite}
+@keyframes dash{to{stroke-dashoffset:-24}}
+@media (max-width:720px){.ft{grid-template-columns:minmax(0,1fr)}.ft-arrow svg{transform:rotate(90deg);width:40px;height:40px}}
+.stats{display:grid;grid-template-columns:repeat(4,1fr);margin-top:2rem;border-top:1px solid rgba(255,255,255,.12)}
+.stat{padding:1.1rem 1rem 0 0}
+.stat b{display:block;font-family:var(--mono);font-size:clamp(1.7rem,3.4vw,2.5rem);font-weight:600;color:#fff;line-height:1.1}
+.stat span{font-size:.82rem;color:var(--hero-muted)}
+.stat b .red{color:#FF8A97}
+@media (max-width:620px){.stats{grid-template-columns:repeat(2,1fr)}}
 
-  /* ---- section heads ---- */
-  .sec-head{display:flex;align-items:center;gap:11px;margin:40px 0 18px;}
-  .sec-head .bar{width:26px;height:3px;background:var(--bb-green);border-radius:2px;flex:none;}
-  .sec-head h2{font:700 17px/1.2 var(--bb-font);letter-spacing:.02em;text-transform:uppercase;color:var(--bb-green);margin:0;}
+section.block{padding:clamp(3rem,8vw,6rem) 0;border-bottom:1px solid var(--line)}
+section.block.alt{background:var(--surface-2)}
+.sec-head{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.1fr);gap:1rem 3rem;align-items:end;margin-bottom:2.5rem}
+.sec-num{font-family:var(--mono);font-size:.75rem;letter-spacing:.14em;text-transform:uppercase;color:var(--accent);display:flex;align-items:center;gap:.7rem}
+.sec-num::after{content:"";height:1px;width:48px;background:currentColor;opacity:.5}
+.sec-head h2{font-size:clamp(1.8rem,3.6vw,2.8rem);font-weight:800;margin-top:.6rem}
+.sec-head p{color:var(--muted);font-size:1.02rem;max-width:56ch}
+@media (max-width:860px){.sec-head{grid-template-columns:minmax(0,1fr)}}
 
-  /* ---- principle / structure cards ---- */
-  .panel{background:#fff;border:1px solid var(--bb-border);border-radius:14px;padding:22px 26px;margin-bottom:18px;}
-  .panel.accent{border-top:3px solid var(--bb-green);}
-  .panel ol,.panel ul{margin:0;padding-left:20px;}
-  .panel li{margin:7px 0;font-size:14.5px;}
-  .panel li strong{color:var(--bb-green-dark);}
+.inputs{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:1rem;margin-top:2.5rem}
+@media (max-width:1000px){.inputs{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media (max-width:560px){.inputs{grid-template-columns:minmax(0,1fr)}}
+.input{background:var(--surface);border:1px solid var(--line);border-radius:var(--radius);padding:1.2rem 1.25rem;display:flex;flex-direction:column;gap:.5rem;position:relative}
+.hero .input{background:rgba(255,255,255,.04);border-color:rgba(255,255,255,.12)}
+.input .idx{font-family:var(--mono);font-size:.72rem;color:var(--mint)}
+.input h3{font-size:1.02rem;color:#fff}
+.input p{font-size:.86rem;color:var(--hero-muted)}
+.input code{background:rgba(255,255,255,.08);color:#E4F1EC;font-size:.74rem;align-self:flex-start}
+.inputs-title{margin-top:2.75rem;font-family:var(--mono);font-size:.72rem;letter-spacing:.14em;text-transform:uppercase;color:var(--hero-muted)}
+.inputs-title + .inputs{margin-top:.9rem}
 
-  pre.tree{background:var(--bb-green-dark);color:#dfeee7;border-radius:12px;padding:20px 22px;overflow:auto;
-           font:400 13px/1.7 var(--bb-mono);margin:0;}
+.principles{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,300px),1fr));gap:0;border-top:1px solid var(--line)}
+.principle{padding:1.3rem 1.5rem 1.4rem 0;border-bottom:1px solid var(--line);display:grid;grid-template-columns:2.4rem 1fr;gap:.2rem .6rem}
+.principle .n{font-family:var(--mono);color:var(--accent);font-weight:600;font-size:.9rem;padding-top:.15rem}
+.principle h3{font-size:1.02rem}
+.principle p{grid-column:2;font-size:.9rem;color:var(--muted)}
 
-  /* ---- the validate loop banner ---- */
-  .loop{background:var(--bb-amber-bg);border:1px solid var(--bb-amber-border);border-radius:12px;
-        padding:16px 20px;margin-bottom:26px;display:flex;gap:14px;align-items:flex-start;}
-  .loop .tag{background:var(--bb-red);color:#fff;font:600 10px/1 var(--bb-font);letter-spacing:.07em;
-             text-transform:uppercase;padding:6px 11px;border-radius:999px;flex:none;}
-  .loop .steps{font:500 13.5px/1.6 var(--bb-font);color:var(--bb-amber-ink);}
-  .loop .steps code{font-family:var(--bb-mono);font-size:12.5px;background:rgba(122,90,0,.1);padding:1px 6px;border-radius:5px;}
-  .loop .steps .arrow{color:var(--bb-green);font-weight:700;padding:0 4px;}
+.analysis{border:1px solid var(--line);border-radius:var(--radius);overflow:hidden;background:var(--surface)}
+.an-row{display:grid;grid-template-columns:11rem minmax(0,1fr) 2.5rem minmax(0,1fr);align-items:stretch;border-top:1px solid var(--line)}
+.an-row:first-child{border-top:0}
+.an-row > div{padding:1rem 1.2rem;font-size:.9rem;min-width:0}
+.an-row.head > div{font-family:var(--mono);font-size:.7rem;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);padding-top:.8rem;padding-bottom:.8rem;background:var(--surface-2)}
+.an-aspect{font-weight:600;color:var(--heading)}
+.an-arrow{color:var(--mint);padding-left:0!important;padding-right:0!important;text-align:center}
+.an-to{background:var(--to-bg)}
+.an-row.head .an-to{background:var(--surface-2)}
+.swatches{display:flex;flex-wrap:wrap;gap:.35rem;margin-top:.5rem}
+.sw{width:22px;height:22px;border-radius:6px;border:1px solid var(--line)}
+@media (max-width:760px){
+  .an-row{grid-template-columns:minmax(0,1fr)}
+  .an-row.head{display:none}
+  .an-row > div{padding:.35rem 1.1rem}
+  .an-aspect{padding-top:1rem!important}
+  .an-arrow{display:none}
+  .an-to{padding-bottom:1rem!important;background:transparent}
+  .an-from::before,.an-to::before{display:block;font-family:var(--mono);font-size:.65rem;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);margin-bottom:.15rem}
+  .an-from::before{content:"Prototype"}
+  .an-to::before{content:"Becomes"}
+}
 
-  /* ---- checkpoint cards ---- */
-  .cp{background:#fff;border:1px solid var(--bb-border);border-top:3px solid var(--bb-green);
-      border-radius:14px;padding:0;margin-bottom:16px;overflow:hidden;}
-  .cp summary{list-style:none;cursor:pointer;display:flex;align-items:center;gap:16px;padding:18px 22px;
-              transition:background .14s;}
-  .cp summary::-webkit-details-marker{display:none;}
-  .cp summary:hover{background:var(--bb-mint-soft);}
-  .cp .num{width:46px;height:46px;border-radius:11px;background:var(--bb-mint);color:var(--bb-green);
-           font:700 17px/1 var(--bb-mono);display:flex;align-items:center;justify-content:center;flex:none;}
-  .cp .title{flex:1;}
-  .cp .title .id{font:600 10.5px/1 var(--bb-font);letter-spacing:.08em;text-transform:uppercase;color:var(--bb-muted);}
-  .cp .title h3{font:600 17px/1.3 var(--bb-font);color:var(--bb-green-dark);margin:4px 0 0;}
-  .cp .chev{color:var(--bb-green);font-size:18px;transition:transform .2s;flex:none;}
-  .cp[open] .chev{transform:rotate(90deg);}
-  .cp .body{padding:4px 22px 22px 84px;border-top:1px solid var(--bb-border-soft);}
-  .cp .body .row{margin:14px 0 0;}
-  .cp .body .lbl{display:inline-block;font:600 10.5px/1 var(--bb-font);letter-spacing:.06em;text-transform:uppercase;
-                 padding:5px 10px;border-radius:6px;margin-bottom:8px;}
-  .lbl.do{background:#E4F1EC;color:var(--bb-green);}
-  .lbl.val{background:#E8F0FF;color:#2952cc;}
-  .lbl.test{background:#FBEAEC;color:var(--bb-red);}
-  .lbl.exit{background:#EFEAFB;color:#6b3fb0;}
-  .cp .body p{margin:0;font-size:14px;color:var(--bb-ink-soft);}
-  .cp .body code{font-family:var(--bb-mono);font-size:12.5px;background:var(--bb-bg);padding:1px 6px;border-radius:5px;color:var(--bb-green-dark);}
+.arch{display:grid;grid-template-columns:minmax(0,1.05fr) minmax(0,1fr);gap:2rem;align-items:start}
+@media (max-width:960px){.arch{grid-template-columns:minmax(0,1fr)}}
+.panel{background:var(--surface);border:1px solid var(--line);border-radius:var(--radius);box-shadow:var(--shadow)}
+.panel-head{display:flex;justify-content:space-between;align-items:center;gap:1rem;padding:.9rem 1.2rem;border-bottom:1px solid var(--line);font-family:var(--mono);font-size:.72rem;letter-spacing:.1em;text-transform:uppercase;color:var(--muted)}
+.diagram{padding:1rem}
+.diagram svg{display:block;width:100%;height:auto;max-width:560px;margin:0 auto}
+.ly rect.lb{fill:var(--surface-2);stroke:var(--line);stroke-width:1.5;transition:fill .2s,stroke .2s}
+.ly text.t{fill:var(--heading);font-family:var(--font);font-weight:700;font-size:17px}
+.ly text.s{fill:var(--muted);font-family:var(--mono);font-size:12.5px}
+.ly text.k{fill:var(--accent);font-family:var(--mono);font-size:11px;font-weight:600}
+.ly:hover rect.lb,.ly:focus rect.lb{fill:var(--chip-bg);stroke:var(--accent)}
+.ly.out rect.lb{fill:var(--green);stroke:var(--green)}
+.ly.out text.t{fill:#fff}
+.ly.out text.s,.ly.out text.k{fill:#CDEBDF}
+.ly.tok rect.lb{stroke:var(--accent);stroke-dasharray:4 4}
+.flow{stroke:var(--mint);stroke-width:2;fill:none;stroke-dasharray:5 5;animation:dash 1.2s linear infinite}
+.arrowhead{fill:var(--mint)}
+.tree{margin:0;padding:1.1rem 1.2rem 1.3rem;font-family:var(--mono);font-size:.68rem;line-height:1.75;color:var(--heading);overflow-x:auto;white-space:pre}
+.tree .c{color:var(--muted)}
+.tree .d{color:var(--accent);font-weight:600}
+.legend{display:flex;flex-wrap:wrap;gap:.5rem 1.25rem;padding:0 1.2rem 1.1rem;font-size:.8rem;color:var(--muted)}
+.legend span{display:inline-flex;align-items:center;gap:.45rem}
+.legend i{width:14px;height:14px;border-radius:4px;display:inline-block;border:1.5px solid var(--line);background:var(--surface-2)}
+.legend i.o{background:var(--green);border-color:var(--green)}
+.legend i.f{border:1.5px dashed var(--accent)}
 
-  /* ---- risks ---- */
-  .risk{display:flex;gap:14px;align-items:flex-start;padding:14px 0;border-bottom:1px solid var(--bb-border-soft);}
-  .risk:last-child{border-bottom:none;}
-  .risk .dot{width:9px;height:9px;border-radius:50%;background:var(--bb-red);flex:none;margin-top:7px;}
-  .risk .txt{font-size:14.5px;}
-  .risk .txt strong{color:var(--bb-green-dark);}
+.tl-tools{display:flex;flex-wrap:wrap;gap:.6rem;align-items:center;margin-bottom:1.5rem}
+.lanes{display:flex;flex-wrap:wrap;gap:.5rem;font-size:.82rem;color:var(--muted);margin-right:auto}
+.lane-tag{display:inline-flex;align-items:center;gap:.4rem;padding:.3rem .7rem;border-radius:999px;background:var(--chip-bg);color:var(--chip-ink);font-weight:500}
+.lane-tag i{width:9px;height:9px;border-radius:50%;background:var(--mint)}
+.lane-tag.b i{background:var(--green)}
+.btn{font:inherit;font-size:.82rem;font-weight:600;border:1px solid var(--line);background:var(--surface);color:var(--heading);padding:.5rem .95rem;border-radius:10px;cursor:pointer}
+.btn:hover{border-color:var(--accent)}
+.timeline{list-style:none;margin:0;padding:0;position:relative}
+.timeline::before{content:"";position:absolute;left:27px;top:28px;bottom:28px;width:2px;background:linear-gradient(var(--accent),var(--mint))}
+.cp{display:grid;grid-template-columns:56px minmax(0,1fr);gap:1rem;padding-bottom:.8rem;scroll-margin-top:80px}
+.cp-dot{width:56px;height:56px;border-radius:50%;display:grid;place-items:center;font-family:var(--mono);font-weight:600;font-size:1rem;background:var(--surface);color:var(--accent);border:2px solid var(--accent);position:relative;z-index:1;transition:background .2s,color .2s,transform .2s}
+.cp.open .cp-dot{background:var(--accent);color:var(--accent-ink);transform:scale(1.06)}
+.cp.final .cp-dot{background:var(--green-deep);color:#fff;border-color:var(--green-deep)}
+.cp-card{background:var(--surface);border:1px solid var(--line);border-radius:var(--radius);overflow:hidden;transition:border-color .2s,box-shadow .2s}
+.cp.open .cp-card{border-color:var(--accent);box-shadow:var(--shadow)}
+.cp-toggle{all:unset;box-sizing:border-box;display:grid;grid-template-columns:minmax(0,1fr) auto;gap:.3rem 1rem;width:100%;padding:1rem 1.25rem;cursor:pointer;align-items:center}
+.cp-toggle:focus-visible{outline:3px solid var(--mint);outline-offset:-3px;border-radius:var(--radius)}
+.cp-toggle:hover .cp-name{color:var(--accent)}
+.cp-name{font-size:1.12rem;font-weight:700;color:var(--heading);letter-spacing:-.01em;transition:color .15s}
+.cp-meta{grid-column:1;display:flex;flex-wrap:wrap;gap:.4rem;align-items:center;font-size:.76rem}
+.chip{display:inline-flex;align-items:center;gap:.3rem;padding:.12rem .55rem;border-radius:999px;background:var(--chip-bg);color:var(--chip-ink);font-family:var(--mono);font-size:.72rem;font-weight:500;white-space:nowrap}
+.cp-panel .chip{white-space:normal;max-width:100%}
+.chip.au{background:transparent;border:1px solid var(--line);color:var(--muted)}
+.chip.lane{background:transparent;color:var(--muted);font-family:var(--font)}
+.chip.lane i{width:8px;height:8px;border-radius:50%;background:var(--mint)}
+.chip.lane.b i{background:var(--green)}
+.chev{grid-column:2;grid-row:1/span 2;width:34px;height:34px;border-radius:50%;display:grid;place-items:center;border:1px solid var(--line);color:var(--accent);transition:transform .25s,background .2s}
+.chev svg{width:16px;height:16px}
+.cp.open .chev{transform:rotate(180deg);background:var(--chip-bg)}
+.cp-panel{border-top:1px solid var(--line);padding:1.25rem 1.25rem 1.35rem;display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:1.2rem 2rem;animation:reveal .3s ease}
+.cp-panel[hidden]{display:none}
+@keyframes reveal{from{opacity:0;transform:translateY(-6px)}to{opacity:1;transform:none}}
+.cp-panel .full{grid-column:1/-1}
+.cp-panel h4{font-family:var(--mono);font-size:.68rem;letter-spacing:.14em;text-transform:uppercase;color:var(--muted);font-weight:500;margin-bottom:.45rem}
+.cp-goal{font-size:1.1rem;color:var(--heading);font-weight:500;line-height:1.5}
+.cp-list{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:.4rem;font-size:.9rem}
+.cp-list li{display:flex;gap:.5rem;align-items:baseline}
+.dep-row{display:flex;flex-wrap:wrap;gap:.4rem}
+.dep-btn{font:inherit;font-family:var(--mono);font-size:.76rem;font-weight:600;border:1px solid var(--accent);color:var(--accent);background:transparent;border-radius:8px;padding:.15rem .55rem;cursor:pointer}
+.dep-btn:hover{background:var(--accent);color:var(--accent-ink)}
+.none{color:var(--muted);font-size:.88rem}
+.gate{display:flex;flex-wrap:wrap;gap:.35rem;align-items:center;font-family:var(--mono);font-size:.74rem;color:var(--heading)}
+.gate span{padding:.18rem .5rem;border-radius:6px;background:var(--chip-bg);color:var(--chip-ink)}
+.gate b{color:var(--mint);font-weight:400}
+.docs{display:flex;flex-wrap:wrap;gap:.5rem}
+.doc-link{display:inline-flex;align-items:center;gap:.45rem;padding:.45rem .8rem;border:1px solid var(--line);border-radius:10px;text-decoration:none;font-family:var(--mono);font-size:.78rem;color:var(--heading);background:var(--surface-2)}
+.doc-link:hover{border-color:var(--accent);color:var(--accent)}
+.doc-link svg{width:14px;height:14px;flex:none;color:var(--accent)}
+@media (max-width:640px){
+  .timeline::before{left:19px}
+  .cp{grid-template-columns:40px minmax(0,1fr);gap:.7rem}
+  .cp-dot{width:40px;height:40px;font-size:.82rem}
+  .cp-panel{grid-template-columns:minmax(0,1fr)}
+  .cp-toggle{padding:.9rem 1rem}
+  .cp-panel{padding:1rem}
+}
 
-  footer.foot{background:var(--bb-green-dark);color:rgba(255,255,255,.7);text-align:center;
-              font:500 12.5px/1.6 var(--bb-font);padding:22px 40px;border-top:3px solid var(--bb-red);}
-  footer.foot strong{color:#fff;}
+.sev-summary{display:flex;flex-wrap:wrap;gap:.6rem;margin-bottom:1.25rem;align-items:center}
+.filter{font:inherit;font-size:.82rem;font-weight:600;border:1px solid var(--line);background:var(--surface);color:var(--heading);padding:.45rem .9rem;border-radius:999px;cursor:pointer;display:inline-flex;align-items:center;gap:.45rem}
+.filter[aria-pressed="true"]{background:var(--heading);color:var(--bg);border-color:var(--heading)}
+.filter .count{font-family:var(--mono);font-size:.74rem;opacity:.75}
+.wcag-note{margin-left:auto;font-size:.82rem;color:var(--muted)}
+.wcag-note b{color:var(--heading);font-family:var(--mono)}
+.sev{display:inline-flex;align-items:center;gap:.35rem;font-size:.72rem;font-weight:700;letter-spacing:.04em;text-transform:uppercase;padding:.22rem .6rem;border-radius:6px;white-space:nowrap}
+.sev svg{width:11px;height:11px}
+.sev.high{background:var(--red);color:#fff}
+.sev.medium{background:var(--med-bg);color:var(--med-ink)}
+.sev.low{background:var(--low-bg);color:var(--low-ink);border:1px solid var(--line)}
+.audit{width:100%;border-collapse:separate;border-spacing:0;background:var(--surface);border:1px solid var(--line);border-radius:var(--radius);overflow:hidden;font-size:.9rem}
+.audit th{text-align:left;font-family:var(--mono);font-size:.68rem;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);font-weight:500;padding:.8rem 1rem;background:var(--surface-2);border-bottom:1px solid var(--line)}
+.audit td{padding:1rem;border-bottom:1px solid var(--line);vertical-align:top}
+.audit tr:last-child td{border-bottom:0}
+.audit tr.is-high td:first-child{box-shadow:inset 4px 0 0 var(--red)}
+.audit .num{font-family:var(--mono);font-weight:600;color:var(--heading);width:3rem}
+.audit .issue{font-weight:600;color:var(--heading);min-width:12rem}
+.audit .wcag{font-family:var(--mono);font-size:.82rem;white-space:nowrap}
+.audit .wcag.hit{color:var(--red);font-weight:600}
+.audit .how{color:var(--text);font-size:.86rem}
+.cp-links{display:flex;flex-wrap:wrap;gap:.35rem}
+.cp-jump{font:inherit;font-family:var(--mono);font-size:.74rem;padding:.15rem .5rem;border-radius:6px;cursor:pointer;border:1px solid var(--line);background:transparent;color:var(--muted)}
+.cp-jump.lead{background:var(--accent);border-color:var(--accent);color:var(--accent-ink);font-weight:600}
+.cp-jump:hover{border-color:var(--accent);color:var(--accent)}
+.cp-jump.lead:hover{color:var(--accent-ink);filter:brightness(1.08)}
+.audit tr[hidden]{display:none}
+@media (max-width:860px){
+  .audit,.audit tbody,.audit tr,.audit td{display:block;width:100%}
+  .audit thead{display:none}
+  .audit{border:0;background:transparent}
+  .audit tr{background:var(--surface);border:1px solid var(--line);border-radius:var(--radius);margin-bottom:.8rem;padding:.4rem 0;position:relative;overflow:hidden}
+  .audit tr.is-high{box-shadow:inset 4px 0 0 var(--red)}
+  .audit tr.is-high td:first-child{box-shadow:none}
+  .audit td{border:0;padding:.35rem 1.1rem}
+  .audit td[data-label]::before{content:attr(data-label);display:block;font-family:var(--mono);font-size:.64rem;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);margin-bottom:.15rem}
+  .audit .num{width:auto}
+  .audit .issue{min-width:0;font-size:1rem}
+}
 
-  @media(max-width:680px){
-    .masthead .wrap,.container{padding-left:20px;padding-right:20px;}
-    .cp .body{padding-left:22px;}
-  }
+.loop{display:grid;grid-template-columns:minmax(0,.9fr) minmax(0,1.1fr);gap:2.5rem;align-items:center}
+@media (max-width:960px){.loop{grid-template-columns:minmax(0,1fr)}}
+.ring-wrap{position:relative;max-width:460px;width:100%;margin:0 auto}
+.ring-wrap svg{width:100%;height:auto;display:block}
+.ring-track{fill:none;stroke:var(--line);stroke-width:10}
+.ring-prog{fill:none;stroke:var(--mint);stroke-width:10;stroke-linecap:round;transition:stroke-dashoffset .7s cubic-bezier(.6,.05,.3,1)}
+.orbit{transition:transform .7s cubic-bezier(.6,.05,.3,1);transform-origin:200px 200px}
+.orbit circle{fill:none;stroke:var(--accent);stroke-width:3;opacity:.55}
+.node{cursor:pointer}
+.node circle{fill:var(--surface);stroke:var(--line);stroke-width:2;transition:fill .3s,stroke .3s}
+.node text{fill:var(--heading);font-family:var(--font);font-weight:700;font-size:13.5px;text-anchor:middle;dominant-baseline:central;pointer-events:none;transition:fill .3s}
+.node text.i{font-family:var(--mono);font-size:10px;font-weight:500;fill:var(--muted)}
+.node.done circle{stroke:var(--mint)}
+.node.on circle{fill:var(--accent);stroke:var(--accent)}
+.node.on text{fill:var(--accent-ink)}
+.node:focus{outline:none}
+.node:focus-visible circle{stroke:var(--mint);stroke-width:4}
+.ring-center .big{fill:var(--heading);font-family:var(--font);font-weight:800;font-size:19px;text-anchor:middle}
+.ring-center .small{fill:var(--muted);font-family:var(--mono);font-size:10.5px;text-anchor:middle;letter-spacing:.08em}
+.fix-arc{fill:none;stroke:var(--red);stroke-width:2;stroke-dasharray:4 5}
+.fix-label{fill:var(--red);font-family:var(--mono);font-size:10.5px;font-weight:600;text-anchor:middle;letter-spacing:.06em}
+.steps{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:.55rem;counter-reset:s}
+.step{border:1px solid var(--line);border-radius:12px;background:var(--surface);padding:.85rem 1.1rem;display:grid;grid-template-columns:2rem minmax(0,1fr);gap:.15rem .7rem;cursor:pointer;transition:border-color .25s,background .25s,transform .25s}
+.step .k{font-family:var(--mono);font-size:.8rem;color:var(--muted);grid-row:1/span 3;padding-top:.15rem}
+.step h3{font-size:1rem}
+.step .cmd{font-family:var(--mono);font-size:.78rem;color:var(--accent);overflow-wrap:anywhere}
+.step .pass{font-size:.84rem;color:var(--muted)}
+.step.on{border-color:var(--accent);background:var(--to-bg);transform:translateX(4px)}
+.step.on .k{color:var(--accent);font-weight:600}
+.loop-ctrl{display:flex;gap:.6rem;align-items:center;margin-top:1rem;flex-wrap:wrap}
+.never{display:inline-flex;align-items:center;gap:.5rem;font-weight:700;color:var(--red);font-size:.95rem}
+.never svg{width:18px;height:18px}
+
+.rd{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.25fr);gap:2rem;align-items:start}
+@media (max-width:900px){.rd{grid-template-columns:minmax(0,1fr)}}
+.rd h3{font-size:1.15rem;display:flex;align-items:center;gap:.6rem;margin-bottom:1rem}
+.rd h3 .tag{font-family:var(--mono);font-size:.7rem;font-weight:500;color:var(--muted);letter-spacing:.08em}
+.rd-list{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:.8rem}
+.rd-item{background:var(--surface);border:1px solid var(--line);border-radius:var(--radius);padding:1.1rem 1.25rem;display:grid;grid-template-columns:3rem minmax(0,1fr);gap:.3rem .9rem}
+.rd-id{font-family:var(--mono);font-weight:600;font-size:.95rem;width:2.6rem;height:2.6rem;border-radius:10px;display:grid;place-items:center;background:var(--chip-bg);color:var(--chip-ink);grid-row:1/span 3}
+.rd-item.risk .rd-id{background:transparent;border:1.5px solid var(--line);color:var(--heading)}
+.rd-item h4{font-size:1rem;line-height:1.35}
+.rd-impact{font-size:.84rem;color:var(--muted)}
+.rd-impact b{font-weight:600;color:var(--heading)}
+.rd-mit{font-size:.88rem;border-left:3px solid var(--mint);padding-left:.7rem;margin-top:.35rem}
+
+.dod{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.3fr);gap:2.5rem;align-items:start}
+@media (max-width:900px){.dod{grid-template-columns:minmax(0,1fr)}}
+.dod-big{font-size:clamp(1.6rem,3vw,2.3rem);font-weight:800;color:var(--heading);line-height:1.2;letter-spacing:-.025em}
+.dod-big em{font-style:normal;color:var(--accent)}
+.dod-routes{display:flex;flex-wrap:wrap;gap:.4rem;margin-top:1.4rem}
+.dod-list{list-style:none;margin:0;padding:0;border-top:1px solid var(--line)}
+.dod-list li{display:grid;grid-template-columns:2rem minmax(0,1fr);gap:.8rem;padding:1rem 0;border-bottom:1px solid var(--line);font-size:.98rem;align-items:start}
+.box{width:1.45rem;height:1.45rem;border-radius:6px;border:2px solid var(--accent);margin-top:.1rem}
+.lh{display:flex;flex-wrap:wrap;gap:.4rem;margin-top:.5rem}
+.lh span{font-family:var(--mono);font-size:.74rem;padding:.2rem .55rem;border-radius:6px;background:var(--chip-bg);color:var(--chip-ink)}
+
+footer{padding:2.5rem 0 3rem;font-size:.82rem;color:var(--muted)}
+footer .wrap{display:flex;flex-wrap:wrap;justify-content:space-between;gap:1rem}
+
+@media (prefers-reduced-motion: reduce){
+  html{scroll-behavior:auto}
+  *,*::before,*::after{animation:none!important;transition:none!important}
+}
 </style>
 </head>
 <body>
+<a class="skip" href="#main">Skip to content</a>
 
-<header class="masthead">
+<header class="topbar">
   <div class="wrap">
-    <div class="eyebrow">Bangladesh Bank · Refactor &amp; Design</div>
-    <h1>Prototype HTML → Nuxt 4 SSG Migration Plan</h1>
-    <p>Companion to <code>architecture.md</code>. A 12-checkpoint, build-and-validate path from the
-    single-file design export into a modular, statically-generated Nuxt 4 site — preserving pixel
-    fidelity and the prototype's data-driven pattern.</p>
+    <a class="brand" href="#top" aria-label="Migration plan, back to top">
+      <svg class="brand-mark" viewBox="0 0 32 32" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#006A4E"/><circle cx="14" cy="16" r="7.5" fill="#F42A41"/><path d="M22 9v14" stroke="#5FBE9E" stroke-width="3" stroke-linecap="round"/></svg>
+      <span>BB Migration Plan</span>
+    </a>
+    <nav class="topnav" aria-label="Sections">
+      <a href="#analysis">Prototype</a>
+      <a href="#architecture">Architecture</a>
+      <a href="#timeline">Checkpoints</a>
+      <a href="#audit">Audit map</a>
+      <a href="#loop">Validation loop</a>
+      <a href="#risks">Risks</a>
+      <a href="#done">Done</a>
+    </nav>
+    <button class="theme-btn" id="themeBtn" type="button" aria-label="Toggle light or dark theme">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="12" cy="12" r="4.5"/><path d="M12 2.5v2M12 19.5v2M2.5 12h2M19.5 12h2M5.3 5.3l1.4 1.4M17.3 17.3l1.4 1.4M5.3 18.7l1.4-1.4M17.3 6.7l1.4-1.4"/></svg>
+    </button>
   </div>
 </header>
 
-<div class="container">
+<main id="main">
+<section class="hero" id="top" aria-labelledby="heroTitle">
+  <div class="wrap">
+    <div class="eyebrow"><span class="pill">Planning phase</span><span>Bangladesh Bank public website</span></div>
+    <h1 id="heroTitle">From design prototype to <em>production Nuxt&nbsp;4</em>, in 12 green checkpoints.</h1>
+    <p class="hero-lede">The live site fails 3 WCAG criteria and has 9 audit issues. The prototype fixes the design; this plan turns it into modular, typed, static production code: home plus 4 inner views, in English and Bangla.</p>
 
-  <!-- PRINCIPLES -->
-  <div class="sec-head"><span class="bar"></span><h2>0 · Guiding Principles</h2></div>
-  <div class="panel accent">
-    <ol>
-      <li><strong>The HTML is the specification.</strong> Every color, spacing value, font weight, copy string (en <em>and</em> bn), hover state, and transition is transcribed verbatim. Nuxt conventions yield to pixel fidelity.</li>
-      <li><strong>SSG only</strong> — <code>ssr: true</code>, <code>nitro.preset: 'static'</code>. Build with <code>npm run generate</code> → <code>.output/public/</code>. No backend, no server routes, no runtime fetch.</li>
-      <li><strong>Preserve the prototype's data-driven pattern</strong> — locale dict → typed props → dumb components. The view-model render function becomes <code>useLocale</code> + per-component props.</li>
-      <li><strong>One responsibility per file.</strong> Repeated items extract into their own SFC.</li>
-      <li><strong>Incremental, verifiable steps.</strong> Each checkpoint ends in a green build + visual diff against the original before the next begins.</li>
-    </ol>
+    <div class="ft">
+      <div class="ft-card">
+        <div class="ft-label">From</div>
+        <div class="ft-title">One 80&nbsp;KB HTML prototype</div>
+        <p>Design-tool export with a custom mini-template runtime: <code>sc-for</code>, <code>sc-if</code>, <code>style-hover</code>. State in memory, no URLs.</p>
+        <p><code>02-Design/Bangladesh Bank.html</code></p>
+      </div>
+      <div class="ft-arrow" aria-hidden="true">
+        <svg viewBox="0 0 56 56" fill="none"><path d="M6 28h40" stroke="currentColor" stroke-width="2.5"/><path d="M38 18l10 10-10 10" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="animation:none;stroke-dasharray:none"/></svg>
+      </div>
+      <div class="ft-card to">
+        <div class="ft-label">To</div>
+        <div class="ft-title">Modular, typed, static Nuxt 4 site</div>
+        <p>Vue 3 SFCs, TypeScript strict, scoped CSS with design tokens. SSG only: <code>ssr: true</code>, <code>nitro.preset: 'static'</code>.</p>
+        <p><code>Bangladesh Bank New Website/</code> &middot; <code>npm run generate</code></p>
+      </div>
+    </div>
+
+    <div class="stats">
+      <div class="stat"><b>12</b><span>checkpoints, each ending green</span></div>
+      <div class="stat"><b>9</b><span>audit issues, each mapped to a fix</span></div>
+      <div class="stat"><b><span class="red">3</span></b><span>WCAG failures closed</span></div>
+      <div class="stat"><b>5&times;2</b><span>routes &times; languages (en, bn)</span></div>
+    </div>
+
+    <div class="inputs-title">The 4 inputs this plan is built from</div>
+    <div class="inputs">
+      <article class="input">
+        <span class="idx">01 / Spec</span>
+        <h3>New design (the prototype)</h3>
+        <p>Colors, spacing, fonts, copy in English and Bangla, hover states and layout.</p>
+        <code>02-Design/Bangladesh Bank.html</code>
+      </article>
+      <article class="input">
+        <span class="idx">02 / Problems</span>
+        <h3>UX audit report</h3>
+        <p>9 problems on the live site: 5 High, 3 Medium, 1 Low, 3 WCAG failures.</p>
+        <code>01-Finding/Report/BB_UX_Audit_Report.html</code>
+      </article>
+      <article class="input">
+        <span class="idx">03 / Rules</span>
+        <h3>Architecture</h3>
+        <p>Target folder structure, layer rules, i18n pattern, routing and styling rules.</p>
+        <code>03-Planning/docs/architecture.md</code>
+      </article>
+      <article class="input">
+        <span class="idx">04 / Target</span>
+        <h3>Target project</h3>
+        <p>The empty Nuxt project with its <code>CLAUDE.md</code> and <code>.claude/rules</code>.</p>
+        <code>Bangladesh Bank New Website/</code>
+      </article>
+    </div>
   </div>
+</section>
 
-  <!-- PROTOTYPE PATTERN -->
-  <div class="sec-head"><span class="bar"></span><h2>Prototype Design Pattern (the spec)</h2></div>
-  <div class="panel">
-    <ul>
-      <li>Single design-tool export using a custom mini-template (<code>sc-for</code>, <code>sc-if</code>, <code>style-hover</code>, <code>{{ }}</code>) — a transcription source, not runtime code.</li>
-      <li><strong>State:</strong> <code>view</code> (<code>home | mp | fin | pub | svc</code>) + <code>lang</code> (<code>en | bn</code>). No URLs in the prototype; view switches are in-memory.</li>
-      <li><strong>Content:</strong> one <code>T = { en, bn }</code> dictionary; both share an identical shape including a nested <code>pages</code> map for the 4 inner views.</li>
-      <li><strong>View-model:</strong> a render function maps locale data + icons + click handlers into flat bindings. Repeated shapes (<code>marketCards</code>, <code>news</code>, <code>modules</code>, <code>services</code>, inner <code>groups</code>/<code>tables</code>) are list-driven.</li>
-      <li><strong>Chrome:</strong> utility bar → masthead → sticky nav → ticker → (home | inner) → footer.</li>
-      <li><strong>Inner pages</strong> = one shared template driven by <code>L.pages[view]</code> (highlight, link groups, data tables, sidebar).</li>
-    </ul>
+<section class="block" id="principles" aria-labelledby="prTitle">
+  <div class="wrap">
+    <div class="sec-head">
+      <div>
+        <div class="sec-num">01 &mdash; Guiding principles</div>
+        <h2 id="prTitle">Seven rules every checkpoint obeys</h2>
+      </div>
+      <p>When a Nuxt convention conflicts with pixel fidelity, fidelity wins. Accessibility additions are invisible additions.</p>
+    </div>
+    <div class="principles">
+      <div class="principle"><span class="n">01</span><h3>The prototype is the specification</h3><p>Colors, spacing, fonts, radii, shadows, copy (en + bn), hover states and transitions are transcribed exactly.</p></div>
+      <div class="principle"><span class="n">02</span><h3>Keep the data-driven pattern</h3><p>Locale dictionary &rarr; typed props &rarr; simple components.</p></div>
+      <div class="principle"><span class="n">03</span><h3>One responsibility per file</h3><p>A repeated item becomes its own component.</p></div>
+      <div class="principle"><span class="n">04</span><h3>Every audit issue maps to a checkpoint</h3><p>No issue is left without an owner and a verification step.</p></div>
+      <div class="principle"><span class="n">05</span><h3>Each checkpoint ends demo-able</h3><p>Buildable, testable, demo-able. Never advance on red.</p></div>
+      <div class="principle"><span class="n">06</span><h3>SSG only</h3><p><code>ssr: true</code>, <code>nitro.preset: 'static'</code>. No backend, no server routes, no runtime fetch.</p></div>
+      <div class="principle"><span class="n">07</span><h3>Invisible accessibility</h3><p><code>aria-*</code>, landmarks, skip link, <code>tel:</code> links and focus styles without changing a default-state pixel (D1).</p></div>
+    </div>
   </div>
+</section>
 
-  <!-- STRUCTURE -->
-  <div class="sec-head"><span class="bar"></span><h2>Target Structure</h2></div>
-  <div class="panel">
-<pre class="tree">app/
-├─ app.vue                      # &lt;NuxtLayout&gt;&lt;NuxtPage/&gt;&lt;/NuxtLayout&gt;
-├─ layouts/default.vue          # utility bar, masthead, nav, ticker, footer + &lt;slot/&gt;
-├─ pages/                       # index.vue + mp/fin/pub/svc one-liners
-├─ components/{base,layout,home,inner}/
-├─ composables/                 # useLocale.ts, useNav.ts
-├─ data/                        # routes.ts, icons.ts
-├─ i18n/                        # en.ts, bn.ts, types.ts
-└─ assets/css/                  # tokens.css, base.css</pre>
+<section class="block alt" id="analysis" aria-labelledby="anTitle">
+  <div class="wrap">
+    <div class="sec-head">
+      <div>
+        <div class="sec-num">02 &mdash; Prototype analysis</div>
+        <h2 id="anTitle">What the prototype does, and what it becomes</h2>
+      </div>
+      <p>Every design-tool mechanism has a clear Nuxt home. The design runtime (<code>support.js</code>, <code>image-slot.js</code>) is read, never ported.</p>
+    </div>
+    <div class="analysis" role="table" aria-label="Prototype to Nuxt mapping">
+      <div class="an-row head" role="row"><div role="columnheader">Aspect</div><div role="columnheader">Prototype</div><div role="columnheader" aria-hidden="true"></div><div role="columnheader" class="an-to">Becomes</div></div>
+      <div class="an-row" role="row"><div class="an-aspect" role="cell">Template engine</div><div class="an-from" role="cell">Mini-template: <code>sc-for</code>, <code>sc-if</code>, <code>style-hover</code>, <code>{{ }}</code>, <code>&lt;image-slot&gt;</code></div><div class="an-arrow" aria-hidden="true">&rarr;</div><div class="an-to" role="cell">Vue templates; <code>style-hover</code> &rarr; scoped <code>:hover</code>; <code>image-slot</code> &rarr; <code>BaseImageSlot.vue</code></div></div>
+      <div class="an-row" role="row"><div class="an-aspect" role="cell">State</div><div class="an-from" role="cell"><code>view</code> (home | mp | fin | pub | svc) + <code>lang</code> (en | bn), in memory, no URLs</div><div class="an-arrow" aria-hidden="true">&rarr;</div><div class="an-to" role="cell"><code>view</code> &rarr; real routes; <code>lang</code> &rarr; <code>useLocale()</code> over <code>useState</code></div></div>
+      <div class="an-row" role="row"><div class="an-aspect" role="cell">Content</div><div class="an-from" role="cell">One <code>T = { en, bn }</code> dictionary, identical shape, nested <code>pages</code> map (lines ~519&ndash;853)</div><div class="an-arrow" aria-hidden="true">&rarr;</div><div class="an-to" role="cell"><code>i18n/en.ts</code>, <code>i18n/bn.ts</code> typed by <code>LocaleContent</code></div></div>
+      <div class="an-row" role="row"><div class="an-aspect" role="cell">View-model</div><div class="an-from" role="cell">A render function maps locale + icons + handlers into flat bindings</div><div class="an-arrow" aria-hidden="true">&rarr;</div><div class="an-to" role="cell">Composables + per-component props</div></div>
+      <div class="an-row" role="row"><div class="an-aspect" role="cell">Icons</div><div class="an-from" role="cell"><code>ICONS</code> path map + <code>svg(name, size)</code></div><div class="an-arrow" aria-hidden="true">&rarr;</div><div class="an-to" role="cell"><code>data/icons.ts</code> + <code>BaseIcon.vue</code></div></div>
+      <div class="an-row" role="row"><div class="an-aspect" role="cell">Chrome order</div><div class="an-from" role="cell">utility bar &rarr; masthead &rarr; sticky nav &rarr; ticker &rarr; content &rarr; footer</div><div class="an-arrow" aria-hidden="true">&rarr;</div><div class="an-to" role="cell"><code>layouts/default.vue</code> + 5 <code>layout/</code> components</div></div>
+      <div class="an-row" role="row"><div class="an-aspect" role="cell">Home</div><div class="an-from" role="cell">Market cards, auctions, news, policy rates, reserves, modules, governor, services, hotlines, links</div><div class="an-arrow" aria-hidden="true">&rarr;</div><div class="an-to" role="cell"><code>components/home/*</code></div></div>
+      <div class="an-row" role="row"><div class="an-aspect" role="cell">Inner views</div><div class="an-from" role="cell">One shared template driven by <code>L.pages[view]</code></div><div class="an-arrow" aria-hidden="true">&rarr;</div><div class="an-to" role="cell"><code>inner/InnerPage.vue</code> + 4 one-line pages</div></div>
+      <div class="an-row" role="row"><div class="an-aspect" role="cell">Palette</div><div class="an-from" role="cell"><code>#006A4E</code> used 59&times;, plus 9 supporting colors
+        <div class="swatches" aria-hidden="true"><i class="sw" style="background:#006A4E"></i><i class="sw" style="background:#4A4A4A"></i><i class="sw" style="background:#E0E4E8"></i><i class="sw" style="background:#F42A41"></i><i class="sw" style="background:#EDF0F3"></i><i class="sw" style="background:#E4F1EC"></i><i class="sw" style="background:#0A3D2C"></i><i class="sw" style="background:#5FBE9E"></i><i class="sw" style="background:#F7FAF8"></i><i class="sw" style="background:#DCEFE6"></i></div></div><div class="an-arrow" aria-hidden="true">&rarr;</div><div class="an-to" role="cell"><code>assets/css/tokens.css</code> (<code>--bb-*</code>)</div></div>
+      <div class="an-row" role="row"><div class="an-aspect" role="cell">Fonts</div><div class="an-from" role="cell">Inter (UI), JetBrains Mono (numbers)</div><div class="an-arrow" aria-hidden="true">&rarr;</div><div class="an-to" role="cell"><code>&lt;link&gt;</code> in <code>nuxt.config.ts</code>; <code>--bb-font</code>, <code>--bb-mono</code></div></div>
+      <div class="an-row" role="row"><div class="an-aspect" role="cell">Gaps</div><div class="an-from" role="cell">0 <code>aria-label</code>, 0 <code>tel:</code> links, 0 <code>@media</code> rules, 0 skip link</div><div class="an-arrow" aria-hidden="true">&rarr;</div><div class="an-to" role="cell">Added in CP07, CP09, CP11 (Decisions D1, D2)</div></div>
+    </div>
   </div>
+</section>
 
-  <!-- CHECKPOINTS -->
-  <div class="sec-head"><span class="bar"></span><h2>The 12 Checkpoints</h2></div>
-
-  <div class="loop">
-    <span class="tag">Loop · every CP</span>
-    <span class="steps">
-      <strong>Build</strong> <span class="arrow">→</span> <code>npm run generate</code> succeeds
-      <span class="arrow">→</span> <strong>Validate</strong> (checks below)
-      <span class="arrow">→</span> <strong>Vitest</strong> suite green
-      <span class="arrow">→</span> <strong>Live visual QA</strong> via Chrome DevTools MCP (console clean, side-by-side diff vs <code>Bangladesh Bank.html</code>)
-      <span class="arrow">→</span> <strong>Commit</strong> on green. Never advance on red.
-    </span>
+<section class="block" id="architecture" aria-labelledby="archTitle">
+  <div class="wrap">
+    <div class="sec-head">
+      <div>
+        <div class="sec-num">03 &mdash; Target architecture</div>
+        <h2 id="archTitle">Eight layers, each one only depends on the layer below</h2>
+      </div>
+      <p>Read the diagram bottom-up: design tokens and the typed i18n contract are the foundation; pages are thin; the build output is plain static HTML.</p>
+    </div>
+    <div class="arch">
+      <figure class="panel" style="margin:0">
+        <div class="panel-head"><span>Layer diagram</span><span>bottom &rarr; top</span></div>
+        <div class="diagram">
+          <svg viewBox="0 0 480 724" role="img" aria-labelledby="layTitle layDesc">
+            <title id="layTitle">Layer diagram of the Nuxt 4 target</title>
+            <desc id="layDesc">From bottom to top: design tokens, i18n contract, composables fed also by static data, base components, domain components, layout, pages, and static output.</desc>
+            <defs>
+              <marker id="ah" viewBox="0 0 10 10" refX="5" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path class="arrowhead" d="M0 0L10 5L0 10z"/></marker>
+            </defs>
+            <g class="ly out" tabindex="0"><rect class="lb" x="20" y="14" width="320" height="62" rx="12"/><text class="k" x="38" y="36">08</text><text class="t" x="64" y="40">Static output</text><text class="s" x="64" y="61">.output/public/</text></g>
+            <g class="ly" tabindex="0"><rect class="lb" x="20" y="102" width="320" height="62" rx="12"/><text class="k" x="38" y="124">07</text><text class="t" x="64" y="128">Pages</text><text class="s" x="64" y="149">index + 4 inner</text></g>
+            <g class="ly" tabindex="0"><rect class="lb" x="20" y="190" width="320" height="62" rx="12"/><text class="k" x="38" y="212">06</text><text class="t" x="64" y="216">Layout</text><text class="s" x="64" y="237">default.vue</text></g>
+            <g class="ly" tabindex="0"><rect class="lb" x="20" y="278" width="320" height="62" rx="12"/><text class="k" x="38" y="300">05</text><text class="t" x="64" y="304">Domain components</text><text class="s" x="64" y="325">layout/ · home/ · inner/</text></g>
+            <g class="ly" tabindex="0"><rect class="lb" x="20" y="366" width="320" height="62" rx="12"/><text class="k" x="38" y="388">04</text><text class="t" x="64" y="392">Base components</text><text class="s" x="64" y="413">BaseIcon · BaseImageSlot</text></g>
+            <g class="ly" tabindex="0"><rect class="lb" x="20" y="454" width="320" height="62" rx="12"/><text class="k" x="38" y="476">03</text><text class="t" x="64" y="480">Composables</text><text class="s" x="64" y="501">useLocale · useNav</text></g>
+            <g class="ly" tabindex="0"><rect class="lb" x="20" y="542" width="320" height="62" rx="12"/><text class="k" x="38" y="564">02</text><text class="t" x="64" y="568">i18n contract</text><text class="s" x="64" y="589">types.ts · en.ts · bn.ts</text></g>
+            <g class="ly tok" tabindex="0"><rect class="lb" x="20" y="630" width="320" height="62" rx="12"/><text class="k" x="38" y="652">01</text><text class="t" x="64" y="656">Design tokens</text><text class="s" x="64" y="677">tokens.css · base.css</text></g>
+            <g class="ly" tabindex="0"><rect class="lb" x="364" y="440" width="104" height="90" rx="12"/><text class="t" x="378" y="468" style="font-size:15px">Static data</text><text class="s" x="378" y="492">icons.ts</text><text class="s" x="378" y="512">routes.ts</text></g>
+            <path class="flow" d="M180 630V608" marker-end="url(#ah)"/>
+            <path class="flow" d="M180 542V520" marker-end="url(#ah)"/>
+            <path class="flow" d="M180 454V432" marker-end="url(#ah)"/>
+            <path class="flow" d="M180 366V344" marker-end="url(#ah)"/>
+            <path class="flow" d="M180 278V256" marker-end="url(#ah)"/>
+            <path class="flow" d="M180 190V168" marker-end="url(#ah)"/>
+            <path class="flow" d="M180 102V80" marker-end="url(#ah)"/>
+            <path class="flow" d="M364 485H346" marker-end="url(#ah)"/>
+          </svg>
+        </div>
+        <div class="legend"><span><i class="f"></i>Foundation</span><span><i></i>Source layer</span><span><i class="o"></i>Build output</span></div>
+      </figure>
+      <div class="panel">
+        <div class="panel-head"><span>Folder tree</span><span>srcDir: app/</span></div>
+<pre class="tree" tabindex="0" aria-label="Target folder tree"><span class="d">app/</span>
+├─ app.vue             <span class="c"># &lt;NuxtLayout&gt;&lt;NuxtPage/&gt;&lt;/NuxtLayout&gt;</span>
+├─ <span class="d">layouts/</span>default.vue  <span class="c"># chrome + &lt;slot/&gt;</span>
+├─ <span class="d">pages/</span>              <span class="c"># index.vue + 4 inner routes</span>
+├─ <span class="d">components/</span>
+│  ├─ <span class="d">base/</span>            <span class="c"># BaseIcon, BaseImageSlot</span>
+│  ├─ <span class="d">layout/</span>          <span class="c"># UtilityBar, Masthead,</span>
+│  │                   <span class="c">#   PrimaryNav, Ticker, Footer</span>
+│  ├─ <span class="d">home/</span>            <span class="c"># MarketCard, NewsList,</span>
+│  │                   <span class="c">#   PolicyRates, ModuleCard, …</span>
+│  └─ <span class="d">inner/</span>           <span class="c"># InnerPage, LinkGroup,</span>
+│                      <span class="c">#   DataTable, Sidebar</span>
+├─ <span class="d">composables/</span>        <span class="c"># useLocale.ts, useNav.ts</span>
+├─ <span class="d">data/</span>               <span class="c"># routes.ts, icons.ts</span>
+├─ <span class="d">i18n/</span>               <span class="c"># types.ts, en.ts, bn.ts</span>
+└─ <span class="d">assets/css/</span>         <span class="c"># tokens.css, base.css</span></pre>
+      </div>
+    </div>
   </div>
+</section>
 
-  <!-- CP1 -->
-  <details class="cp" open>
-    <summary>
-      <div class="num">01</div>
-      <div class="title"><div class="id">Checkpoint 1</div><h3>Scaffold + tooling baseline</h3></div>
-      <div class="chev">›</div>
-    </summary>
-    <div class="body">
-      <div class="row"><span class="lbl do">Do</span><p>Nuxt 4 init, <code>srcDir: app/</code>, <code>ssr: true</code>, <code>nitro.preset: 'static'</code>. TypeScript strict, ESLint + Prettier, Vitest + <code>@vue/test-utils</code> + <code>@nuxt/test-utils</code>. Load Inter + JetBrains Mono via <code>&lt;link&gt;</code> in <code>nuxt.config.ts</code> (same sources as prototype lines 11–15).</p></div>
-      <div class="row"><span class="lbl val">Validate</span><p><code>npm run generate</code> produces <code>.output/public/index.html</code>; lint + typecheck pass; one trivial Vitest passes.</p></div>
-      <div class="row"><span class="lbl test">Test loop</span><p>Smoke test that the dev server boots and fonts resolve (DevTools MCP).</p></div>
-      <div class="row"><span class="lbl exit">Exit</span><p>Empty app builds statically; CI runs the test command.</p></div>
+<section class="block alt" id="timeline" aria-labelledby="tlTitle">
+  <div class="wrap">
+    <div class="sec-head">
+      <div>
+        <div class="sec-num">04 &mdash; The 12 checkpoints</div>
+        <h2 id="tlTitle">A sequence where every step is buildable and demo-able</h2>
+      </div>
+      <p>Click a checkpoint to open its goal, dependencies, audit fixes and the three documents behind it. Arrow keys move between checkpoints.</p>
     </div>
-  </details>
-
-  <!-- CP2 -->
-  <details class="cp">
-    <summary>
-      <div class="num">02</div>
-      <div class="title"><div class="id">Checkpoint 2</div><h3>Design tokens + global base CSS</h3></div>
-      <div class="chev">›</div>
-    </summary>
-    <div class="body">
-      <div class="row"><span class="lbl do">Do</span><p>Extract palette (<code>#006A4E</code>, <code>#0A3D2C</code>, <code>#F42A41</code>, <code>#E4F1EC</code>, <code>#F4F6F8</code>, borders <code>#E0E4E8</code>…), fonts, max-width <code>1240px</code>, gutters <code>40px</code> → <code>assets/css/tokens.css</code> (<code>--bb-*</code>). Port global resets (<code>box-sizing</code>, <code>::selection</code>, <code>a</code> reset) → <code>base.css</code>.</p></div>
-      <div class="row"><span class="lbl val">Validate</span><p>No magic duplicates; a token sheet page renders each color/font.</p></div>
-      <div class="row"><span class="lbl test">Test</span><p>Snapshot test of the token sheet.</p></div>
-      <div class="row"><span class="lbl exit">Exit</span><p>Every recurring value referenced from a token.</p></div>
+    <div class="tl-tools">
+      <div class="lanes">
+        <span class="lane-tag"><i></i>CP02, CP03, CP05 run in parallel after CP01</span>
+        <span class="lane-tag b"><i></i>CP08&ndash;09 and CP10 run in parallel after CP07</span>
+      </div>
+      <button class="btn" type="button" id="expandAll">Expand all</button>
+      <button class="btn" type="button" id="collapseAll">Collapse all</button>
     </div>
-  </details>
-
-  <!-- CP3 -->
-  <details class="cp">
-    <summary>
-      <div class="num">03</div>
-      <div class="title"><div class="id">Checkpoint 3 · highest-value early step</div><h3>i18n contract (types.ts + en/bn dicts)</h3></div>
-      <div class="chev">›</div>
-    </summary>
-    <div class="body">
-      <div class="row"><span class="lbl do">Do</span><p>Define <code>LocaleContent</code> in <code>i18n/types.ts</code> covering <strong>all</strong> prototype keys (utility bar, masthead, nav map, ticker, marketCards, news, policyRates, reserves, auctions, modules, moreLinks, services, hotlines, usefulLinks, aboutLinks, footer, and <code>pages: { mp, fin, pub, svc }</code> with highlight/groups/tables/related). Transcribe <code>en.ts</code> and <code>bn.ts</code> verbatim from prototype lines ~519–853.</p></div>
-      <div class="row"><span class="lbl val">Validate</span><p>Both dicts satisfy <code>LocaleContent</code> (typecheck fails on drift); key-count parity test.</p></div>
-      <div class="row"><span class="lbl test">Test</span><p><code>Object.keys(en.pages)</code> deep-equals <code>Object.keys(bn.pages)</code> recursively.</p></div>
-      <div class="row"><span class="lbl exit">Exit</span><p>Content layer complete and shape-locked.</p></div>
-    </div>
-  </details>
-
-  <!-- CP4 -->
-  <details class="cp">
-    <summary>
-      <div class="num">04</div>
-      <div class="title"><div class="id">Checkpoint 4</div><h3>useLocale composable</h3></div>
-      <div class="chev">›</div>
-    </summary>
-    <div class="body">
-      <div class="row"><span class="lbl do">Do</span><p><code>useState</code>-backed active language, <code>L</code> computed of current dict, <code>setLang('en'|'bn')</code>. Mirrors <code>L = T[lang]</code> with no URL change.</p></div>
-      <div class="row"><span class="lbl val">Validate</span><p>Toggling re-renders without navigation.</p></div>
-      <div class="row"><span class="lbl test">Test</span><p><code>setLang('bn')</code> flips <code>L</code> to Bangla; default is <code>en</code>.</p></div>
-      <div class="row"><span class="lbl exit">Exit</span><p>Language state centralized and tested.</p></div>
-    </div>
-  </details>
-
-  <!-- CP5 -->
-  <details class="cp">
-    <summary>
-      <div class="num">05</div>
-      <div class="title"><div class="id">Checkpoint 5</div><h3>Icon system (data/icons.ts + BaseIcon)</h3></div>
-      <div class="chev">›</div>
-    </summary>
-    <div class="body">
-      <div class="row"><span class="lbl do">Do</span><p>Transcribe the <code>ICONS</code> path map (lines 519–637) → <code>data/icons.ts</code>. Build <code>components/base/BaseIcon.vue</code> reproducing <code>svg(name, size)</code> (viewBox, size, currentColor).</p></div>
-      <div class="row"><span class="lbl val">Validate</span><p>Each icon renders at its prototype size; color inherits.</p></div>
-      <div class="row"><span class="lbl test">Test</span><p>Snapshot rendering all icons.</p></div>
-      <div class="row"><span class="lbl exit">Exit</span><p><code>&lt;BaseIcon name="landmark" :size="28" /&gt;</code> reusable everywhere.</p></div>
-    </div>
-  </details>
-
-  <!-- CP6 -->
-  <details class="cp">
-    <summary>
-      <div class="num">06</div>
-      <div class="title"><div class="id">Checkpoint 6</div><h3>Routing + useNav</h3></div>
-      <div class="chev">›</div>
-    </summary>
-    <div class="body">
-      <div class="row"><span class="lbl do">Do</span><p><code>data/routes.ts</code> (<code>VIEW_ROUTES</code>: home→<code>/</code>, mp→<code>/monetary-policy</code>, fin→<code>/financial-system</code>, pub→<code>/publications</code>, svc→<code>/services</code>). <code>useNav()</code> builds nav items: labels from <code>L.nav</code>, <code>active</code> from <code>useRoute().path</code>, <code>to: null</code> for prototype no-op links (<code>about</code>, <code>fx</code>, <code>gsec</code>, <code>pay</code>). Create thin page files.</p></div>
-      <div class="row"><span class="lbl val">Validate</span><p>Each route resolves and statically generates; no-op nav items render but don't navigate.</p></div>
-      <div class="row"><span class="lbl test">Test</span><p><code>useNav</code> active-state per path; <code>nuxi generate</code> emits one HTML file per route.</p></div>
-      <div class="row"><span class="lbl exit">Exit</span><p>SPA views are real routes; deep-linkable.</p></div>
-    </div>
-  </details>
-
-  <!-- CP7 -->
-  <details class="cp">
-    <summary>
-      <div class="num">07</div>
-      <div class="title"><div class="id">Checkpoint 7</div><h3>Layout chrome (layouts/default.vue)</h3></div>
-      <div class="chev">›</div>
-    </summary>
-    <div class="body">
-      <div class="row"><span class="lbl do">Do</span><p>Port utility bar, masthead (crest, search box, lang toggle → <code>setLang</code>), sticky primary nav (<code>useNav</code> + <code>BaseIcon</code>), notice ticker, footer. Each piece → <code>components/layout/</code> SFC (<code>LayoutUtilityBar</code>, <code>LayoutMasthead</code>, <code>LayoutPrimaryNav</code>, <code>LayoutTicker</code>, <code>LayoutFooter</code>). <code>style-hover</code> → scoped <code>:hover</code> rules with exact source values.</p></div>
-      <div class="row"><span class="lbl val">Validate</span><p>Chrome pixel-matches original across both languages; sticky nav intact.</p></div>
-      <div class="row"><span class="lbl test">Test</span><p>Mount test for <code>LayoutPrimaryNav</code> (active underline <code>#006A4E</code>); lang toggle style-swap test.</p></div>
-      <div class="row"><span class="lbl exit">Exit</span><p>Every route shows identical header/footer.</p></div>
-    </div>
-  </details>
-
-  <!-- CP8 -->
-  <details class="cp">
-    <summary>
-      <div class="num">08</div>
-      <div class="title"><div class="id">Checkpoint 8</div><h3>Home — market data row</h3></div>
-      <div class="chev">›</div>
-    </summary>
-    <div class="body">
-      <div class="row"><span class="lbl do">Do</span><p>Section rendering <code>home/MarketCard.vue</code> from <code>marketCards</code> (single vs dual variants, <code>font-variant-numeric: tabular-nums slashed-zero</code>) + upcoming-auctions card from <code>auctions</code>.</p></div>
-      <div class="row"><span class="lbl val">Validate</span><p>4-col grid, 16px gap, green top border, mono numerals match.</p></div>
-      <div class="row"><span class="lbl test">Test</span><p><code>MarketCard</code> props test for single/dual rendering.</p></div>
-      <div class="row"><span class="lbl exit">Exit</span><p>Top of home page verified.</p></div>
-    </div>
-  </details>
-
-  <!-- CP9 -->
-  <details class="cp">
-    <summary>
-      <div class="num">09</div>
-      <div class="title"><div class="id">Checkpoint 9</div><h3>Home — remaining sections</h3></div>
-      <div class="chev">›</div>
-    </summary>
-    <div class="body">
-      <div class="row"><span class="lbl do">Do</span><p>Port news list, policy rates, reserves, modules grid (<code>modules</code> + icon/onClick → routes), services, hotlines, useful/about links. Each repeated shape → its own <code>home/</code> component.</p></div>
-      <div class="row"><span class="lbl val">Validate</span><p>Full home diffs clean in both languages; module/service cards navigate correctly.</p></div>
-      <div class="row"><span class="lbl test">Test</span><p>Snapshot of full <code>index.vue</code>; click-through test module→route.</p></div>
-      <div class="row"><span class="lbl exit">Exit</span><p>Home view complete.</p></div>
-    </div>
-  </details>
-
-  <!-- CP10 -->
-  <details class="cp">
-    <summary>
-      <div class="num">10</div>
-      <div class="title"><div class="id">Checkpoint 10</div><h3>Shared inner-page system (inner/InnerPage.vue)</h3></div>
-      <div class="chev">›</div>
-    </summary>
-    <div class="body">
-      <div class="row"><span class="lbl do">Do</span><p>Data-driven inner template: breadcrumb, eyebrow+title+lead, conditional highlight card, <code>inner/LinkGroup.vue</code> (groups), <code>inner/DataTable.vue</code> (head + rows, mono right-aligned values), sidebar (<code>sideRates</code> + <code>related</code>). Each page file is a one-liner: <code>&lt;InnerPage view="mp" /&gt;</code>.</p></div>
-      <div class="row"><span class="lbl val">Validate</span><p>All four inner routes render from <code>L.pages[view]</code>; adding a view needs only locale data + a thin page.</p></div>
-      <div class="row"><span class="lbl test">Test</span><p><code>InnerPage</code> mounts each <code>view</code>, asserts highlight/groups/tables conditionals; <code>DataTable</code> row/column count test.</p></div>
-      <div class="row"><span class="lbl exit">Exit</span><p>Inner-page system done; 4 inner views verified.</p></div>
-    </div>
-  </details>
-
-  <!-- CP11 -->
-  <details class="cp">
-    <summary>
-      <div class="num">11</div>
-      <div class="title"><div class="id">Checkpoint 11</div><h3>Full QA pass — visual · behavioral · a11y · responsive</h3></div>
-      <div class="chev">›</div>
-    </summary>
-    <div class="body">
-      <div class="row"><span class="lbl do">Do</span><p>Review every route × every language. Verify transitions (durations/easing exact), hover states, sticky positioning, focus states, tab order, alt/aria on icons + search, responsive <code>max-vw</code> clamps.</p></div>
-      <div class="row"><span class="lbl val">Validate</span><p>Chrome DevTools MCP — console clean, no layout shift, Lighthouse a11y check.</p></div>
-      <div class="row"><span class="lbl test">Test</span><p>Add component tests for gaps; fix and re-run full Vitest suite + <code>nuxi generate</code>.</p></div>
-      <div class="row"><span class="lbl exit">Exit</span><p>Zero visual/behavioral deltas from prototype.</p></div>
-    </div>
-  </details>
-
-  <!-- CP12 -->
-  <details class="cp">
-    <summary>
-      <div class="num">12</div>
-      <div class="title"><div class="id">Checkpoint 12</div><h3>Production hardening + release</h3></div>
-      <div class="chev">›</div>
-    </summary>
-    <div class="body">
-      <div class="row"><span class="lbl do">Do</span><p>SEO meta/OG/<code>lang</code> per route, favicon/crest, 404 page, robots/sitemap, font preload, asset hashing check, bundle-size review. CI runs lint + typecheck + test + <code>generate</code> on every push. README run/build docs.</p></div>
-      <div class="row"><span class="lbl val">Validate</span><p>Lighthouse (perf/SEO/a11y/best-practices) on generated output; CI green end-to-end.</p></div>
-      <div class="row"><span class="lbl test">Test</span><p>Full suite + <code>nuxi generate</code> in CI; serve <code>.output/public</code> and smoke-test all routes.</p></div>
-      <div class="row"><span class="lbl exit">Exit</span><p>Deployable <code>.output/public/</code>; pipeline enforces quality gates.</p></div>
-    </div>
-  </details>
-
-  <!-- RISKS -->
-  <div class="sec-head"><span class="bar"></span><h2>Risks &amp; Decisions to Lock Before CP3</h2></div>
-  <div class="panel">
-    <div class="risk"><span class="dot"></span><span class="txt"><strong>Bangla content fidelity</strong> — the bn dict must be transcribed character-exact; budget a review pass.</span></div>
-    <div class="risk"><span class="dot"></span><span class="txt"><strong><code>to: null</code> nav links</strong> — confirm these stay non-navigating (faithful) vs. becoming stubs.</span></div>
-    <div class="risk"><span class="dot"></span><span class="txt"><strong><code>image-slot.js</code> / <code>support.js</code></strong> — design-tool runtime, <em>not</em> ported; all icons/images become <code>BaseIcon</code> / static assets.</span></div>
+    <ol class="timeline" id="cpList"></ol>
   </div>
+</section>
 
-  <!-- TOOLING -->
-  <div class="sec-head"><span class="bar"></span><h2>Tooling Decisions (locked)</h2></div>
-  <div class="panel accent">
-    <ul>
-      <li><strong>Test loop:</strong> Vitest (unit/component) + Chrome DevTools MCP (live visual/behavioral QA) at every checkpoint, gated by <code>nuxi generate</code>.</li>
-      <li><strong>Build target:</strong> TBD — scaffolding deferred until explicitly requested.</li>
-    </ul>
+<section class="block" id="audit" aria-labelledby="auTitle">
+  <div class="wrap">
+    <div class="sec-head">
+      <div>
+        <div class="sec-num">05 &mdash; Audit issue map</div>
+        <h2 id="auTitle">Every audit issue has an owner checkpoint</h2>
+      </div>
+      <p>The filled chip is the checkpoint that fixes the issue; outlined chips follow up. Click any chip to jump to that checkpoint.</p>
+    </div>
+    <div class="sev-summary" role="group" aria-label="Filter by severity">
+      <button class="filter" type="button" data-f="all" aria-pressed="true">All <span class="count">9</span></button>
+      <button class="filter" type="button" data-f="high" aria-pressed="false">High <span class="count">5</span></button>
+      <button class="filter" type="button" data-f="medium" aria-pressed="false">Medium <span class="count">3</span></button>
+      <button class="filter" type="button" data-f="low" aria-pressed="false">Low <span class="count">1</span></button>
+      <span class="wcag-note"><b>3</b> WCAG failures: 2.2.2 &middot; 1.4.1 &middot; 1.4.3</span>
+    </div>
+    <table class="audit" id="auditTable">
+      <thead><tr><th scope="col">#</th><th scope="col">Issue</th><th scope="col">Severity</th><th scope="col">WCAG</th><th scope="col">Fixed in</th><th scope="col">How</th></tr></thead>
+      <tbody></tbody>
+    </table>
   </div>
+</section>
 
-</div>
+<section class="block alt" id="loop" aria-labelledby="loopTitle">
+  <div class="wrap">
+    <div class="sec-head">
+      <div>
+        <div class="sec-num">06 &mdash; Validation loop</div>
+        <h2 id="loopTitle">The same five gates close every checkpoint</h2>
+      </div>
+      <p>Build, validate, test, compare against the prototype, and only then commit, after explicit approval. Anything red sends the work back to Build.</p>
+    </div>
+    <div class="loop">
+      <div class="ring-wrap">
+        <svg viewBox="0 0 400 400" role="img" aria-labelledby="ringTitle">
+          <title id="ringTitle">Validation loop: Build, Validate, Unit test, Visual QA, Commit, then back to Build</title>
+          <circle class="ring-track" cx="200" cy="200" r="140"/>
+          <circle class="ring-prog" id="ringProg" cx="200" cy="200" r="140" transform="rotate(-90 200 200)"/>
+          <path class="fix-arc" d="M158 244 Q200 272 242 244"/>
+          <text class="fix-label" x="200" y="284">FIX ON RED</text>
+          <g class="ring-center">
+            <text class="small" x="200" y="178">EVERY CHECKPOINT</text>
+            <text class="big" x="200" y="206">Never advance</text>
+            <text class="big" x="200" y="230">on red.</text>
+          </g>
+          <g class="orbit" id="orbit"><circle cx="200" cy="60" r="50"/></g>
+          <g id="nodes"></g>
+        </svg>
+      </div>
+      <div>
+        <ol class="steps" id="steps">
+          <li class="step" data-i="0"><span class="k">01</span><h3>Build</h3><span class="cmd">npm run generate</span><span class="pass">exit 0, files in <code>.output/public/</code></span></li>
+          <li class="step" data-i="1"><span class="k">02</span><h3>Validate</h3><span class="cmd">npx nuxi typecheck &middot; npx eslint .</span><span class="pass">0 errors</span></li>
+          <li class="step" data-i="2"><span class="k">03</span><h3>Unit test</h3><span class="cmd">npx vitest run</span><span class="pass">all green</span></li>
+          <li class="step" data-i="3"><span class="k">04</span><h3>Visual QA vs prototype</h3><span class="cmd">Chrome DevTools MCP: prototype and npx serve .output/public side by side</span><span class="pass">0 visible deltas, console 0 errors</span></li>
+          <li class="step" data-i="4"><span class="k">05</span><h3>Commit on green</h3><span class="cmd">git commit</span><span class="pass">only after explicit approval</span></li>
+        </ol>
+        <div class="loop-ctrl">
+          <button class="btn" type="button" id="loopBtn" aria-pressed="false">Pause</button>
+          <span class="never"><svg viewBox="0 0 20 20" aria-hidden="true"><path d="M10 2 19 18H1z" fill="currentColor"/><path d="M10 8v4M10 14.5v.5" stroke="#fff" stroke-width="2" stroke-linecap="round"/></svg>Never advance on red.</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
 
-<footer class="foot">
-  <strong>Bangladesh Bank</strong> — Prototype → Nuxt 4 SSG Migration Plan · Companion to architecture.md
+<section class="block" id="risks" aria-labelledby="rkTitle">
+  <div class="wrap">
+    <div class="sec-head">
+      <div>
+        <div class="sec-num">07 &mdash; Risks and decisions</div>
+        <h2 id="rkTitle">Three decisions made up front, seven risks watched</h2>
+      </div>
+      <p>Decisions settle the tension between pixel fidelity and accessibility. Risks each carry a concrete mitigation, not a hope.</p>
+    </div>
+    <div class="rd">
+      <div>
+        <h3>Decisions <span class="tag">D1&ndash;D3</span></h3>
+        <ul class="rd-list">
+          <li class="rd-item"><span class="rd-id">D1</span><h4>Fidelity vs accessibility: the prototype has no ARIA, skip link or <code>tel:</code></h4><p class="rd-impact"><b>Impact:</b> audit fixes need markup the design lacks.</p><p class="rd-mit">Add semantic and ARIA markup that does not change a default-state pixel. Skip link is visually hidden until focus.</p></li>
+          <li class="rd-item"><span class="rd-id">D2</span><h4>The prototype has 0 <code>@media</code> rules</h4><p class="rd-impact"><b>Impact:</b> mobile layout undefined.</p><p class="rd-mit">CP11 adds breakpoints at 768&nbsp;px and 375&nbsp;px; desktop (1280&nbsp;px) stays pixel-exact.</p></li>
+          <li class="rd-item"><span class="rd-id">D3</span><h4>Ticker pause control is a new visible element</h4><p class="rd-impact"><b>Impact:</b> small visual change.</p><p class="rd-mit">Approved exception for WCAG 2.2.2; style it with existing tokens.</p></li>
+        </ul>
+      </div>
+      <div>
+        <h3>Risks <span class="tag">R1&ndash;R7</span></h3>
+        <ul class="rd-list">
+          <li class="rd-item risk"><span class="rd-id">R1</span><h4>Bangla transcription errors</h4><p class="rd-impact"><b>Impact:</b> wrong official content.</p><p class="rd-mit">Copy text programmatically from the <code>T</code> dict; key-parity test; native-speaker review in CP11.</p></li>
+          <li class="rd-item risk"><span class="rd-id">R2</span><h4><code>to: null</code> nav links (<code>about</code>, <code>fx</code>, <code>gsec</code>, <code>pay</code>)</h4><p class="rd-impact"><b>Impact:</b> dead links confuse users.</p><p class="rd-mit">Keep non-navigating (faithful) and mark <code>aria-disabled="true"</code>; list for a later phase.</p></li>
+          <li class="rd-item risk"><span class="rd-id">R3</span><h4><code>support.js</code> / <code>image-slot.js</code> are design runtime</h4><p class="rd-impact"><b>Impact:</b> accidental port of tool code.</p><p class="rd-mit">Do not port. <code>check-port.mjs</code> hook flags <code>sc-for</code>, <code>sc-if</code>, <code>style-hover</code>.</p></li>
+          <li class="rd-item risk"><span class="rd-id">R4</span><h4>Visual diff by eye is subjective</h4><p class="rd-impact"><b>Impact:</b> missed deltas.</p><p class="rd-mit">Fixed widths (1280 / 768 / 375) and a written per-section checklist in each <code>test-criteria.md</code>.</p></li>
+          <li class="rd-item risk"><span class="rd-id">R5</span><h4>The prototype fails WCAG 1.4.3 twice: <code>#9aa39e</code> on white is 2.59:1 (8 uses), white on <code>#F42A41</code> is 4.00:1</h4><p class="rd-impact"><b>Impact:</b> fidelity conflicts with contrast.</p><p class="rd-mit">CP02 keeps exact values; CP11 asks the owner to approve a darker token as an exception.</p></li>
+          <li class="rd-item risk"><span class="rd-id">R6</span><h4><code>Bangladesh Bank New Website/app/</code> already holds draft code (27 components, 5 pages)</h4><p class="rd-impact"><b>Impact:</b> plan could duplicate or ignore work.</p><p class="rd-mit">Each checkpoint marks matching files &ldquo;Verify / rewrite&rdquo;; its tests decide if the draft stays. Nothing is deleted.</p></li>
+          <li class="rd-item risk"><span class="rd-id">R7</span><h4>Project <code>CLAUDE.md</code>, agents and skills point to <code>../01-Bangldesh-Bank-Refactor-Design/</code>, which does not exist</h4><p class="rd-impact"><b>Impact:</b> agents read no design.</p><p class="rd-mit">CP01 changes the path to <code>../02-Design/</code>.</p></li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="block alt" id="done" aria-labelledby="doneTitle">
+  <div class="wrap">
+    <div class="sec-head">
+      <div>
+        <div class="sec-num">08 &mdash; Definition of done</div>
+        <h2 id="doneTitle">The full migration is done when all seven hold</h2>
+      </div>
+      <p>These are checked once, after CP12, on the deployable <code>.output/public/</code>.</p>
+    </div>
+    <div class="dod">
+      <div>
+        <p class="dod-big">5 static routes, 2 languages, <em>0 visual deltas</em>, 9 audit issues closed.</p>
+        <div class="dod-routes"><span class="chip">/</span><span class="chip">/monetary-policy</span><span class="chip">/financial-system</span><span class="chip">/publications</span><span class="chip">/services</span></div>
+      </div>
+      <ul class="dod-list">
+        <li><span class="box" aria-hidden="true"></span><span>5 routes generate as static HTML: <code>/</code>, <code>/monetary-policy</code>, <code>/financial-system</code>, <code>/publications</code>, <code>/services</code>.</span></li>
+        <li><span class="box" aria-hidden="true"></span><span>Both languages switch on every route with no URL change.</span></li>
+        <li><span class="box" aria-hidden="true"></span><span>0 visual deltas from the prototype at 1280&nbsp;px.</span></li>
+        <li><span class="box" aria-hidden="true"></span><span>All 9 audit issues verified fixed.</span></li>
+        <li><span class="box" aria-hidden="true"></span><span>Lighthouse targets met:<span class="lh"><span>Accessibility &ge; 95</span><span>Performance &ge; 90</span><span>SEO &ge; 95</span><span>Best Practices &ge; 95</span></span></span></li>
+        <li><span class="box" aria-hidden="true"></span><span>CI runs lint, typecheck, Vitest and <code>generate</code> on every push.</span></li>
+        <li><span class="box" aria-hidden="true"></span><span>No design-tool syntax remains in <code>app/</code>.</span></li>
+      </ul>
+    </div>
+  </div>
+</section>
+</main>
+
+<footer>
+  <div class="wrap">
+    <span>Source: <code>03-Planning/docs/migration-plan.md</code> &middot; companion to <code>architecture.md</code></span>
+    <span>Bangladesh Bank website migration &middot; planning phase</span>
+  </div>
 </footer>
 
+<script>
+(function(){
+  var root=document.documentElement;
+  try{var saved=localStorage.getItem("bb-plan-theme");if(saved==="light"||saved==="dark")root.setAttribute("data-theme",saved);}catch(e){}
+  document.getElementById("themeBtn").addEventListener("click",function(){
+    var cur=root.getAttribute("data-theme");
+    if(!cur)cur=window.matchMedia("(prefers-color-scheme: dark)").matches?"dark":"light";
+    var next=cur==="dark"?"light":"dark";
+    root.setAttribute("data-theme",next);
+    try{localStorage.setItem("bb-plan-theme",next);}catch(e){}
+  });
+
+  var AUDIT={
+    1:{t:"No persistent navigation bar",s:"high"},2:{t:"Fixed narrow page width (~843 px)",s:"high"},3:{t:"Auto-rotating banner, no pause",s:"high"},
+    4:{t:"Red/green card borders without meaning",s:"high"},5:{t:"Governor section wasted space",s:"medium"},6:{t:"Card icon/border misalignment",s:"medium"},
+    7:{t:"Social icons without labels",s:"medium"},8:{t:"Hotlines as bitmap images",s:"high"},9:{t:"Decorative header, low-contrast search",s:"low"}
+  };
+  var AUDIT_ROWS=[
+    {n:1,w:"—",cps:[["07",1],["11",0]],how:"Sticky primary nav with all sections visible; skip-to-content link; <code>&lt;nav aria-label&gt;</code>"},
+    {n:2,w:"—",cps:[["02",1],["09",0],["11",0]],how:"<code>--bb-max: 1240px</code> + 40 px gutters; CSS Grid sections; responsive breakpoints in CP11"},
+    {n:3,w:"2.2.2",cps:[["07",1]],how:"Ticker gets a pause/play control, pauses on hover and focus, honors <code>prefers-reduced-motion</code>"},
+    {n:4,w:"1.4.1",cps:[["02",1],["09",0]],how:"Semantic tokens: <code>--bb-green</code> for brand, <code>--bb-red</code> for alerts only"},
+    {n:5,w:"—",cps:[["09",1]],how:"Compact governor card from the prototype with message excerpt and descriptive link"},
+    {n:6,w:"—",cps:[["09",1]],how:"One <code>HomeModuleCard</code> component used by every card grid"},
+    {n:7,w:"—",cps:[["07",1]],how:"Every icon-only link gets <code>aria-label</code>; <code>BaseIcon</code> is <code>aria-hidden</code>"},
+    {n:8,w:"—",cps:[["09",1]],how:"HTML text + <code>&lt;a href=\"tel:…\"&gt;</code>, <code>role=\"region\" aria-label=\"Emergency hotlines\"</code>, bilingual labels"},
+    {n:9,w:"1.4.3",cps:[["07",1]],how:"Masthead with real search input; placeholder contrast ≥ 4.5:1"}
+  ];
+  var CPS=[
+    {n:"01",name:"Scaffold and tooling baseline",slug:"CP01-scaffold-and-tooling",goal:"An empty Nuxt 4 app builds to static HTML with lint, typecheck and Vitest green.",deps:[],dec:["R7"]},
+    {n:"02",name:"Design tokens and base CSS",slug:"CP02-design-tokens",goal:"Every recurring color, font and width from the prototype is a <code>--bb-*</code> token.",deps:["01"],lane:"a",dec:["R5"]},
+    {n:"03",name:"i18n contract",slug:"CP03-i18n-contract",goal:"<code>LocaleContent</code> types all prototype content; <code>en.ts</code> and <code>bn.ts</code> are transcribed exactly and cannot drift.",deps:["01"],lane:"a"},
+    {n:"04",name:"useLocale and language switch",slug:"CP04-use-locale",goal:"One composable holds the active language and switches content with no URL change.",deps:["03"]},
+    {n:"05",name:"Icon system",slug:"CP05-icon-system",goal:"Every prototype icon renders through <code>&lt;BaseIcon name size&gt;</code>.",deps:["01"],lane:"a"},
+    {n:"06",name:"Routes and useNav",slug:"CP06-routes-and-nav",goal:"Each prototype view is a real, statically generated route with an active nav state.",deps:["04"]},
+    {n:"07",name:"Layout chrome",slug:"CP07-layout-chrome",goal:"Every route shows the pixel-matched header, sticky nav, ticker and footer, with audit fixes 1, 3, 7, 9.",deps:["02","05","06"],dec:["D1","D3"]},
+    {n:"08",name:"Home — market data row",slug:"CP08-home-market-row",goal:"The market cards and auctions card match the prototype in both languages.",deps:["07"],lane:"b"},
+    {n:"09",name:"Home — remaining sections",slug:"CP09-home-sections",goal:"The full home page matches the prototype, with audit fixes 4, 5, 6, 8.",deps:["08"],lane:"b",dec:["D1"]},
+    {n:"10",name:"Shared inner-page system",slug:"CP10-inner-page-system",goal:"4 inner routes render from one <code>InnerPage.vue</code> driven by <code>L.pages[view]</code>.",deps:["07"],lane:"b"},
+    {n:"11",name:"Full QA pass",slug:"CP11-full-qa-pass",goal:"5 routes × 2 languages × 3 widths show 0 visual deltas and pass WCAG 2.1 AA checks.",deps:["09","10"],dec:["D1","D2","R1","R5"]},
+    {n:"12",name:"Production hardening and release",slug:"CP12-hardening-and-release",goal:"<code>.output/public/</code> is deployable and CI enforces every gate.",deps:["11"]}
+  ];
+  var DEC={D1:"Invisible ARIA, skip link and tel: markup",D2:"Breakpoints at 768 px and 375 px",D3:"Ticker pause control exception",R1:"Native-speaker review of Bangla",R5:"Contrast failures in prototype colors",R7:"Fix design path to ../02-Design/"};
+
+  var auditByCp={};
+  AUDIT_ROWS.forEach(function(r){r.cps.forEach(function(c){(auditByCp[c[0]]=auditByCp[c[0]]||[]).push({n:r.n,lead:!!c[1]});});});
+  var unlocks={};
+  CPS.forEach(function(c){c.deps.forEach(function(d){(unlocks[d]=unlocks[d]||[]).push(c.n);});});
+
+  var chevSvg='<svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 6l4 4 4-4"/></svg>';
+  var docSvg='<svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><path d="M4 1.5h5.5L13 5v9.5H4z"/><path d="M9.5 1.5V5H13"/></svg>';
+  function depBtns(list){
+    if(!list||!list.length)return '<span class="none">None, this is the starting point.</span>';
+    return '<div class="dep-row">'+list.map(function(d){return '<button type="button" class="dep-btn" data-go="'+d+'">CP'+d+'</button>';}).join("")+'</div>';
+  }
+  var list=document.getElementById("cpList");
+  list.innerHTML=CPS.map(function(c,i){
+    var au=auditByCp[c.n]||[];
+    var meta='<span class="chip">'+(c.deps.length?"after CP"+c.deps.join(", CP"):"start")+'</span>';
+    if(au.length)meta+='<span class="chip au">'+au.length+' audit '+(au.length>1?"issues":"issue")+'</span>';
+    if(c.lane==="a")meta+='<span class="chip lane"><i></i>parallel lane</span>';
+    if(c.lane==="b")meta+='<span class="chip lane b"><i></i>parallel lane</span>';
+    var auHtml=au.length?'<ul class="cp-list">'+au.map(function(a){var x=AUDIT[a.n];return '<li><span class="sev '+x.s+'">'+x.s+'</span><span><b>#'+a.n+'</b> '+x.t+(a.lead?"":' <span class="none">(follow-up)</span>')+'</span></li>';}).join("")+'</ul>':'<span class="none">No audit issue owned here; this checkpoint is foundation.</span>';
+    var decHtml=c.dec?'<div class="full"><h4>Decisions and risks applied</h4><div class="dep-row">'+c.dec.map(function(d){return '<span class="chip">'+d+' &middot; '+DEC[d]+'</span>';}).join("")+'</div></div>':"";
+    var base="checkpoints/"+c.slug+"/";
+    return '<li class="cp'+(i===CPS.length-1?" final":"")+'" id="cp-'+c.n+'">'+
+      '<span class="cp-dot" aria-hidden="true">'+c.n+'</span>'+
+      '<div class="cp-card"><h3 style="margin:0"><button type="button" class="cp-toggle" aria-expanded="false" aria-controls="cp-'+c.n+'-panel" data-n="'+c.n+'">'+
+      '<span class="cp-name"><span class="mono" style="color:var(--muted);font-weight:500">CP'+c.n+'</span> '+c.name+'</span>'+
+      '<span class="cp-meta">'+meta+'</span><span class="chev">'+chevSvg+'</span></button></h3>'+
+      '<div class="cp-panel" id="cp-'+c.n+'-panel" role="region" aria-label="CP'+c.n+' details" hidden>'+
+      '<div class="full"><h4>Goal</h4><p class="cp-goal">'+c.goal+'</p></div>'+
+      '<div><h4>Depends on</h4>'+depBtns(c.deps)+'</div>'+
+      '<div><h4>Unlocks</h4>'+(unlocks[c.n]?depBtns(unlocks[c.n]):'<span class="none">Release: the migration is done.</span>')+'</div>'+
+      '<div class="full"><h4>Audit issues addressed</h4>'+auHtml+'</div>'+decHtml+
+      '<div class="full"><h4>Exit gate</h4><div class="gate"><span>Build</span><b>&rarr;</b><span>Validate</span><b>&rarr;</b><span>Unit test</span><b>&rarr;</b><span>Visual QA</span><b>&rarr;</b><span>Commit</span></div></div>'+
+      '<div class="full"><h4>Checkpoint documents</h4><div class="docs">'+
+      '<a class="doc-link" href="'+base+'goal.md">'+docSvg+'goal.md</a>'+
+      '<a class="doc-link" href="'+base+'plan.md">'+docSvg+'plan.md</a>'+
+      '<a class="doc-link" href="'+base+'test-criteria.md">'+docSvg+'test-criteria.md</a></div></div>'+
+      '</div></div></li>';
+  }).join("");
+
+  function setOpen(n,open){
+    var btn=list.querySelector('.cp-toggle[data-n="'+n+'"]');if(!btn)return;
+    var li=btn.closest(".cp"),panel=document.getElementById("cp-"+n+"-panel");
+    btn.setAttribute("aria-expanded",open?"true":"false");panel.hidden=!open;li.classList.toggle("open",open);
+  }
+  function goTo(n){
+    setOpen(n,true);
+    var li=document.getElementById("cp-"+n);
+    li.scrollIntoView({behavior:window.matchMedia("(prefers-reduced-motion: reduce)").matches?"auto":"smooth",block:"start"});
+    li.querySelector(".cp-toggle").focus({preventScroll:true});
+  }
+  list.addEventListener("click",function(e){
+    var go=e.target.closest("[data-go]");
+    if(go){goTo(go.getAttribute("data-go"));return;}
+    var t=e.target.closest(".cp-toggle");
+    if(t)setOpen(t.getAttribute("data-n"),t.getAttribute("aria-expanded")!=="true");
+  });
+  list.addEventListener("keydown",function(e){
+    var t=e.target.closest(".cp-toggle");if(!t)return;
+    var all=Array.prototype.slice.call(list.querySelectorAll(".cp-toggle")),i=all.indexOf(t),j=-1;
+    if(e.key==="ArrowDown")j=Math.min(i+1,all.length-1);
+    else if(e.key==="ArrowUp")j=Math.max(i-1,0);
+    else if(e.key==="Home")j=0;
+    else if(e.key==="End")j=all.length-1;
+    if(j>-1){e.preventDefault();all[j].focus();}
+  });
+  document.getElementById("expandAll").addEventListener("click",function(){CPS.forEach(function(c){setOpen(c.n,true);});});
+  document.getElementById("collapseAll").addEventListener("click",function(){CPS.forEach(function(c){setOpen(c.n,false);});});
+
+  var tbody=document.querySelector("#auditTable tbody");
+  var sevIcon={high:'<svg viewBox="0 0 12 12" aria-hidden="true"><path d="M6 1l5 10H1z" fill="currentColor"/></svg>',medium:'<svg viewBox="0 0 12 12" aria-hidden="true"><path d="M6 1l5 5-5 5-5-5z" fill="currentColor"/></svg>',low:'<svg viewBox="0 0 12 12" aria-hidden="true"><circle cx="6" cy="6" r="4.5" fill="currentColor"/></svg>'};
+  tbody.innerHTML=AUDIT_ROWS.map(function(r){
+    var a=AUDIT[r.n];
+    return '<tr class="is-'+a.s+'" data-s="'+a.s+'">'+
+      '<td class="num" data-label="Issue #">'+r.n+'</td>'+
+      '<td class="issue" data-label="Issue">'+a.t+'</td>'+
+      '<td data-label="Severity"><span class="sev '+a.s+'">'+sevIcon[a.s]+a.s+'</span></td>'+
+      '<td class="wcag'+(r.w!=="—"?" hit":"")+'" data-label="WCAG">'+(r.w==="—"?'<span aria-label="none">—</span>':r.w)+'</td>'+
+      '<td data-label="Fixed in"><div class="cp-links">'+r.cps.map(function(c){return '<button type="button" class="cp-jump'+(c[1]?" lead":"")+'" data-go="'+c[0]+'" aria-label="Go to checkpoint '+c[0]+(c[1]?", lead fix":", follow-up")+'">CP'+c[0]+'</button>';}).join("")+'</div></td>'+
+      '<td class="how" data-label="How">'+r.how+'</td></tr>';
+  }).join("");
+  tbody.addEventListener("click",function(e){var g=e.target.closest("[data-go]");if(g)goTo(g.getAttribute("data-go"));});
+  var filters=document.querySelectorAll(".filter");
+  Array.prototype.forEach.call(filters,function(f){
+    f.addEventListener("click",function(){
+      var v=f.getAttribute("data-f");
+      Array.prototype.forEach.call(filters,function(x){x.setAttribute("aria-pressed",x===f?"true":"false");});
+      Array.prototype.forEach.call(tbody.rows,function(row){row.hidden=v!=="all"&&row.getAttribute("data-s")!==v;});
+    });
+  });
+
+  var STEPS=["Build","Validate","Unit test","Visual QA","Commit"];
+  var nodesG=document.getElementById("nodes"),NS="http://www.w3.org/2000/svg",R=140,C=200;
+  var nodeEls=STEPS.map(function(label,i){
+    var ang=(-90+i*72)*Math.PI/180,x=C+R*Math.cos(ang),y=C+R*Math.sin(ang);
+    var g=document.createElementNS(NS,"g");g.setAttribute("class","node");g.setAttribute("tabindex","0");g.setAttribute("role","button");g.setAttribute("aria-label","Step "+(i+1)+": "+label);
+    var c=document.createElementNS(NS,"circle");c.setAttribute("cx",x);c.setAttribute("cy",y);c.setAttribute("r",42);
+    var t=document.createElementNS(NS,"text");t.setAttribute("x",x);t.setAttribute("y",y+6);t.textContent=label;
+    var k=document.createElementNS(NS,"text");k.setAttribute("class","i");k.setAttribute("x",x);k.setAttribute("y",y-13);k.textContent="0"+(i+1);
+    g.appendChild(c);g.appendChild(k);g.appendChild(t);nodesG.appendChild(g);
+    g.addEventListener("click",function(){manual(i);});
+    g.addEventListener("keydown",function(e){if(e.key==="Enter"||e.key===" "){e.preventDefault();manual(i);}});
+    return g;
+  });
+  var stepEls=Array.prototype.slice.call(document.querySelectorAll(".step"));
+  stepEls.forEach(function(s,i){s.addEventListener("click",function(){manual(i);});});
+  var prog=document.getElementById("ringProg"),orbit=document.getElementById("orbit"),circ=2*Math.PI*R;
+  prog.style.strokeDasharray=circ;
+  var cur=0,turns=0,timer=null;
+  function show(i){
+    if(i<cur&&i===0)turns++;
+    cur=i;
+    nodeEls.forEach(function(n,j){n.classList.toggle("on",j===i);n.classList.toggle("done",j<i);});
+    stepEls.forEach(function(s,j){s.classList.toggle("on",j===i);});
+    prog.style.strokeDashoffset=circ*(1-(i/5));
+    orbit.style.transform="rotate("+(turns*360+i*72)+"deg)";
+  }
+  var reduce=window.matchMedia("(prefers-reduced-motion: reduce)");
+  var loopBtn=document.getElementById("loopBtn");
+  function play(){stop();timer=setInterval(function(){show((cur+1)%5);},1800);loopBtn.textContent="Pause";loopBtn.setAttribute("aria-pressed","false");}
+  function stop(){if(timer){clearInterval(timer);timer=null;}loopBtn.textContent="Play";loopBtn.setAttribute("aria-pressed","true");}
+  function manual(i){stop();show(i);}
+  loopBtn.addEventListener("click",function(){timer?stop():play();});
+  show(0);
+  if(reduce.matches)stop();
+  else{
+    var started=false;
+    var io=new IntersectionObserver(function(es){es.forEach(function(e){if(e.isIntersecting&&!started){started=true;play();}});},{threshold:.3});
+    io.observe(document.getElementById("loop"));
+    stop();
+  }
+
+  var links=document.querySelectorAll(".topnav a");
+  var secIo=new IntersectionObserver(function(es){es.forEach(function(e){if(e.isIntersecting){Array.prototype.forEach.call(links,function(a){a.classList.toggle("is-current",a.getAttribute("href")==="#"+e.target.id);});}});},{rootMargin:"-45% 0px -50% 0px"});
+  ["analysis","architecture","timeline","audit","loop","risks","done"].forEach(function(id){secIo.observe(document.getElementById(id));});
+})();
+</script>
 </body>
 </html>
