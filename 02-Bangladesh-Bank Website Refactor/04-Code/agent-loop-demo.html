@@ -1,0 +1,762 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Agent Loop Demo</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --green:#006A4E;
+  --deep:#0A3D2C;
+  --red:#F42A41;
+  --mint:#E4F1EC;
+  --mint-2:#DCEFE6;
+  --accent:#5FBE9E;
+  --bg:#F7FAF8;
+  --line:#E0E4E8;
+  --ink:#4A4A4A;
+  --surface:#FFFFFF;
+  --surface-2:#F7FAF8;
+  --heading:#0A3D2C;
+  --muted:#6B7570;
+  --brand:#006A4E;
+  --brand-ink:#FFFFFF;
+  --soft:#E4F1EC;
+  --soft-2:#DCEFE6;
+  --red-soft:rgba(244,42,65,.10);
+  --shadow:0 1px 2px rgba(10,61,44,.06),0 8px 24px -12px rgba(10,61,44,.18);
+  --ring:rgba(95,190,158,.45);
+  --mono:"JetBrains Mono",ui-monospace,SFMono-Regular,Menlo,monospace;
+  --sans:"Inter",system-ui,-apple-system,"Segoe UI",sans-serif;
+  color-scheme:light;
+}
+@media (prefers-color-scheme:dark){
+  :root:not([data-theme="light"]){
+    --bg:#06150F;
+    --surface:#0B231A;
+    --surface-2:#0E2B20;
+    --ink:#C9D6D0;
+    --heading:#E4F1EC;
+    --muted:#8EA39A;
+    --line:#1C3A2E;
+    --brand:#5FBE9E;
+    --brand-ink:#06150F;
+    --soft:#0F3326;
+    --soft-2:#123B2C;
+    --red-soft:rgba(244,42,65,.16);
+    --shadow:0 1px 2px rgba(0,0,0,.4),0 10px 28px -14px rgba(0,0,0,.7);
+    --ring:rgba(95,190,158,.35);
+    color-scheme:dark;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#06150F;
+  --surface:#0B231A;
+  --surface-2:#0E2B20;
+  --ink:#C9D6D0;
+  --heading:#E4F1EC;
+  --muted:#8EA39A;
+  --line:#1C3A2E;
+  --brand:#5FBE9E;
+  --brand-ink:#06150F;
+  --soft:#0F3326;
+  --soft-2:#123B2C;
+  --red-soft:rgba(244,42,65,.16);
+  --shadow:0 1px 2px rgba(0,0,0,.4),0 10px 28px -14px rgba(0,0,0,.7);
+  --ring:rgba(95,190,158,.35);
+  color-scheme:dark;
+}
+*{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%}
+body{margin:0;background:var(--bg);color:var(--ink);font:400 17px/1.5 var(--sans);overflow-x:hidden}
+code,.mono{font-family:var(--mono)}
+h1,h2,h3{color:var(--heading);margin:0;letter-spacing:-.01em}
+button{font:inherit;cursor:pointer}
+.wrap{max-width:1480px;margin:0 auto;padding:0 28px}
+.top{background:var(--deep);color:#E4F1EC;border-bottom:4px solid var(--green)}
+.top .wrap{display:flex;flex-wrap:wrap;gap:20px 32px;align-items:flex-end;justify-content:space-between;padding-top:26px;padding-bottom:22px}
+.eyebrow{font:600 13px/1 var(--mono);letter-spacing:.14em;text-transform:uppercase;color:var(--accent)}
+.top h1{color:#fff;font-size:clamp(28px,3.4vw,44px);font-weight:800;margin-top:10px;line-height:1.08}
+.top p{margin:10px 0 0;max-width:62ch;color:#C5DDD3;font-size:18px}
+.top p b{color:#fff;font-weight:600}
+.controls{display:flex;flex-wrap:wrap;gap:10px;align-items:center}
+.btn{display:inline-flex;align-items:center;gap:8px;border:1px solid rgba(228,241,236,.25);background:rgba(228,241,236,.06);color:#E4F1EC;border-radius:10px;padding:10px 16px;font-weight:600;font-size:16px;min-height:44px;transition:background .15s,border-color .15s}
+.btn:hover{background:rgba(228,241,236,.14);border-color:rgba(228,241,236,.45)}
+.btn:focus-visible,.seg button:focus-visible,.gate button:focus-visible{outline:3px solid var(--accent);outline-offset:2px}
+.btn.primary{background:var(--accent);color:#06150F;border-color:var(--accent);min-width:118px;justify-content:center}
+.btn.primary:hover{background:#7BD0B3}
+.seg{display:inline-flex;border:1px solid rgba(228,241,236,.25);border-radius:10px;overflow:hidden}
+.seg button{background:transparent;border:0;color:#C5DDD3;padding:10px 14px;font:600 15px var(--mono);min-height:44px}
+.seg button+button{border-left:1px solid rgba(228,241,236,.18)}
+.seg button[aria-pressed="true"]{background:#E4F1EC;color:var(--deep)}
+.simclock{font:500 14px var(--mono);color:#9CC6B5;padding-left:4px;min-width:150px}
+
+.stage{display:grid;grid-template-columns:minmax(0,1.6fr) minmax(0,1fr);gap:24px;padding-top:24px;padding-bottom:24px;align-items:start}
+.panel{background:var(--surface);border:1px solid var(--line);border-radius:16px;box-shadow:var(--shadow)}
+.panel-h{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:16px 20px;border-bottom:1px solid var(--line)}
+.panel-h h2{font-size:18px;font-weight:700}
+.panel-h .tag{font:500 13px var(--mono);color:var(--muted)}
+
+.orch{padding:20px}
+.orch-node{display:flex;gap:16px;align-items:center;background:var(--soft);border:1px solid var(--soft-2);border-radius:14px;padding:14px 18px;position:relative}
+.orch-icon{flex:none;width:52px;height:52px;border-radius:12px;background:var(--green);display:grid;place-items:center;color:#fff;font:800 24px var(--sans);position:relative}
+.orch-icon::after{content:"";position:absolute;inset:-5px;border-radius:15px;border:2px solid var(--accent);opacity:0}
+.run .orch-icon::after{animation:pulse 1.6s ease-out infinite}
+.orch-text{min-width:0;flex:1}
+.orch-role{font:600 13px var(--mono);letter-spacing:.08em;text-transform:uppercase;color:var(--brand)}
+.orch-msg{font-size:19px;font-weight:600;color:var(--heading);margin-top:2px;line-height:1.35}
+.orch-sub{font-size:14px;color:var(--muted);margin-top:2px}
+.waves{display:grid;grid-template-columns:repeat(8,minmax(0,1fr));gap:6px;margin-top:14px}
+.wave{border:1px solid var(--line);border-radius:10px;padding:7px 8px;background:var(--surface);transition:background .3s,border-color .3s,transform .3s}
+.wave b{display:block;font:700 12px var(--mono);color:var(--muted);letter-spacing:.06em}
+.wave span{display:block;font:500 13px var(--mono);color:var(--ink);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.wave.cur{border-color:var(--accent);background:var(--soft);box-shadow:0 0 0 3px var(--ring)}
+.wave.cur b{color:var(--brand)}
+.wave.done{background:var(--soft-2);border-color:var(--soft-2)}
+.wave.done b::after{content:" ✓";color:var(--brand)}
+
+.gate{margin-top:14px;border:2px dashed var(--brand);border-radius:14px;padding:14px 18px;display:none;gap:14px;align-items:center;background:var(--surface-2)}
+.gate.on{display:flex;animation:pop .35s ease-out}
+.gate-ic{flex:none;width:44px;height:44px;border-radius:50%;background:var(--deep);color:#fff;display:grid;place-items:center;font-size:20px}
+.gate-body{flex:1;min-width:0}
+.gate-k{font:700 14px var(--mono);color:var(--brand);letter-spacing:.04em}
+.gate-t{font-size:18px;font-weight:700;color:var(--heading)}
+.gate-d{font-size:14px;color:var(--muted);margin-top:2px}
+.gate-bar{height:4px;background:var(--line);border-radius:4px;margin-top:8px;overflow:hidden}
+.gate-bar i{display:block;height:100%;width:0;background:var(--brand)}
+.gate button{flex:none;border:0;background:var(--green);color:#fff;border-radius:10px;padding:10px 16px;font-weight:700;min-height:44px}
+.gate button:hover{background:var(--deep)}
+
+.rail{position:relative;margin-top:18px;padding-top:18px}
+.rail::before{content:"";position:absolute;left:50%;top:0;height:18px;border-left:2px dashed var(--accent)}
+.lanes{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px;min-height:340px;position:relative;border-top:2px dashed var(--accent);padding-top:16px}
+.lanes.n1 .lane{grid-column:2}
+.lanes.n2{grid-template-columns:repeat(2,minmax(0,1fr))}
+.empty{grid-column:1/-1;display:grid;place-items:center;color:var(--muted);font:500 15px var(--mono);border:1px dashed var(--line);border-radius:14px;min-height:300px;text-align:center;padding:20px}
+.lane{position:relative;border:1px solid var(--line);border-radius:14px;background:var(--surface);padding:14px;display:flex;flex-direction:column;gap:12px;animation:enter .45s cubic-bezier(.2,.8,.2,1);transition:border-color .25s,box-shadow .25s,opacity .45s,transform .45s}
+.lane::before{content:"";position:absolute;left:50%;top:-18px;height:16px;border-left:2px dashed var(--accent)}
+.lane.gate-wait{border-color:var(--brand);box-shadow:0 0 0 3px var(--ring)}
+.lane.fail{border-color:var(--red);box-shadow:0 0 0 3px var(--red-soft)}
+.lane.merging{opacity:.55;transform:translateY(-6px) scale(.98)}
+.lane-h{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.lane-tag{font:700 12px var(--mono);letter-spacing:.06em;text-transform:uppercase;color:var(--brand-ink);background:var(--brand);border-radius:6px;padding:3px 7px}
+.cp-id{font:700 15px var(--mono);color:var(--muted)}
+.lane h3{font-size:18px;font-weight:700;line-height:1.2;width:100%}
+.round{margin-left:auto;font:700 12px var(--mono);color:var(--red);background:var(--red-soft);border-radius:6px;padding:3px 7px;display:none}
+.round.on{display:inline-block}
+.wt{display:flex;flex-direction:column;gap:3px;font:500 13px var(--mono);color:var(--muted);background:var(--surface-2);border:1px solid var(--line);border-radius:8px;padding:7px 9px;min-width:0}
+.wt span{overflow-wrap:anywhere}
+.wt span::before{display:inline-block;width:18px;color:var(--brand)}
+.wt span:first-child::before{content:"⌂"}
+.wt span:last-child::before{content:"⑂"}
+.steps{list-style:none;margin:0;padding:0;display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:4px;counter-reset:s}
+.steps li{position:relative;text-align:center;font:600 12px var(--mono);color:var(--muted);padding:7px 0 6px;border-radius:7px;background:var(--surface-2);border:1px solid var(--line);transition:background .25s,color .25s,border-color .25s}
+.steps li.done{background:var(--soft);border-color:var(--soft-2);color:var(--brand)}
+.steps li.cur{background:var(--green);border-color:var(--green);color:#fff}
+.steps li.cur.red{background:var(--red);border-color:var(--red)}
+.steps li.failed{background:var(--red-soft);border-color:var(--red);color:var(--red)}
+.roles{display:flex;flex-wrap:wrap;gap:5px}
+.role{font:600 12px var(--sans);color:var(--muted);border:1px solid var(--line);border-radius:999px;padding:3px 9px;transition:all .25s}
+.role.on{color:#fff;background:var(--deep);border-color:var(--deep);box-shadow:0 0 0 3px var(--ring)}
+.now{font-size:14px;line-height:1.35;color:var(--ink);min-height:38px}
+.now b{color:var(--heading)}
+.bar{height:6px;border-radius:6px;background:var(--line);overflow:hidden}
+.bar i{display:block;height:100%;width:0;background:var(--accent);border-radius:6px}
+.lane.fail .bar i{background:var(--red)}
+.tests{display:flex;align-items:center;gap:8px;font:600 13px var(--mono);color:var(--muted)}
+.dots{display:flex;flex-wrap:wrap;gap:4px;flex:1}
+.dots i{width:10px;height:10px;border-radius:3px;background:var(--line);transition:background .2s}
+.dots i.r{background:var(--red)}
+.dots i.g{background:var(--accent)}
+.callout{font-size:13px;line-height:1.35;color:var(--red);background:var(--red-soft);border-left:3px solid var(--red);border-radius:6px;padding:7px 9px;display:none}
+.callout.on{display:block;animation:pop .35s ease-out}
+.finale{display:none;margin-top:14px;border-radius:14px;background:var(--green);color:#fff;padding:16px 18px;font-weight:600;font-size:17px;animation:pop .4s ease-out}
+.finale.on{display:block}
+.finale small{display:block;font:500 13px var(--mono);color:#CDE9DD;margin-top:4px}
+
+.tracker .summary{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px;padding:14px 16px}
+.stat{background:var(--surface-2);border:1px solid var(--line);border-radius:10px;padding:8px 10px;min-width:0}
+.stat b{display:block;font:700 22px var(--mono);color:var(--heading);line-height:1.15}
+.stat span{font-size:12px;color:var(--muted);text-transform:uppercase;letter-spacing:.06em;font-weight:600}
+.stat.gates b{color:var(--brand)}
+.stat.gates.on{border-color:var(--brand);background:var(--soft)}
+.donebar{grid-column:1/-1;height:8px;border-radius:8px;background:var(--line);overflow:hidden}
+.donebar i{display:block;height:100%;width:0;background:var(--green);transition:width .5s}
+.tbl-wrap{overflow-x:auto;padding:0 8px}
+table{width:100%;border-collapse:collapse;font-size:14px}
+th{font:600 11px var(--mono);letter-spacing:.08em;text-transform:uppercase;color:var(--muted);text-align:left;padding:8px;border-bottom:1px solid var(--line);white-space:nowrap}
+td{padding:6px 8px;border-bottom:1px solid var(--line);vertical-align:middle;white-space:nowrap}
+tr:last-child td{border-bottom:0}
+td.cp{font:700 13px var(--mono);color:var(--muted)}
+td.nm{white-space:normal;color:var(--heading);font-weight:500;min-width:120px}
+td.st{font-weight:600}
+td.sm{font:500 12px var(--mono);color:var(--muted)}
+tr.flash td{animation:flash 1s ease-out}
+tr.active td.st{color:var(--brand)}
+tr.isfail td.st{color:var(--red)}
+.sec-h{font:700 12px var(--mono);letter-spacing:.1em;text-transform:uppercase;color:var(--muted);padding:14px 16px 8px;border-top:1px solid var(--line);display:flex;justify-content:space-between}
+.audit{display:grid;grid-template-columns:repeat(9,minmax(0,1fr));gap:5px;padding:0 16px 6px}
+.aud{border:1px solid var(--line);border-radius:8px;text-align:center;padding:6px 0 5px;background:var(--surface-2);transition:all .35s}
+.aud b{display:block;font:700 15px var(--mono);color:var(--muted)}
+.aud span{display:block;font:500 10px var(--mono);color:var(--muted)}
+.aud.fixed{background:var(--green);border-color:var(--green);animation:pop .4s ease-out}
+.aud.fixed b,.aud.fixed span{color:#fff}
+.audit-legend{font-size:13px;color:var(--muted);padding:2px 16px 12px;min-height:22px}
+.log{list-style:none;margin:0;padding:0 16px 16px;max-height:300px;overflow-y:auto;font:500 13px/1.45 var(--mono)}
+.log li{padding:5px 0;border-bottom:1px dashed var(--line);color:var(--ink);overflow-wrap:anywhere}
+.log li:first-child{animation:slidein .35s ease-out}
+.log .t{color:var(--muted)}
+.log .c{color:var(--heading);font-weight:700}
+.log .e{font-weight:700;color:var(--brand)}
+.log .e.bad{color:var(--red)}
+.log .e.gate{color:var(--heading)}
+
+.explain{padding-bottom:48px}
+.explain-h{display:flex;flex-wrap:wrap;align-items:baseline;justify-content:space-between;gap:8px;margin:16px 0 16px}
+.explain-h h2{font-size:clamp(24px,2.6vw,32px);font-weight:800}
+.explain-h p{margin:0;color:var(--muted);max-width:70ch}
+.loop{padding:24px}
+.flow{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:34px;position:relative}
+.node{position:relative;border:1px solid var(--line);border-radius:14px;padding:14px;background:var(--surface-2);text-align:left}
+.node:not(:last-child)::after{content:"→";position:absolute;right:-27px;top:50%;transform:translateY(-50%);font:700 22px var(--sans);color:var(--brand)}
+.node .n{font:700 13px var(--mono);color:var(--brand)}
+.node h3{font-size:19px;margin-top:2px}
+.node .who{display:inline-block;margin-top:8px;font:600 12px var(--sans);color:#fff;background:var(--deep);border-radius:999px;padding:3px 9px}
+.node p{margin:8px 0 0;font-size:14px;color:var(--ink);line-height:1.4}
+.node.red{border-color:var(--red)}
+.node.red .n{color:var(--red)}
+.node.green{border-color:var(--accent)}
+.fix{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:34px;margin-top:10px}
+.fix div{grid-column:3/5;border:2px solid var(--red);border-top:0;border-radius:0 0 14px 14px;height:30px;position:relative}
+.fix div::before{content:"▲";position:absolute;left:-9px;top:-14px;color:var(--red);font-size:14px}
+.fix p{grid-column:2/6;margin:6px 0 0;text-align:center;color:var(--red);font-weight:600;font-size:15px}
+.roles-grid{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:14px;margin-top:24px}
+.rc{border:1px solid var(--line);border-radius:14px;padding:16px;background:var(--surface)}
+.rc h3{font-size:17px}
+.rc .s{font:500 12px var(--mono);color:var(--muted);margin-top:2px;overflow-wrap:anywhere}
+.rc dl{margin:10px 0 0;font-size:14px;line-height:1.4}
+.rc dt{font:700 11px var(--mono);letter-spacing:.08em;text-transform:uppercase;color:var(--brand);margin-top:8px}
+.rc dt.no{color:var(--red)}
+.rc dd{margin:2px 0 0}
+.rules{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:14px;margin-top:24px}
+.rule{border-radius:14px;padding:16px;background:var(--soft);border:1px solid var(--soft-2)}
+.rule b{display:block;color:var(--heading);font-size:16px}
+.rule span{display:block;font-size:14px;margin-top:4px}
+.rule.bad{background:var(--red-soft);border-color:var(--red)}
+.indep{margin-top:18px;border-left:4px solid var(--accent);padding:10px 16px;background:var(--surface-2);border-radius:0 12px 12px 0;font-size:16px}
+.indep b{color:var(--heading)}
+.foot{color:var(--muted);font-size:13px;margin-top:24px;font-family:var(--mono)}
+
+@keyframes pulse{0%{opacity:.9;transform:scale(1)}100%{opacity:0;transform:scale(1.35)}}
+@keyframes enter{from{opacity:0;transform:translateY(14px) scale(.97)}to{opacity:1;transform:none}}
+@keyframes pop{0%{transform:scale(.97);opacity:.4}100%{transform:none;opacity:1}}
+@keyframes flash{0%{background:var(--soft-2)}100%{background:transparent}}
+@keyframes slidein{from{opacity:0;transform:translateX(-8px)}to{opacity:1;transform:none}}
+
+@media (prefers-reduced-motion:reduce){
+  *,*::before,*::after{animation:none!important;transition:none!important}
+}
+@media (max-width:1180px){
+  .stage{grid-template-columns:minmax(0,1fr)}
+  .roles-grid{grid-template-columns:repeat(3,minmax(0,1fr))}
+  .rules{grid-template-columns:repeat(2,minmax(0,1fr))}
+}
+@media (max-width:860px){
+  .lanes,.lanes.n2{grid-template-columns:minmax(0,1fr)}
+  .lanes.n1 .lane{grid-column:auto}
+  .lane::before{display:none}
+  .lanes{min-height:0}
+  .waves{grid-template-columns:repeat(4,minmax(0,1fr))}
+  .flow{grid-template-columns:minmax(0,1fr);gap:28px}
+  .node:not(:last-child)::after{content:"↓";right:auto;left:50%;top:auto;bottom:-27px;transform:translateX(-50%)}
+  .fix{display:block}
+  .fix div{display:none}
+  .fix p{text-align:left;border:2px solid var(--red);border-radius:12px;padding:10px 12px;margin-top:12px}
+  .roles-grid{grid-template-columns:minmax(0,1fr)}
+}
+@media (max-width:560px){
+  body{font-size:16px}
+  .wrap{padding:0 16px}
+  .top p{font-size:16px}
+  .controls{width:100%}
+  .simclock{width:100%;min-width:0}
+  .btn{padding:10px 12px}
+  .orch{padding:14px}
+  .orch-node{padding:12px}
+  .orch-icon{width:42px;height:42px;font-size:18px}
+  .orch-msg{font-size:17px}
+  .gate{flex-wrap:wrap}
+  .gate button{width:100%}
+  .tracker .summary{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .audit{grid-template-columns:repeat(5,minmax(0,1fr))}
+  .rules{grid-template-columns:minmax(0,1fr)}
+  .loop{padding:16px}
+  .panel-h{padding:14px 16px}
+}
+</style>
+</head>
+<body>
+<header class="top">
+  <div class="wrap">
+    <div>
+      <div class="eyebrow">Code phase · simulated run</div>
+      <h1>One prompt. One orchestrator. Twelve checkpoints.</h1>
+      <p>Claude reads <b>PROMPT.md</b>, becomes the <b>orchestrator</b> and runs every checkpoint through the same 5-step loop. Independent subagents, each in its own <b>git worktree</b>, with humans approving installs and merges.</p>
+    </div>
+    <div class="controls" role="group" aria-label="Simulation controls">
+      <button class="btn primary" id="play" type="button">▶ Play</button>
+      <button class="btn" id="stepBtn" type="button" title="Jump to the next event (→)">⏭ Step</button>
+      <button class="btn" id="restart" type="button">↺ Restart</button>
+      <div class="seg" role="group" aria-label="Speed">
+        <button type="button" data-speed="1" aria-pressed="true">1×</button>
+        <button type="button" data-speed="2" aria-pressed="false">2×</button>
+        <button type="button" data-speed="4" aria-pressed="false">4×</button>
+      </div>
+      <span class="simclock" id="clock" aria-live="off">—</span>
+    </div>
+  </div>
+</header>
+
+<main class="wrap stage">
+  <section class="panel" aria-labelledby="simTitle">
+    <div class="panel-h"><h2 id="simTitle">Live run</h2><span class="tag">max 3 checkpoints in parallel</span></div>
+    <div class="orch" id="orch">
+      <div class="orch-node">
+        <div class="orch-icon" aria-hidden="true">O</div>
+        <div class="orch-text">
+          <div class="orch-role">Orchestrator · main session</div>
+          <div class="orch-msg" id="orchMsg" aria-live="polite">Reading PROGRESS.md…</div>
+          <div class="orch-sub" id="orchSub">Schedules subagents · creates worktrees · updates PROGRESS.md · never writes code</div>
+        </div>
+      </div>
+      <div class="waves" id="waves"></div>
+      <div class="gate" id="gate" role="alert">
+        <div class="gate-ic" aria-hidden="true">⏸</div>
+        <div class="gate-body">
+          <div class="gate-k">⏸ gate — waiting for human</div>
+          <div class="gate-t" id="gateTitle"></div>
+          <div class="gate-d" id="gateDetail"></div>
+          <div class="gate-bar"><i id="gateBar"></i></div>
+        </div>
+        <button type="button" id="approve">Approve ✓</button>
+      </div>
+      <div class="finale" id="finale">✅ Definition of done — 12 / 12 merged · 9 / 9 audit issues fixed · 0 worktrees · 0 open gates<small>migration/integration builds · lint, typecheck and Vitest green</small></div>
+      <div class="rail">
+        <div class="lanes" id="lanes"></div>
+      </div>
+    </div>
+  </section>
+
+  <aside class="panel tracker" aria-labelledby="trkTitle">
+    <div class="panel-h"><h2 id="trkTitle">PROGRESS.md</h2><span class="tag">updated after every step</span></div>
+    <div class="summary">
+      <div class="stat"><b id="sDone">0 / 12</b><span>Done</span></div>
+      <div class="stat"><b id="sProg">0</b><span>In progress</span></div>
+      <div class="stat gates" id="sGatesBox"><b id="sGates">0</b><span>Open gates</span></div>
+      <div class="stat"><b id="sWave">1</b><span>Wave</span></div>
+      <div class="donebar"><i id="doneBar"></i></div>
+    </div>
+    <div class="tbl-wrap">
+      <table>
+        <thead><tr><th>CP</th><th>Name</th><th>Status</th><th>Step</th><th>Tests</th><th>Fix</th></tr></thead>
+        <tbody id="rows"></tbody>
+      </table>
+    </div>
+    <div class="sec-h"><span>Audit issues</span><span id="audCount">0 / 9 fixed</span></div>
+    <div class="audit" id="audit"></div>
+    <div class="audit-legend" id="audLegend">Fixed at CP02 · CP07 · CP09</div>
+    <div class="sec-h"><span>Activity log</span><span>newest first</span></div>
+    <ol class="log" id="log" aria-live="off"></ol>
+  </aside>
+</main>
+
+<section class="wrap explain" aria-labelledby="loopTitle">
+  <div class="explain-h">
+    <h2 id="loopTitle">The loop every checkpoint runs</h2>
+    <p>Each role is a separate subagent with fresh context. It sees only files and reports, never another role's reasoning.</p>
+  </div>
+  <div class="panel loop">
+    <div class="flow">
+      <div class="node"><div class="n">1</div><h3>Plan</h3><span class="who">Planner</span><p>goal.md + plan.md → <code>brief.md</code> listing every file and step.</p></div>
+      <div class="node red"><div class="n">2 · red</div><h3>Test</h3><span class="who">Tester</span><p>Writes tests from test-criteria.md <b>before</b> the code exists and proves they fail.</p></div>
+      <div class="node green"><div class="n">3 · green</div><h3>Code</h3><span class="who">Developer</span><p>Codes until generate, typecheck, eslint and vitest all exit 0.</p></div>
+      <div class="node"><div class="n">4</div><h3>Review + Visual QA</h3><span class="who">Reviewer</span><p>Verdict PASS / FAIL · console 0 errors · 0 deltas at 1280 px.</p></div>
+      <div class="node"><div class="n">5</div><h3>Merge</h3><span class="who">Orchestrator</span><p>Into <code>migration/integration</code> after human approval. Worktree removed.</p></div>
+    </div>
+    <div class="fix"><div></div><p>↺ FAIL sends findings back to the Developer · max 3 rounds, then ⛔ blocked and ask the human</p></div>
+
+    <div class="roles-grid">
+      <div class="rc"><h3>Orchestrator</h3><div class="s">main session</div><dl><dt>Does</dt><dd>Schedules checkpoints, creates worktrees, starts subagents, updates PROGRESS.md, writes the HTML report, asks for approval</dd><dt class="no">Never</dt><dd>Writes application code or tests</dd></dl></div>
+      <div class="rc"><h3>Planner</h3><div class="s">Plan / architect-planner</div><dl><dt>Does</dt><dd>Turns plan.md + goal.md into a short brief: files, steps, design line ranges</dd><dt class="no">Never</dt><dd>Writes code</dd></dl></div>
+      <div class="rc"><h3>Tester</h3><div class="s">independent-tester</div><dl><dt>Does</dt><dd>Writes the tests from test-criteria.md first and proves they fail (red)</dd><dt class="no">Never</dt><dd>Reads the developer's code or reasoning; weakens a test</dd></dl></div>
+      <div class="rc"><h3>Developer</h3><div class="s">section-porter / developer</div><dl><dt>Does</dt><dd>Writes code until every test is green, inside its own worktree</dd><dt class="no">Never</dt><dd>Edits a test to make it pass</dd></dl></div>
+      <div class="rc"><h3>Reviewer</h3><div class="s">design-fidelity + adversarial</div><dl><dt>Does</dt><dd>Reviews the diff and runs visual QA with Chrome DevTools MCP against the prototype</dd><dt class="no">Never</dt><dd>Fixes code itself</dd></dl></div>
+    </div>
+    <p class="indep"><b>Why independence matters:</b> the Tester never sees the code it judges, and the Reviewer never fixes what it finds. Nobody grades their own homework.</p>
+
+    <div class="rules">
+      <div class="rule"><b>Git worktrees</b><span>Each checkpoint gets <code>.worktrees/cpNN</code> on branch <code>migration/cpNN-&lt;name&gt;</code>. Parallel agents never touch the same files.</span></div>
+      <div class="rule"><b>8 waves, max 3 parallel</b><span>A checkpoint starts as soon as all its dependencies are merged.</span></div>
+      <div class="rule"><b>Human gates</b><span>Before any install · before every merge (one approval per wave) · open decisions · blocked checkpoints.</span></div>
+      <div class="rule bad"><b>Never advance on red</b><span>Never skip a step. Never edit a test to make it pass.</span></div>
+    </div>
+    <p class="foot">Source: 04-Code/PROMPT.md · 04-Code/PROGRESS.md · 03-Planning/docs/migration-plan.md. Timings, test counts and the FAIL finding are simulated for the demo.</p>
+  </div>
+</section>
+
+<script>
+(function(){
+const CPS=[
+  {id:'01',name:'Scaffold and tooling',short:'scaffold-and-tooling',wave:1,lane:'—',deps:[],tests:6,k:1},
+  {id:'02',name:'Design tokens',short:'design-tokens',wave:2,lane:'A',deps:['01'],tests:8,k:.8},
+  {id:'03',name:'i18n contract',short:'i18n-contract',wave:2,lane:'B',deps:['01'],tests:10,k:1.15},
+  {id:'04',name:'useLocale',short:'use-locale',wave:3,lane:'B',deps:['03'],tests:5,k:.85},
+  {id:'05',name:'Icon system',short:'icon-system',wave:2,lane:'C',deps:['01'],tests:7,k:.95},
+  {id:'06',name:'Routes and useNav',short:'routes-and-nav',wave:4,lane:'B',deps:['04'],tests:8,k:.9},
+  {id:'07',name:'Layout chrome',short:'layout-chrome',wave:5,lane:'—',deps:['02','05','06'],tests:12,k:1.05,fail:'header search fails WCAG 1.4.3 contrast (audit #9)'},
+  {id:'08',name:'Home — market row',short:'home-market-row',wave:6,lane:'A',deps:['07'],tests:9,k:.85},
+  {id:'09',name:'Home — sections',short:'home-sections',wave:6,lane:'A',deps:['08'],tests:12,k:.9},
+  {id:'10',name:'Inner-page system',short:'inner-page-system',wave:6,lane:'B',deps:['07'],tests:10,k:1.55},
+  {id:'11',name:'Full QA pass',short:'full-qa-pass',wave:7,lane:'—',deps:['09','10'],tests:14,k:1.1},
+  {id:'12',name:'Hardening and release',short:'hardening-and-release',wave:8,lane:'—',deps:['11'],tests:8,k:.9}
+];
+const BY=Object.fromEntries(CPS.map(c=>[c.id,c]));
+const WAVES=[[['01']],[['02'],['03'],['05']],[['04']],[['06']],[['07']],[['08','09'],['10']],[['11']],[['12']]];
+const AUDIT=[
+  [1,'No persistent navigation bar','07'],[2,'Fixed narrow page width','02'],[3,'Auto-rotating banner, no pause','07'],
+  [4,'Red/green borders without meaning','02'],[5,'Governor section wasted space','09'],[6,'Card icon/border misalignment','09'],
+  [7,'Social icons without labels','07'],[8,'Hotlines as bitmap images','09'],[9,'Low-contrast header search','07']
+];
+const INSTALLS='vitest, @vue/test-utils, @nuxt/test-utils, happy-dom, @nuxt/eslint, eslint, vue-tsc, typescript, serve';
+const D={plan:1.1,test:1.3,code:1.8,review:1.4,fix:1.4,merge:.9,gate:1.8,install:2.6};
+const STATUS={todo:'⬜ todo',ready:'🟦 ready',plan:'📝 plan',test:'🧪 test',code:'🛠 code',review:'🔍 review',gate:'⏸ gate',done:'✅ done',blocked:'⛔ blocked'};
+const STEP_LABEL={plan:'Plan',test:'Test',code:'Code',review:'Review',gate:'Merge',merge:'Merge'};
+const ROLE={plan:'Planner',test:'Tester',code:'Developer',review:'Reviewer',gate:'Human',merge:'Orchestrator'};
+const STEPS=['plan','test','code','review','merge'];
+const reduce=window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+const $=id=>document.getElementById(id);
+const pad=n=>String(n).padStart(2,'0');
+const wt=c=>'.worktrees/cp'+c.id;
+const br=c=>'migration/cp'+c.id+'-'+c.short;
+let S,cards=new Map(),dirty=true,flashRows=new Set();
+
+function clock(t){
+  const d=new Date(2026,10,16,9,0,0);
+  d.setMinutes(d.getMinutes()+Math.floor(t*4));
+  return d.getFullYear()+'-'+pad(d.getMonth()+1)+'-'+pad(d.getDate())+' '+pad(d.getHours())+':'+pad(d.getMinutes());
+}
+function log(cp,ev,detail,kind){
+  S.log.unshift({t:clock(S.t),cp:cp,ev:ev,detail:detail,kind:kind||''});
+  if(S.log.length>120)S.log.pop();
+  dirty=true;
+}
+function setStatus(id,st,step){
+  S.status[id]=st;
+  if(step!==undefined)S.step[id]=step;
+  S.upd[id]=clock(S.t);
+  flashRows.add(id);
+  dirty=true;
+}
+function say(msg,sub){S.msg=msg;S.sub=sub||'';dirty=true}
+
+function reset(){
+  S={t:0,playing:!reduce,speed:S?S.speed:1,wave:-1,active:[],gate:null,status:{},step:{},tests:{},round:{},upd:{},done:new Set(),fixed:new Set(),log:[],finished:false,msg:'',sub:''};
+  CPS.forEach(c=>{S.status[c.id]=c.id==='01'?'ready':'todo';S.step[c.id]='—';S.tests[c.id]='—';S.round[c.id]=0;S.upd[c.id]='—'});
+  cards.forEach(el=>el.remove());cards.clear();
+  log('—','created','tracker initialized, CP01 ready');
+  openGate({kind:'install',cps:['01'],title:'Install vetting before CP01',detail:'vet-before-install: licence + security report for '+INSTALLS});
+  say('Gate 1: CP01 needs 9 packages. Showing the licence and security report.','Nothing is installed until a human approves.');
+  dirty=true;
+}
+
+function openGate(g){
+  g.t0=S.t;g.t1=S.t+(g.kind==='install'?D.install:D.gate);
+  S.gate=g;
+  log(g.cps.length===1?'CP'+g.cps[0]:'—','gate',g.title,'gate');
+}
+function approveGate(){
+  const g=S.gate;if(!g)return;
+  S.gate=null;
+  log(g.cps.length===1?'CP'+g.cps[0]:'—','approved',g.kind==='install'?'licence + security OK, installs allowed':'merge approved for '+g.cps.map(i=>'CP'+i).join(', '),'gate');
+  if(g.kind==='install'){startWave(0);return}
+  g.cps.forEach(id=>{
+    const a=S.active.find(x=>x.cp.id===id);
+    a.phase='merge';a.t0=S.t;a.t1=S.t+D.merge;
+    setStatus(id,'gate','Merge');
+  });
+  say('Merging '+g.cps.map(i=>'CP'+i).join(', ')+' into migration/integration','git merge · git worktree remove');
+}
+
+function startWave(i){
+  S.wave=i;
+  const lanes=WAVES[i];
+  lanes.forEach(l=>start(l[0]));
+  const ids=lanes.map(l=>l.join(' → ')).map(s=>s.replace(/(\d\d)/g,'CP$1'));
+  if(lanes.length>1)say('Wave '+(i+1)+': '+lanes.length+' worktrees in parallel',ids.join('  ·  '));
+  else say('Wave '+(i+1)+': '+ids[0]+' — '+BY[lanes[0][0]].name,'All dependencies merged, so it can start.');
+}
+function start(id){
+  const c=BY[id];
+  const a={cp:c,phase:'plan',t0:S.t,t1:S.t+D.plan*c.k,round:0,failNote:false};
+  S.active.push(a);
+  setStatus(id,'plan','Plan');
+  S.tests[id]='—';
+  log('CP'+id,'start','worktree '+wt(c)+' · branch '+br(c));
+}
+
+function laneSuccessor(id){
+  for(const w of WAVES)for(const l of w){const i=l.indexOf(id);if(i>-1&&i<l.length-1)return l[i+1]}
+  return null;
+}
+function maybeGate(){
+  if(S.gate)return;
+  const at=S.active.filter(a=>a.phase==='gate');
+  if(!at.length)return;
+  let batch=null;
+  if(S.active.every(a=>a.phase==='gate'))batch=at;
+  else{const s=at.filter(a=>laneSuccessor(a.cp.id));if(s.length)batch=s}
+  if(!batch)return;
+  const ids=batch.map(a=>a.cp.id).sort();
+  const lane=batch.length===1&&laneSuccessor(ids[0]);
+  openGate({kind:'merge',cps:ids,title:'Merge approval · wave '+(S.wave+1)+(lane?' · lane '+BY[ids[0]].lane:''),detail:'Review PASS · tests green · '+ids.map(i=>'CP'+i).join(', ')+' → migration/integration'+(lane?' (lane '+BY[ids[0]].lane+' continues with CP'+lane+')':'')});
+  say('Stopped at a human gate: merge approval','Shows the review verdict and test results, then waits.');
+}
+
+function transition(a){
+  const c=a.cp,id=c.id;
+  if(a.phase==='plan'){
+    a.phase='test';a.t0=S.t;a.t1=S.t+D.test*c.k;
+    setStatus(id,'test','Test');
+    S.tests[id]='0/'+c.tests;
+    log('CP'+id,'plan','brief.md ready in .agent/');
+  }else if(a.phase==='test'){
+    a.phase='code';a.t0=S.t;a.t1=S.t+D.code*c.k;
+    setStatus(id,'code','Code');
+    log('CP'+id,'red',c.tests+' tests fail for the right reason','bad');
+  }else if(a.phase==='code'){
+    a.phase='review';a.t0=S.t;a.t1=S.t+D.review*c.k;
+    setStatus(id,'review','Review');
+    S.tests[id]=c.tests+'/'+c.tests;
+    log('CP'+id,'green',c.tests+'/'+c.tests+' tests · generate, typecheck, eslint exit 0');
+  }else if(a.phase==='review'){
+    if(c.fail&&a.round===0){
+      a.round=1;S.round[id]=1;a.failNote=true;
+      a.phase='code';a.t0=S.t;a.t1=S.t+D.fix*c.k;
+      setStatus(id,'code','Code (fix 1)');
+      log('CP'+id,'FAIL',c.fail+' → back to Developer, fix round 1/3','bad');
+      say('CP'+id+' review FAIL: findings go back to the Developer','Fix round 1 of max 3. Never advance on red.');
+    }else{
+      a.phase='gate';a.t0=S.t;a.t1=Infinity;a.failNote=false;
+      setStatus(id,'gate','Merge');
+      log('CP'+id,'PASS','review + visual QA, console 0 errors, 0 deltas at 1280 px');
+      maybeGate();
+    }
+  }else if(a.phase==='merge'){
+    S.active=S.active.filter(x=>x!==a);
+    S.done.add(id);
+    setStatus(id,'done','—');
+    log('CP'+id,'merge','into migration/integration · worktree removed');
+    AUDIT.forEach(([n,,cp])=>{if(cp===id)S.fixed.add(n)});
+    CPS.forEach(x=>{if(S.status[x.id]==='todo'&&x.deps.every(d=>S.done.has(d)))setStatus(x.id,'ready','—')});
+    const nx=laneSuccessor(id);
+    if(nx){start(nx);say('Lane '+BY[nx].lane+' continues: CP'+nx+' starts the moment CP'+id+' is merged','Dependencies merged → start. No need to wait for the whole wave.')}
+    if(!S.active.length){
+      if(S.wave<WAVES.length-1)startWave(S.wave+1);
+      else finish();
+    }else{
+      if(!nx&&!S.active.some(x=>x.phase==='merge'))say('Wave '+(S.wave+1)+': waiting for the other lane','Merges are batched per wave.');
+      maybeGate();
+    }
+  }
+}
+function finish(){
+  S.finished=true;S.playing=false;
+  log('—','complete','12/12 done · 9/9 audit issues fixed · 0 worktrees · 0 open gates');
+  say('Run complete. All 12 checkpoints merged.','Definition of done met. Report regenerated.');
+}
+
+function nextEvent(){
+  let best=null,bt=Infinity;
+  if(S.gate&&S.gate.t1<bt){bt=S.gate.t1;best='gate'}
+  for(const a of S.active)if(a.t1<bt){bt=a.t1;best=a}
+  return {t:bt,e:best};
+}
+function advance(to){
+  let guard=0;
+  while(!S.finished&&guard++<1000){
+    const n=nextEvent();
+    if(!n.e||n.t>to)break;
+    S.t=n.t;
+    if(n.e==='gate')approveGate();else transition(n.e);
+  }
+  if(!S.finished)S.t=Math.max(S.t,to);
+}
+function stepOnce(){
+  S.playing=false;
+  const n=nextEvent();
+  if(n.e)advance(n.t);
+  dirty=true;
+}
+
+const roleNames=['Planner','Tester','Developer','Reviewer','Orchestrator'];
+function makeCard(a){
+  const c=a.cp,el=document.createElement('article');
+  el.className='lane';el.dataset.cp=c.id;
+  el.innerHTML='<div class="lane-h"><span class="lane-tag">'+(c.lane==='—'?'Lane':'Lane '+c.lane)+'</span><span class="cp-id">CP'+c.id+'</span><span class="round">fix round 1/3</span><h3>'+c.name+'</h3></div>'+
+    '<div class="wt"><span>'+wt(c)+'</span><span>'+br(c)+'</span></div>'+
+    '<ol class="steps">'+['Plan','Test','Code','Review','Merge'].map((s,i)=>'<li data-s="'+STEPS[i]+'">'+s+'</li>').join('')+'</ol>'+
+    '<div class="roles">'+roleNames.map(r=>'<span class="role" data-r="'+r+'">'+r+'</span>').join('')+'</div>'+
+    '<div class="callout"></div>'+
+    '<div class="now"></div><div class="bar"><i></i></div>'+
+    '<div class="tests"><span class="tl">tests</span><div class="dots">'+'<i></i>'.repeat(c.tests)+'</div><span class="tc"></span></div>';
+  return el;
+}
+const NOW={
+  plan:'<b>Planner</b> · turning goal.md + plan.md into brief.md',
+  test:'<b>Tester</b> · writing tests from test-criteria.md — they must fail first',
+  code:'<b>Developer</b> · coding until generate, typecheck, eslint, vitest exit 0',
+  fix:'<b>Developer</b> · fix round 1/3 — addressing the review findings',
+  review:'<b>Reviewer</b> · diff review + visual QA at 1280 px via Chrome DevTools MCP',
+  gate:'<b>⏸ Human</b> · waiting for merge approval',
+  merge:'<b>Orchestrator</b> · merging into migration/integration, removing worktree'
+};
+function updateCard(el,a){
+  const ph=a.phase,idx=ph==='gate'?4:STEPS.indexOf(ph);
+  el.classList.toggle('gate-wait',ph==='gate');
+  el.classList.toggle('fail',a.failNote);
+  el.classList.toggle('merging',ph==='merge');
+  el.querySelectorAll('.steps li').forEach((li,i)=>{
+    li.className='';
+    if(i<idx)li.classList.add('done');
+    if(i===idx)li.classList.add('cur');
+    if(i===idx&&ph==='test')li.classList.add('red');
+    if(a.failNote&&i===3)li.classList.add('failed');
+  });
+  const r=ROLE[ph];
+  el.querySelectorAll('.role').forEach(x=>x.classList.toggle('on',x.dataset.r===r));
+  el.querySelector('.round').classList.toggle('on',a.round>0);
+  const co=el.querySelector('.callout');
+  co.classList.toggle('on',a.failNote);
+  if(a.failNote)co.textContent='✗ Reviewer: FAIL · '+a.cp.fail+' → back to Developer';
+  el.querySelector('.now').innerHTML=a.failNote&&ph==='code'?NOW.fix:NOW[ph];
+}
+function paintCard(el,a){
+  const p=isFinite(a.t1)?Math.min(1,Math.max(0,(S.t-a.t0)/(a.t1-a.t0))):1;
+  el.querySelector('.bar i').style.width=(p*100).toFixed(1)+'%';
+  const dots=el.querySelectorAll('.dots i'),n=dots.length;
+  let red=0,green=0;
+  if(a.phase==='test')red=Math.floor(p*n+.0001);
+  else if(a.phase==='code'){green=a.failNote?Math.floor(n-1+p):Math.floor(p*n+.0001);red=n-green}
+  else if(a.phase!=='plan')green=n;
+  if(a.failNote&&a.phase==='code'&&p<1){green=n-1;red=1}
+  dots.forEach((d,i)=>{d.className=i<green?'g':(i<green+red?'r':'')});
+  el.querySelector('.tc').textContent=a.phase==='plan'?'—':(green+'/'+n+(a.phase==='test'?' red':''));
+}
+
+function renderStatic(){
+  $('waves').innerHTML=WAVES.map((w,i)=>'<div class="wave" data-w="'+i+'"><b>W'+(i+1)+'</b><span>'+w.map(l=>l.join('→')).join('·')+'</span></div>').join('');
+  $('audit').innerHTML=AUDIT.map(([n,t,cp])=>'<div class="aud" data-n="'+n+'" title="#'+n+' '+t+' — fixed in CP'+cp+'"><b>'+n+'</b><span>CP'+cp+'</span></div>').join('');
+  $('rows').innerHTML=CPS.map(c=>'<tr data-cp="'+c.id+'"><td class="cp">'+c.id+'</td><td class="nm">'+c.name+'</td><td class="st"></td><td class="sm sp"></td><td class="sm ts"></td><td class="sm fr"></td></tr>').join('');
+}
+function render(){
+  const orch=$('orch');
+  orch.classList.toggle('run',S.playing&&!S.finished&&!S.gate);
+  $('orchMsg').textContent=S.msg;$('orchSub').textContent=S.sub;
+  document.querySelectorAll('.wave').forEach(w=>{
+    const i=+w.dataset.w;
+    w.classList.toggle('cur',i===S.wave&&!S.finished);
+    w.classList.toggle('done',i<S.wave||S.finished);
+  });
+  const g=$('gate');
+  g.classList.toggle('on',!!S.gate);
+  if(S.gate){$('gateTitle').textContent=S.gate.title;$('gateDetail').textContent=S.gate.detail}
+  $('finale').classList.toggle('on',S.finished);
+  const lanes=$('lanes'),order=[...S.active].sort((x,y)=>x.cp.lane.localeCompare(y.cp.lane));
+  const live=new Set(order.map(a=>a.cp.id));
+  cards.forEach((el,id)=>{if(!live.has(id)){el.remove();cards.delete(id)}});
+  const empty=lanes.querySelector('.empty');
+  if(!order.length){
+    if(!empty){const e=document.createElement('div');e.className='empty';lanes.appendChild(e)}
+    lanes.querySelector('.empty').textContent=S.finished?'All worktrees removed · git worktree list shows only main':'No worktrees yet · waiting for the install gate';
+  }else if(empty)empty.remove();
+  const slots=WAVES[S.wave]?WAVES[S.wave].length:1;
+  lanes.className='lanes n'+Math.min(3,Math.max(1,slots));
+  order.forEach((a,i)=>{
+    let el=cards.get(a.cp.id);
+    if(!el){el=makeCard(a);cards.set(a.cp.id,el)}
+    if(lanes.children[i]!==el)lanes.insertBefore(el,lanes.children[i]||null);
+    updateCard(el,a);
+  });
+  const doneN=S.done.size;
+  $('sDone').textContent=doneN+' / 12';
+  $('sProg').textContent=S.active.length;
+  const og=S.gate?1:0;
+  $('sGates').textContent=og;
+  $('sGatesBox').classList.toggle('on',!!og);
+  $('sWave').textContent=S.finished?'8 ✓':String(Math.max(1,S.wave+1));
+  $('doneBar').style.width=(doneN/12*100)+'%';
+  document.querySelectorAll('#rows tr').forEach(tr=>{
+    const id=tr.dataset.cp,st=S.status[id];
+    const a=S.active.find(x=>x.cp.id===id);
+    tr.querySelector('.st').textContent=STATUS[st];
+    tr.querySelector('.sp').textContent=S.step[id]+(a&&ROLE[a.phase]&&st!=='done'?' · '+ROLE[a.phase]:'');
+    tr.querySelector('.ts').textContent=S.tests[id];
+    tr.querySelector('.fr').textContent=S.round[id];
+    tr.classList.toggle('active',!!a);
+    tr.classList.toggle('isfail',!!(a&&a.failNote));
+    if(flashRows.has(id)){tr.classList.remove('flash');void tr.offsetWidth;tr.classList.add('flash')}
+  });
+  flashRows.clear();
+  document.querySelectorAll('.aud').forEach(el=>el.classList.toggle('fixed',S.fixed.has(+el.dataset.n)));
+  $('audCount').textContent=S.fixed.size+' / 9 fixed';
+  const last=[...S.fixed].sort((a,b)=>a-b);
+  $('audLegend').textContent=last.length?'Fixed: '+last.map(n=>'#'+n+' '+AUDIT[n-1][1]).join(' · '):'Fixed at CP02 (2, 4) · CP07 (1, 3, 7, 9) · CP09 (5, 6, 8)';
+  const esc=s=>String(s).replace(/[&<>]/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;'}[m]));
+  $('log').innerHTML=S.log.slice(0,80).map(l=>'<li><span class="t">'+l.t+'</span> · <span class="c">'+l.cp+'</span> · <span class="e '+l.kind+'">'+esc(l.ev)+'</span> · '+esc(l.detail)+'</li>').join('');
+  $('play').textContent=S.finished?'▶ Replay':(S.playing?'❚❚ Pause':'▶ Play');
+  dirty=false;
+}
+function paint(){
+  S.active.forEach(a=>{const el=cards.get(a.cp.id);if(el)paintCard(el,a)});
+  if(S.gate)$('gateBar').style.width=(Math.min(1,(S.t-S.gate.t0)/(S.gate.t1-S.gate.t0))*100).toFixed(1)+'%';
+  $('clock').textContent='sim '+clock(S.t)+' · '+S.speed+'×';
+}
+
+let last=performance.now();
+function frame(now){
+  const dt=Math.min(.1,(now-last)/1000);last=now;
+  if(S.playing&&!S.finished){advance(S.t+dt*S.speed);dirty=true}
+  if(dirty)render();
+  paint();
+  requestAnimationFrame(frame);
+}
+
+$('play').addEventListener('click',()=>{
+  if(S.finished){reset();S.playing=true}
+  else S.playing=!S.playing;
+  dirty=true;
+});
+$('stepBtn').addEventListener('click',()=>{if(!S.finished)stepOnce()});
+$('restart').addEventListener('click',()=>{reset();dirty=true});
+$('approve').addEventListener('click',()=>{if(S.gate){approveGate();dirty=true}});
+document.querySelectorAll('.seg button').forEach(b=>b.addEventListener('click',()=>{
+  S.speed=+b.dataset.speed;
+  document.querySelectorAll('.seg button').forEach(x=>x.setAttribute('aria-pressed',String(x===b)));
+  dirty=true;
+}));
+document.addEventListener('keydown',e=>{
+  if(e.target.closest('button'))return;
+  if(e.code==='Space'){e.preventDefault();$('play').click()}
+  else if(e.code==='ArrowRight'){$('stepBtn').click()}
+});
+window.__sim=()=>S;
+renderStatic();
+reset();
+requestAnimationFrame(frame);
+})();
+</script>
+</body>
+</html>

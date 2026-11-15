@@ -1,0 +1,91 @@
+name: Deploy website to GitHub Pages
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "02-Bangladesh-Bank Website Refactor/Bangladesh Bank New Website/**"
+      - ".github/workflows/deploy-pages.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: false
+
+defaults:
+  run:
+    working-directory: "02-Bangladesh-Bank Website Refactor/Bangladesh Bank New Website"
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: "02-Bangladesh-Bank Website Refactor/Bangladesh Bank New Website/package-lock.json"
+
+      - uses: actions/configure-pages@v6
+
+      - name: Install dependencies
+        run: npm ci --no-audit --no-fund
+
+      - name: Security audit (fail on high or critical)
+        run: npm audit --audit-level=high
+
+      - name: Build static site
+        env:
+          NUXT_APP_BASE_URL: /${{ github.event.repository.name }}/
+        run: npx nuxt generate
+
+      - name: Build summary
+        run: |
+          {
+            echo "## Build"
+            echo "| Metric | Value |"
+            echo "|---|---|"
+            echo "| Commit | \`${GITHUB_SHA::7}\` |"
+            echo "| Pages | $(find .output/public -name index.html | wc -l) |"
+            echo "| Files | $(find .output/public -type f | wc -l) |"
+            echo "| Size | $(du -sh .output/public | cut -f1) |"
+          } >> "$GITHUB_STEP_SUMMARY"
+
+      - uses: actions/upload-pages-artifact@v5
+        with:
+          path: "02-Bangladesh-Bank Website Refactor/Bangladesh Bank New Website/.output/public"
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - id: deployment
+        uses: actions/deploy-pages@v5
+
+      - name: Smoke test live site
+        env:
+          BASE: ${{ steps.deployment.outputs.page_url }}
+        run: |
+          sleep 20
+          fail=0
+          echo "## Smoke test" >> "$GITHUB_STEP_SUMMARY"
+          echo "| Route | Status | Time (s) |" >> "$GITHUB_STEP_SUMMARY"
+          echo "|---|---|---|" >> "$GITHUB_STEP_SUMMARY"
+          for r in "" monetary-policy/ financial-system/ publications/ services/; do
+            out=$(curl -s -o /dev/null -w "%{http_code} %{time_total}" "${BASE}${r}")
+            code=${out% *}; t=${out#* }
+            echo "| /${r} | ${code} | ${t} |" >> "$GITHUB_STEP_SUMMARY"
+            echo "route=/${r} status=${code} time=${t}"
+            [ "$code" = "200" ] || fail=1
+          done
+          exit $fail

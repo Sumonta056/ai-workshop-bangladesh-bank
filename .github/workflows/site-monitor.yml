@@ -1,0 +1,33 @@
+name: Site monitor bot
+
+on:
+  schedule:
+    - cron: "17 * * * *"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check every route
+        env:
+          BASE: https://${{ github.repository_owner }}.github.io/${{ github.event.repository.name }}/
+        run: |
+          fail=0
+          now=$(date -u +%Y-%m-%dT%H:%M:%SZ)
+          {
+            echo "## Site monitor · ${now}"
+            echo "| Route | Status | TTFB (s) | Total (s) | Bytes |"
+            echo "|---|---|---|---|---|"
+          } >> "$GITHUB_STEP_SUMMARY"
+          for r in "" monetary-policy/ financial-system/ publications/ services/; do
+            out=$(curl -s -o /dev/null -w "%{http_code} %{time_starttransfer} %{time_total} %{size_download}" "${BASE}${r}")
+            read -r code ttfb total bytes <<< "$out"
+            level=INFO; [ "$code" = "200" ] || { level=ERROR; fail=1; }
+            echo "${now} ${level} route=/${r} status=${code} ttfb=${ttfb} total=${total} bytes=${bytes}"
+            echo "| /${r} | ${code} | ${ttfb} | ${total} | ${bytes} |" >> "$GITHUB_STEP_SUMMARY"
+          done
+          exit $fail
