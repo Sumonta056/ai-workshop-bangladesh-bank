@@ -4,7 +4,7 @@
 INPUT=$(cat)
 FILE=$(echo "$INPUT" | jq -r '.tool_input.file_path')
 case "$FILE" in
-  *.env|*.env.*|*/secrets/*)
+  *.env|*.env.*|*/secrets/*|*/customer/*)
     echo "Blocked: secret file" >&2
     exit 2 ;;   # 2 = deny the call
 esac

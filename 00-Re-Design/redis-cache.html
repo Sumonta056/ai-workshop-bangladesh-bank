@@ -1,0 +1,1162 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Redis Cache Guide</title>
+<style>
+:root{
+  --bg:#f7f8fa;--surface:#ffffff;--surface-2:#f0f2f5;--border:#dde1e7;--text:#1b1f24;--muted:#5b6470;
+  --primary:#2f5fd0;--primary-subtle:#e6edfb;--code-bg:#f3f4f7;--ok:#1f7a4a;--warn:#a5600a;--bad:#b42b2b;
+  --mark:#fff2a8;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --bg:#121417;--surface:#1a1d21;--surface-2:#22262b;--border:#2f343a;--text:#e6e8eb;--muted:#9aa3ad;
+    --primary:#7aa2ff;--primary-subtle:#1f2a44;--code-bg:#15181c;--ok:#5bc48b;--warn:#e0a54a;--bad:#ef7b7b;--mark:#5a4d00;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#121417;--surface:#1a1d21;--surface-2:#22262b;--border:#2f343a;--text:#e6e8eb;--muted:#9aa3ad;
+  --primary:#7aa2ff;--primary-subtle:#1f2a44;--code-bg:#15181c;--ok:#5bc48b;--warn:#e0a54a;--bad:#ef7b7b;--mark:#5a4d00;
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--text);font:15px/1.6 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif}
+header{position:sticky;top:0;z-index:5;background:var(--surface);border-bottom:1px solid var(--border)}
+.wrap{max-width:1040px;margin:0 auto;padding:0 16px}
+.top{display:flex;gap:12px;align-items:center;flex-wrap:wrap;padding:12px 0}
+.top h1{font-size:20px;margin:0;flex:1 1 auto}
+#search{flex:1 1 240px;min-width:0;padding:8px 10px;border:1px solid var(--border);border-radius:8px;background:var(--surface-2);color:var(--text);font:inherit}
+#theme{padding:8px 12px;border:1px solid var(--border);border-radius:8px;background:var(--surface-2);color:var(--text);cursor:pointer;font:inherit}
+nav.tabs{display:flex;gap:4px;overflow-x:auto}
+nav.tabs button{border:0;background:none;color:var(--muted);padding:10px 14px;border-bottom:2px solid transparent;cursor:pointer;font:inherit;white-space:nowrap}
+nav.tabs button[aria-selected="true"]{color:var(--primary);border-bottom-color:var(--primary);font-weight:600}
+main{padding:24px 0 64px}
+section[role="tabpanel"]{display:none}
+section[role="tabpanel"].active{display:block}
+h2{font-size:28px;line-height:1.25;margin:8px 0 14px}
+h3{font-size:19px;margin:28px 0 8px}
+p,li{max-width:78ch}
+code{overflow-wrap:anywhere;font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:13px;background:var(--code-bg);padding:2px 6px;border-radius:4px}
+.pre pre code{background:none;padding:0;font-size:inherit}
+.ref{color:var(--primary);font-family:ui-monospace,Menlo,monospace;font-size:12.5px;overflow-wrap:anywhere}
+.card{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:16px 18px;margin:12px 0}
+.callout{border:1px solid var(--border);background:var(--primary-subtle);padding:14px 16px;border-radius:10px;margin:12px 0}
+.callout.warn{border-color:var(--warn)}
+.table-wrap{overflow-x:auto;border:1px solid var(--border);border-radius:10px;margin:12px 0}
+table{border-collapse:collapse;width:100%;min-width:640px;background:var(--surface)}
+th,td{text-align:left;padding:8px 12px;border-bottom:1px solid var(--border);vertical-align:top;font-size:14px}
+th{background:var(--surface-2);font-weight:600}
+tr:last-child td{border-bottom:0}
+details{background:var(--surface);border:1px solid var(--border);border-radius:10px;margin:10px 0}
+details>summary{cursor:pointer;padding:12px 16px;font-weight:600;list-style:none;display:flex;gap:8px;align-items:baseline;flex-wrap:wrap}
+details>summary::-webkit-details-marker{display:none}
+details>summary::before{content:"\25B8";color:var(--muted);transition:transform .15s}
+details[open]>summary::before{transform:rotate(90deg)}
+details .body{padding:0 16px 14px}
+.pre{position:relative;margin:10px 0}
+.pre pre{margin:0;background:var(--code-bg);border:1px solid var(--border);border-radius:8px;padding:12px 14px;overflow-x:auto;font:12.5px/1.55 ui-monospace,SFMono-Regular,Menlo,monospace}
+.copy{position:absolute;top:6px;right:6px;padding:4px 10px;font-size:12px;border:1px solid var(--border);border-radius:6px;background:var(--surface);color:var(--muted);cursor:pointer}
+.mermaid-box{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:12px;overflow-x:auto;margin:12px 0}
+.tag{display:inline-block;font-size:12px;padding:3px 10px;border-radius:999px;border:1px solid var(--border);color:var(--muted)}
+.pro{color:var(--ok)}.con{color:var(--bad)}
+mark{background:var(--mark);color:inherit}
+.hidden-by-search{display:none !important}
+#noresults{display:none;color:var(--muted)}
+ol.steps li{margin:6px 0}
+
+:root{
+  --d-dept:#6d4ae0;--d-uni:#0e8a8c;--d-faq:#c92a6a;--d-search:#a86a00;--d-admin:#2f5fd0;
+  --hit:#1f8a50;--miss:#c27a00;--err:#c43030;--ns:#6b7280;
+  --t1:#2f5fd0;--t2:#6d4ae0;--t3:#0e8a8c;--t4:#d0571b;
+  --glow:rgba(15,23,42,.10);--on-accent:#ffffff;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --d-dept:#a58bff;--d-uni:#4fd1c5;--d-faq:#f783ac;--d-search:#f2c14e;--d-admin:#7aa2ff;
+    --hit:#5bd38f;--miss:#f2b53c;--err:#f27878;--ns:#9aa3ad;
+    --t1:#7aa2ff;--t2:#a58bff;--t3:#4fd1c5;--t4:#ff9a5c;--glow:rgba(0,0,0,.45);--on-accent:#10131a;
+  }
+}
+:root[data-theme="dark"]{
+  --d-dept:#a58bff;--d-uni:#4fd1c5;--d-faq:#f783ac;--d-search:#f2c14e;--d-admin:#7aa2ff;
+  --hit:#5bd38f;--miss:#f2b53c;--err:#f27878;--ns:#9aa3ad;
+  --t1:#7aa2ff;--t2:#a58bff;--t3:#4fd1c5;--t4:#ff9a5c;--glow:rgba(0,0,0,.45);--on-accent:#10131a;
+}
+#t1{--accent:var(--t1)}#t2{--accent:var(--t2)}#t3{--accent:var(--t3)}#t4{--accent:var(--t4)}
+#b1[aria-selected="true"]{color:var(--t1);border-bottom-color:var(--t1)}
+#b2[aria-selected="true"]{color:var(--t2);border-bottom-color:var(--t2)}
+#b3[aria-selected="true"]{color:var(--t3);border-bottom-color:var(--t3)}
+#b4[aria-selected="true"]{color:var(--t4);border-bottom-color:var(--t4)}
+nav.tabs button{transition:color .2s,border-color .2s}
+section[role="tabpanel"].active{animation:vb-fade-up .35s ease-out}
+section[role="tabpanel"] h2{color:var(--accent)}
+section[role="tabpanel"] h2::after{content:"";display:block;width:48px;height:3px;border-radius:3px;background:var(--accent);margin-top:8px;opacity:.7}
+@keyframes vb-fade-up{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+details .body{animation:vb-fade-up .25s ease-out}
+details{transition:border-color .2s,box-shadow .2s}
+details:hover{border-color:var(--accent)}
+details[open]{box-shadow:0 4px 14px var(--glow)}
+.tag-high{color:var(--err);border-color:var(--err)}
+.tag-medium{color:var(--miss);border-color:var(--miss)}
+.tag-low{color:var(--hit);border-color:var(--hit)}
+
+.stats{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px;margin:16px 0}
+.stat{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:14px 16px}
+.stat b{display:block;font-size:30px;line-height:1.1;color:var(--accent);font-variant-numeric:tabular-nums}
+.stat span{font-size:13px;color:var(--muted)}
+@media (max-width:640px){.stats{grid-template-columns:repeat(2,minmax(0,1fr))}}
+
+.btn{border:1px solid var(--border);background:var(--surface);color:var(--text);padding:8px 14px;border-radius:999px;cursor:pointer;font:inherit;font-size:14px;transition:transform .12s,background .2s,border-color .2s}
+.btn:hover{border-color:var(--accent)}
+.btn:active{transform:scale(.96)}
+.btn:disabled{opacity:.5;cursor:not-allowed}
+.btn-primary{background:var(--accent);border-color:var(--accent);color:var(--on-accent)}
+.btn-on{background:var(--err);border-color:var(--err);color:var(--on-accent)}
+.btn-row{display:flex;flex-wrap:wrap;gap:8px;margin:12px 0}
+
+.sim{background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:16px;margin:12px 0}
+.sim-grid{display:grid;grid-template-columns:minmax(0,1.6fr) minmax(0,1fr);gap:16px}
+.sim-grid>*{min-width:0}
+@media (max-width:820px){.sim-grid{grid-template-columns:1fr}}
+.sim svg{width:100%;height:auto;display:block}
+.node rect{fill:var(--surface-2);stroke:var(--border);stroke-width:1.5;transition:fill .25s,stroke .25s}
+.node text{fill:var(--text);font:600 13px -apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;text-anchor:middle}
+.node text.sub{font-weight:400;font-size:12px;fill:var(--muted)}
+.node.lit rect{stroke:var(--accent);stroke-width:2.5;fill:var(--primary-subtle)}
+.node.down rect{stroke:var(--err);stroke-dasharray:5 4}
+.node.down text{fill:var(--err)}
+.wire{fill:none;stroke:var(--border);stroke-width:2}
+.wire.lit{stroke:var(--accent);stroke-width:3}
+#sim-dot{transition:fill .2s}
+#sim-x{opacity:0;transition:opacity .2s}
+.sim-steps{list-style:none;margin:0;padding:0;font-size:13px;max-height:300px;overflow:auto}
+.sim-steps li{padding:6px 10px;border-radius:8px;color:var(--muted);border:1px solid transparent;transition:all .25s}
+.sim-steps li.now{color:var(--text);border-color:var(--accent);background:var(--primary-subtle)}
+.sim-steps li.done{color:var(--text)}
+.sim-steps li .ref{font-size:12px}
+.result{display:flex;flex-wrap:wrap;gap:10px;align-items:center;margin-top:12px}
+.pill{display:inline-flex;align-items:center;gap:6px;padding:6px 14px;border-radius:999px;font:600 13px ui-monospace,Menlo,monospace;border:1px solid var(--border)}
+.pill.hit{color:var(--hit);border-color:var(--hit)}
+.pill.miss{color:var(--miss);border-color:var(--miss)}
+.pill.err{color:var(--err);border-color:var(--err)}
+.pop{animation:vb-pop .4s ease-out}
+@keyframes vb-pop{0%{transform:scale(.8);opacity:0}70%{transform:scale(1.06)}100%{transform:scale(1);opacity:1}}
+.logline{font:12px/1.5 ui-monospace,Menlo,monospace;background:var(--code-bg);border:1px solid var(--border);border-radius:8px;padding:10px 12px;margin-top:10px;overflow-x:auto;white-space:pre}
+.logline .w{color:var(--miss)}.logline .i{color:var(--hit)}
+.store{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin-top:10px;font-size:13px;color:var(--muted)}
+.keychip{font:12px ui-monospace,Menlo,monospace;padding:6px 12px;border-radius:8px;border:1px dashed var(--border)}
+.keychip.on{border-style:solid;border-color:var(--hit);color:var(--text);animation:vb-pop .4s}
+
+.legend{display:flex;flex-wrap:wrap;gap:12px;font-size:13px;color:var(--muted);margin:8px 0}
+.legend i{display:inline-block;width:10px;height:10px;border-radius:3px;margin-right:6px;vertical-align:middle}
+.board{display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:10px;margin:12px 0}
+.cc{position:relative;text-align:left;background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:14px 14px 14px;cursor:pointer;font:inherit;color:var(--text);overflow:hidden;transition:transform .15s,box-shadow .2s,opacity .3s}
+.cc::before{content:"";position:absolute;top:0;left:0;right:0;height:3px;background:var(--dc)}
+.cc:hover{transform:translateY(-2px);box-shadow:0 6px 14px var(--glow)}
+.cc[aria-pressed="true"]{outline:2px solid var(--dc);outline-offset:1px}
+.cc .nm{font:600 13px ui-monospace,Menlo,monospace;display:block;margin-top:2px}
+.cc .meta{font-size:12px;color:var(--muted);display:flex;justify-content:space-between;margin-top:6px}
+.cc .bar{display:block;height:6px;border-radius:6px;background:var(--surface-2);margin-top:8px;overflow:hidden}
+.cc .bar>span{display:block;height:100%;width:0;background:var(--dc);border-radius:6px}
+.cc.empty{opacity:.55}
+.cc.flash{animation:vb-flash .7s}
+.cc.fill{animation:vb-fill .6s}
+@keyframes vb-flash{0%,100%{border-color:var(--border)}30%{border-color:var(--err);background:var(--surface-2)}}
+@keyframes vb-fill{0%,100%{border-color:var(--border)}30%{border-color:var(--hit);background:var(--surface-2)}}
+.detail{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:14px 16px;margin:8px 0;min-height:60px}
+.detail dl{display:grid;grid-template-columns:max-content 1fr;gap:4px 14px;margin:0;font-size:14px}
+.detail dt{color:var(--muted)}
+.detail dd{margin:0;min-width:0;overflow-wrap:anywhere}
+.speed{display:inline-flex;border:1px solid var(--border);border-radius:999px;overflow:hidden}
+.speed button{border:0;background:none;color:var(--muted);padding:8px 14px;cursor:pointer;font:inherit;font-size:13px}
+.speed button[aria-pressed="true"]{background:var(--accent);color:var(--on-accent)}
+.evlog{font-size:13px;color:var(--muted);margin-top:6px;min-height:20px}
+
+.kb{background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:16px;margin:12px 0}
+.kb-fields{display:grid;grid-template-columns:repeat(auto-fill,minmax(170px,1fr));gap:10px;margin:12px 0}
+.kb label{display:flex;flex-direction:column;gap:4px;font-size:13px;color:var(--muted)}
+.kb input,.kb select{padding:8px 10px;border:1px solid var(--border);border-radius:8px;background:var(--surface-2);color:var(--text);font:inherit;font-size:14px;min-width:0}
+.kb input:focus,.kb select:focus{outline:2px solid var(--accent);outline-offset:1px}
+.kb-out{font:15px/1.5 ui-monospace,Menlo,monospace;background:var(--code-bg);border:1px solid var(--border);border-radius:10px;padding:14px;overflow-x:auto;white-space:nowrap}
+.kb-out .ns{color:var(--ns)}.kb-out .cn{color:var(--dc,var(--accent));font-weight:700}.kb-out .ky{color:var(--hit);font-weight:700}
+.kb-out .seg{display:inline-block;animation:vb-pop .3s}
+.kb-note{font-size:13px;color:var(--muted);margin-top:8px}
+.kb-note.bad{color:var(--err)}
+
+@media (prefers-reduced-motion: reduce){
+  *,*::before,*::after{animation:none !important;transition:none !important}
+}
+</style>
+</head>
+<body>
+<header>
+  <div class="wrap">
+    <div class="top">
+      <h1>Redis cache in Vortibhai (backend)</h1>
+      <input id="search" type="search" placeholder="Search this guide (e.g. TTL, evict, X-Cache)" aria-label="Search this guide">
+      <button id="theme" type="button" aria-label="Toggle light and dark mode">Theme</button>
+    </div>
+    <nav class="tabs" role="tablist">
+      <button role="tab" aria-selected="true" aria-controls="t1" id="b1">1. Overview &amp; flow</button>
+      <button role="tab" aria-selected="false" aria-controls="t2" id="b2">2. Code architecture</button>
+      <button role="tab" aria-selected="false" aria-controls="t3" id="b3">3. Runtime behavior</button>
+      <button role="tab" aria-selected="false" aria-controls="t4" id="b4">4. Pros, cons &amp; gotchas</button>
+    </nav>
+  </div>
+</header>
+
+<main class="wrap">
+<p id="noresults">No match in this tab. Try another tab or clear the search.</p>
+
+<!-- ================= TAB 1 ================= -->
+<section role="tabpanel" id="t1" aria-labelledby="b1" class="active">
+  <h2>What it is and why it exists</h2>
+  <div class="card searchable">
+    <p>The backend (Spring Boot, folder <code>vortibhai/</code>) keeps copies of slow MongoDB read results in Redis. Redis is an in-memory key-value store. A read from Redis takes about 1 ms. A MongoDB aggregation can take 50 to 500 ms.</p>
+    <p><b>Single main responsibility:</b> answer repeated public read requests (department pages, university lists, search, dropdowns) from Redis, and fall back to MongoDB when Redis has no copy or Redis is down.</p>
+    <p>The code does not call Redis directly for normal reads. It uses Spring Cache annotations: <code>@Cacheable</code> reads or fills the cache, <code>@CacheEvict</code> deletes entries after a write. The Redis setup is in <code>config/CacheConfig.java</code> <span class="ref">vortibhai/src/main/java/com/admission/vortibhai/config/CacheConfig.java:27</span>.</p>
+    <p><b>Analogy:</b> Think of a library help desk. The first person who asks "list all CSE departments" makes the librarian walk to the archive (MongoDB). The librarian writes the answer on a sticky note (Redis) with an expiry time (TTL, time to live). The next 1000 people get the sticky note. When a book changes (a write), the librarian throws away the matching notes (evict).</p>
+  </div>
+
+  <div class="stats searchable">
+    <div class="stat"><b data-count="20">0</b><span>named caches (<span class="ref">CacheNames.java:5-24</span>)</span></div>
+    <div class="stat"><b data-count="25">0</b><span><code>@Caching</code> evict blocks in services</span></div>
+    <div class="stat"><b data-count="250" data-suffix=" ms">0</b><span>Redis timeout (<span class="ref">application.properties:109</span>)</span></div>
+    <div class="stat"><b data-count="5" data-suffix=" min">0</b><span>default TTL (<span class="ref">CacheConfig.java:31</span>)</span></div>
+  </div>
+
+  <h2>Try it: request simulator</h2>
+  <div class="sim searchable">
+    <p style="margin-top:0">Send <code>GET /api/departments/d123/university/u456</code>. The first request is a MISS and stores the key. The next request is a HIT. An admin edit deletes the key. Switch Redis off to see the fallback path.</p>
+    <div class="btn-row">
+      <button class="btn btn-primary" id="sim-send" type="button">Send GET request</button>
+      <button class="btn" id="sim-edit" type="button">Admin PUT (evict)</button>
+      <button class="btn" id="sim-redis" type="button" aria-pressed="false">Redis: up</button>
+      <button class="btn" id="sim-reset" type="button">Reset</button>
+    </div>
+    <div class="sim-grid">
+      <div>
+        <svg viewBox="0 0 900 260" role="img" aria-label="Request path from client through filter and cache proxy to Redis or MongoDB">
+          <path id="w-cf" class="wire" d="M130 128 L165 128"/>
+          <path id="w-fp" class="wire" d="M305 128 L340 128"/>
+          <path id="w-pr" class="wire" d="M490 118 C525 118 525 48 560 48"/>
+          <path id="w-ps" class="wire" d="M490 138 C525 138 525 208 560 208"/>
+          <path id="w-sm" class="wire" d="M710 208 L750 208"/>
+          <g class="node" id="n-c"><rect x="10" y="100" width="120" height="56" rx="12"/><text x="70" y="124">Client</text><text class="sub" x="70" y="142">Nuxt app</text></g>
+          <g class="node" id="n-f"><rect x="165" y="100" width="140" height="56" rx="12"/><text x="235" y="124">PerformanceFilter</text><text class="sub" x="235" y="142">X-Cache header</text></g>
+          <g class="node" id="n-p"><rect x="340" y="100" width="150" height="56" rx="12"/><text x="415" y="124">@Cacheable proxy</text><text class="sub" x="415" y="142">HitMissTrackingCache</text></g>
+          <g class="node" id="n-r"><rect x="560" y="20" width="150" height="56" rx="12"/><text x="635" y="44">Redis</text><text class="sub" x="635" y="62">vb:v12:dept-group:*</text></g>
+          <g class="node" id="n-s"><rect x="560" y="180" width="150" height="56" rx="12"/><text x="635" y="204">Service method</text><text class="sub" x="635" y="222">DepartmentServiceImpl</text></g>
+          <g class="node" id="n-m"><rect x="750" y="180" width="130" height="56" rx="12"/><text x="815" y="204">MongoDB</text><text class="sub" x="815" y="222">aggregation</text></g>
+          <text id="sim-x" x="535" y="92" style="fill:var(--err)" font-size="28" font-weight="700">&#10007;</text>
+          <circle id="sim-dot" r="8" cx="-20" cy="-20" style="fill:var(--accent)"/>
+        </svg>
+        <div class="result" id="sim-result" aria-live="polite"></div>
+        <div class="store">Redis key: <span class="keychip" id="sim-key">vb:v12:dept-group:d123:u456 (not stored)</span></div>
+        <div class="logline" id="sim-log">Logs show here.</div>
+      </div>
+      <ol class="sim-steps" id="sim-steps" aria-label="Steps of the current request"></ol>
+    </div>
+  </div>
+
+  <h2>Step by step: one cached read request</h2>
+  <div class="card searchable">
+  <p>Example: <code>GET /api/departments/{departmentId}/university/{universityId}</code>.</p>
+  <ol class="steps">
+    <li><code>PerformanceFilter</code> runs first for every request. It starts a timer <span class="ref">filter/PerformanceFilter.java:45</span>.</li>
+    <li>The controller calls <code>departmentService.getDepartmentGroupByDepartmentAndUniversity(...)</code>. The call goes to a Spring proxy, not to the real class.</li>
+    <li>The proxy sees <code>@Cacheable(value = DEPT_GROUP, key = "#departmentId + ':' + #universityId")</code> <span class="ref">service/impl/DepartmentServiceImpl.java:175</span>. It builds the key, for example <code>d123:u456</code>.</li>
+    <li>The cache manager adds the prefix from <code>CacheConstants.prefixFor</code>. The full Redis key is <code>vb:v12:dept-group:d123:u456</code> <span class="ref">config/CacheConstants.java:5-13</span>.</li>
+    <li><code>HitMissTrackingCache.get</code> asks Redis for the key and records <code>HIT</code> or <code>MISS</code> in a ThreadLocal <span class="ref">config/CacheConfig.java:127-132</span>.</li>
+    <li><b>HIT:</b> Jackson turns the JSON back into <code>DepartmentGroupSummaryDTO</code>. The method body does not run. MongoDB gets no query.</li>
+    <li><b>MISS:</b> the method body runs the MongoDB query. The proxy then writes the result to Redis as JSON with the TTL for <code>dept-group</code> (15 minutes) <span class="ref">config/CacheProperties.java:17</span>.</li>
+    <li><b>Redis error:</b> <code>ResilientCacheErrorHandler</code> logs a WARN and the request continues as a MISS against MongoDB <span class="ref">config/ResilientCacheErrorHandler.java:16-23</span>.</li>
+    <li>Back in <code>PerformanceFilter</code>, the code sets headers <code>X-Cache</code> and <code>X-Response-Time</code>, writes 1 log line, and clears the ThreadLocal <span class="ref">filter/PerformanceFilter.java:51-63</span>.</li>
+  </ol>
+  <h3>Step by step: one write request</h3>
+  <ol class="steps">
+    <li>An admin sends <code>PUT /api/departments/{id}</code>.</li>
+    <li>The method runs and saves to MongoDB.</li>
+    <li>After it returns, <code>@Caching(evict = {...})</code> deletes the related entries: 1 exact key in <code>dept-group</code>, <code>dept-sections</code>, <code>uni-departments</code>, <code>dept-by-id</code>, plus <b>all</b> entries of <code>dept-public-list</code>, <code>dept-facets</code>, <code>dept-admin-list</code>, <code>dept-reviews</code> <span class="ref">service/impl/DepartmentServiceImpl.java:816-830</span>.</li>
+    <li>The next read is a MISS and loads fresh data.</li>
+  </ol>
+  </div>
+
+  <h3>Sequence diagram: read path</h3>
+  <div class="mermaid-box searchable"><div class="mermaid" data-src="seq1"></div></div>
+  <h3>Flowchart: startup wiring</h3>
+  <div class="mermaid-box searchable"><div class="mermaid" data-src="flow1"></div></div>
+</section>
+
+<!-- ================= TAB 2 ================= -->
+<section role="tabpanel" id="t2" aria-labelledby="b2">
+  <h2>Live cache board</h2>
+  <div class="searchable">
+    <p>Each card is 1 cache. The color shows the domain. The bar shows the TTL that remains for the newest entry. Click a card to see its details. The demo values are simulated in your browser, not read from Redis.</p>
+    <div class="legend">
+      <span><i style="background:var(--d-dept)"></i>Department</span>
+      <span><i style="background:var(--d-uni)"></i>University</span>
+      <span><i style="background:var(--d-faq)"></i>FAQ and alumni</span>
+      <span><i style="background:var(--d-search)"></i>Search, dropdown, categories</span>
+      <span><i style="background:var(--d-admin)"></i>Admin</span>
+    </div>
+    <div class="btn-row">
+      <button class="btn btn-primary" id="bd-warm" type="button">Warm up (POST /warmup)</button>
+      <button class="btn" id="bd-visit" type="button">Simulate 50 visitors</button>
+      <button class="btn" id="bd-edit" type="button">Admin edits a department</button>
+      <button class="btn" id="bd-purge" type="button">Purge all</button>
+      <span class="speed" role="group" aria-label="Clock speed">
+        <button type="button" data-speed="1" aria-pressed="false">1x</button>
+        <button type="button" data-speed="60" aria-pressed="true">60x</button>
+        <button type="button" data-speed="600" aria-pressed="false">600x</button>
+      </span>
+    </div>
+    <div class="evlog" id="bd-log" aria-live="polite"></div>
+    <div class="board" id="board"></div>
+    <div class="detail" id="bd-detail">Click a card to see its method, key, TTL and what clears it.</div>
+  </div>
+
+  <h2>Key builder</h2>
+  <div class="kb searchable">
+    <p style="margin-top:0">Choose a cache and type the method parameters. The page builds the Redis key the same way as the SpEL <code>key</code> expression in the code.</p>
+    <label style="max-width:320px">Cache
+      <select id="kb-cache"></select>
+    </label>
+    <div class="kb-fields" id="kb-fields"></div>
+    <div class="kb-out" id="kb-out"></div>
+    <div class="kb-note" id="kb-note"></div>
+    <div class="pre"><pre><code id="kb-cli"></code></pre></div>
+  </div>
+
+  <h2>Files and roles</h2>
+  <p class="searchable">All Java paths below are under <code>vortibhai/src/main/java/com/admission/vortibhai/</code>.</p>
+  <div class="table-wrap searchable">
+  <table>
+    <thead><tr><th>File</th><th>Role</th><th>Key functions / classes</th></tr></thead>
+    <tbody>
+      <tr><td><code>vortibhai/pom.xml</code></td><td>Adds Redis and Spring Cache libraries</td><td><code>spring-boot-starter-data-redis</code> <span class="ref">pom.xml:131</span>, <code>spring-boot-starter-cache</code> <span class="ref">pom.xml:135</span></td></tr>
+      <tr><td><code>resources/application.properties</code></td><td>Redis host, port, password, 250 ms timeouts, optional TTL overrides</td><td><span class="ref">application.properties:106-115</span></td></tr>
+      <tr><td><code>config/CacheConfig.java</code></td><td>Turns caching on, builds the Redis cache manager, wraps it for HIT/MISS tracking, sets the error handler</td><td><code>cacheManager()</code>, <code>configFor()</code>, <code>baseConfig()</code>, <code>HitMissTrackingCacheManager</code>, <code>HitMissTrackingCache</code></td></tr>
+      <tr><td><code>config/CacheNames.java</code></td><td>String constants for the 20 cache names</td><td><span class="ref">CacheNames.java:5-24</span></td></tr>
+      <tr><td><code>config/CacheProperties.java</code></td><td>Default TTL per cache; bound to <code>cache.ttl.*</code> properties</td><td><code>getTtl()</code> <span class="ref">CacheProperties.java:14-40</span></td></tr>
+      <tr><td><code>config/CacheTypeRegistry.java</code></td><td>The Java type stored in each cache, so Jackson knows how to read the JSON back</td><td>constructor <span class="ref">CacheTypeRegistry.java:42-83</span>, <code>all()</code></td></tr>
+      <tr><td><code>config/CacheConstants.java</code></td><td>Key namespace <code>vb:v12:</code> and prefix builder</td><td><code>prefixFor()</code> <span class="ref">CacheConstants.java:11</span></td></tr>
+      <tr><td><code>config/ResilientCacheErrorHandler.java</code></td><td>Logs and ignores every cache error</td><td>4 <code>handle*Error</code> methods</td></tr>
+      <tr><td><code>util/CacheStatusHolder.java</code></td><td>ThreadLocal that holds HIT or MISS for the current request</td><td><code>set()</code> (first write wins), <code>get()</code>, <code>clear()</code></td></tr>
+      <tr><td><code>filter/PerformanceFilter.java</code></td><td>Adds <code>X-Cache</code>, <code>X-Response-Time</code> headers and the request log line</td><td><code>doFilterInternal()</code>, <code>logRequest()</code></td></tr>
+      <tr><td><code>service/impl/*ServiceImpl.java</code></td><td>Where <code>@Cacheable</code> and <code>@CacheEvict</code> live (20 cached methods, 8 classes with evictions)</td><td>See table below</td></tr>
+      <tr><td><code>controller/CacheAdminController.java</code></td><td>Admin endpoints: list, purge one, purge all, warm up</td><td><span class="ref">CacheAdminController.java:37-82</span></td></tr>
+      <tr><td><code>service/impl/CacheAdminServiceImpl.java</code></td><td>Logic for the admin endpoints; counts keys with Redis SCAN</td><td><code>getCacheInfo()</code>, <code>purgeCache()</code>, <code>purgeAll()</code>, <code>warmup()</code>, <code>countKeys()</code></td></tr>
+      <tr><td><code>config/DepartmentAliasSeeder.java</code></td><td>Startup job; clears search caches when it changes aliases</td><td><code>evictCache()</code> <span class="ref">DepartmentAliasSeeder.java:106-121</span></td></tr>
+      <tr><td><code>admin/features/cache/</code>, <code>admin/pages/cache/index.vue</code></td><td>Admin UI page that calls the cache admin endpoints</td><td><code>cacheService.ts</code> <span class="ref">admin/features/cache/api/cacheService.ts:8-22</span>, <code>useCache.ts</code></td></tr>
+      <tr><td><code>docker-compose.yml</code></td><td>Runs Redis 7 with 256 MB memory limit and LRU eviction</td><td><span class="ref">docker-compose.yml:2-17</span></td></tr>
+    </tbody>
+  </table>
+  </div>
+
+  <h3>Cached methods (all 20)</h3>
+  <div class="table-wrap searchable">
+  <table>
+    <thead><tr><th>Cache name</th><th>TTL</th><th>Method</th><th>Key</th></tr></thead>
+    <tbody>
+      <tr><td>dept-group</td><td>15m</td><td>DepartmentServiceImpl.getDepartmentGroupByDepartmentAndUniversity <span class="ref">:175</span></td><td><code>deptId:uniId</code></td></tr>
+      <tr><td>dept-sections</td><td>15m</td><td>DepartmentServiceImpl.getCoveredSections <span class="ref">:959</span></td><td><code>deptId:uniId</code></td></tr>
+      <tr><td>dept-public-list</td><td>15m</td><td>DepartmentServiceImpl.getPublicDepartmentsSummary <span class="ref">:301</span></td><td>page:limit:query:uniIds:category:sort</td></tr>
+      <tr><td>dept-reviews</td><td>15m</td><td>DepartmentServiceImpl.getPagedPublicReviews <span class="ref">:715</span></td><td>uni:dept:section:page:size</td></tr>
+      <tr><td>dept-facets</td><td>60m</td><td>DepartmentServiceImpl.getPublicFacets <span class="ref">:519</span></td><td>trimmed query</td></tr>
+      <tr><td>dept-by-id</td><td>15m</td><td>DepartmentServiceImpl.getDepartmentById <span class="ref">:692</span></td><td><code>id</code></td></tr>
+      <tr><td>dept-admin-list</td><td>5m</td><td>DepartmentServiceImpl.getAllDepartments <span class="ref">:643</span></td><td>page:limit:query:approved:uni</td></tr>
+      <tr><td>uni-departments</td><td>20m</td><td>DepartmentServiceImpl.getGroupedDepartmentsByUniversity <span class="ref">:128</span></td><td><code>universityId</code></td></tr>
+      <tr><td>uni-list</td><td>20m</td><td>UniversityServiceImpl.getAllUniversities <span class="ref">:159</span></td><td>page:limit:query:approved</td></tr>
+      <tr><td>uni-options</td><td>30m</td><td>UniversityServiceImpl.getUniversityOptions <span class="ref">:192</span></td><td><code>'all'</code></td></tr>
+      <tr><td>uni-totals</td><td>20m</td><td>UniversityServiceImpl.getUniversityTotals <span class="ref">:207</span></td><td><code>'all'</code></td></tr>
+      <tr><td>uni-detail</td><td>20m</td><td>UniversityServiceImpl.getUniversityById <span class="ref">:253</span></td><td><code>id</code></td></tr>
+      <tr><td>alumni-public</td><td>15m</td><td>AlumniServiceImpl.getPublicAlumni <span class="ref">:77</span></td><td>dept:uni:page:limit</td></tr>
+      <tr><td>dropdown</td><td>30m</td><td>DropDownDepartmentServiceImpl.getAll <span class="ref">:119</span></td><td>approved or <code>'all'</code></td></tr>
+      <tr><td>dept-summary</td><td>60m</td><td>DepartmentSummaryServiceImpl.getSummary <span class="ref">:118</span></td><td>dept:uni, <code>unless #result == null</code></td></tr>
+      <tr><td>search-results</td><td>15m</td><td>SearchServiceImpl.search <span class="ref">:47</span></td><td>query:type, only when query is not blank</td></tr>
+      <tr><td>categories</td><td>60m</td><td>CategoryServiceImpl.getAll <span class="ref">:30</span></td><td><code>'all'</code></td></tr>
+      <tr><td>faq-questions-list</td><td>5m</td><td>FaqPageQueryServiceImpl.fetchQuestionPage <span class="ref">:45</span></td><td>dept:uni:page:limit</td></tr>
+      <tr><td>faq-replies-list</td><td>5m</td><td>FaqPageQueryServiceImpl.fetchReplyPage <span class="ref">:69</span></td><td>question:page:limit</td></tr>
+      <tr><td>admin-stats-overview</td><td>60s</td><td>AdminStatsServiceImpl.getOverview <span class="ref">:257</span></td><td><code>'overview'</code></td></tr>
+    </tbody>
+  </table>
+  </div>
+
+  <h2>The 5 most critical functions</h2>
+
+  <details class="searchable" open>
+    <summary>1. <code>CacheConfig.cacheManager()</code> <span class="ref">config/CacheConfig.java:47-69</span></summary>
+    <div class="body">
+<div class="pre"><pre><code>Map&lt;String, RedisCacheConfiguration&gt; perCacheConfig = new HashMap&lt;&gt;();
+typeRegistry.all().forEach((name, type) -&gt; {
+  Duration ttl = cacheProperties.getTtl().getOrDefault(name, DEFAULT_TTL);
+  perCacheConfig.put(name, configFor(type, ttl));
+});
+RedisCacheManager delegate = RedisCacheManager.builder(factory)
+    .cacheDefaults(baseConfig().entryTtl(DEFAULT_TTL))
+    .withInitialCacheConfigurations(perCacheConfig)
+    .build();
+delegate.afterPropertiesSet();
+return new HitMissTrackingCacheManager(delegate);</code></pre></div>
+      <ol>
+        <li>Loop over every cache name in <code>CacheTypeRegistry</code>.</li>
+        <li>Find its TTL in <code>CacheProperties</code>. If none, use 5 minutes (<code>DEFAULT_TTL</code>, line 31).</li>
+        <li>Build a config for that cache with a typed JSON serializer (<code>configFor</code>).</li>
+        <li>Build the real <code>RedisCacheManager</code>. Unknown cache names get the default config.</li>
+        <li>Call <code>afterPropertiesSet()</code> by hand. The wrapper is the Spring bean, so Spring never calls it on the inner manager. Without this call the per-cache configs are ignored (comment at lines 63-65).</li>
+        <li>Return the wrapper, which records HIT/MISS.</li>
+      </ol>
+    </div>
+  </details>
+
+  <details class="searchable">
+    <summary>2. <code>configFor()</code> and <code>baseConfig()</code> <span class="ref">config/CacheConfig.java:72-87</span></summary>
+    <div class="body">
+<div class="pre"><pre><code>return baseConfig()
+    .entryTtl(ttl)
+    .serializeValuesWith(SerializationPair.fromSerializer(
+        new Jackson2JsonRedisSerializer&lt;&gt;(mapper, type)));
+...
+return RedisCacheConfiguration.defaultCacheConfig()
+    .computePrefixWith(CacheConstants::prefixFor)
+    .serializeKeysWith(SerializationPair.fromSerializer(new StringRedisSerializer()));</code></pre></div>
+      <ul>
+        <li><b>Keys</b> are plain strings with prefix <code>vb:v12:&lt;cache&gt;:</code>. You can read them in <code>redis-cli</code>.</li>
+        <li><b>Values</b> are JSON. Each cache has its own serializer that knows the exact type (for example <code>PagedResponseDTO&lt;UniversityDTO&gt;</code>). The JSON has no <code>@class</code> field, so it stays small and safe.</li>
+        <li>The <code>ObjectMapper</code> calls <code>findAndRegisterModules()</code> (line 35). This adds support for <code>Instant</code> and records.</li>
+      </ul>
+    </div>
+  </details>
+
+  <details class="searchable">
+    <summary>3. <code>HitMissTrackingCache.get()</code> + <code>CacheStatusHolder.set()</code> <span class="ref">config/CacheConfig.java:127-146</span>, <span class="ref">util/CacheStatusHolder.java:12-16</span></summary>
+    <div class="body">
+<div class="pre"><pre><code>public ValueWrapper get(Object key) {
+  ValueWrapper result = delegate.get(key);
+  CacheStatusHolder.set(result != null ? "HIT" : "MISS");
+  return result;
+}
+// CacheStatusHolder
+public static void set(String status) {
+  if (STATUS.get() == null) { STATUS.set(status); }
+}</code></pre></div>
+      <ol>
+        <li>Ask the real Redis cache for the key.</li>
+        <li>Write HIT or MISS into a ThreadLocal (a value that belongs only to the current request thread).</li>
+        <li>Only the first write counts. A cached method can call another cached method. Without this rule, an inner HIT could hide an outer MISS (comment at <span class="ref">CacheStatusHolder.java:9-11</span>).</li>
+        <li>All other methods (<code>put</code>, <code>evict</code>, <code>clear</code>) pass straight through.</li>
+      </ol>
+    </div>
+  </details>
+
+  <details class="searchable">
+    <summary>4. <code>ResilientCacheErrorHandler</code> <span class="ref">config/ResilientCacheErrorHandler.java:12-40</span></summary>
+    <div class="body">
+<div class="pre"><pre><code>public void handleCacheGetError(RuntimeException exception, Cache cache, Object key) {
+  LOGGER.warn("Cache GET failed [{}::{}] - serving from source: {}",
+      cache.getName(), key, exception.getMessage());
+}</code></pre></div>
+      <ul>
+        <li>Spring calls this when Redis throws during a cache operation. It is registered at <span class="ref">CacheConfig.java:42-45</span>.</li>
+        <li>The handler does not re-throw. A failed GET becomes a MISS, so the method body runs against MongoDB.</li>
+        <li>A failed PUT, EVICT or CLEAR is logged and ignored. The user still gets a 200 response.</li>
+        <li>With the 250 ms timeouts in <span class="ref">application.properties:109-110</span>, a dead Redis adds at most about 250 ms per cache call.</li>
+      </ul>
+    </div>
+  </details>
+
+  <details class="searchable">
+    <summary>5. Eviction on write: <code>@Caching(evict = ...)</code> <span class="ref">service/impl/DepartmentServiceImpl.java:612-626</span></summary>
+    <div class="body">
+<div class="pre"><pre><code>@Caching(evict = {
+  @CacheEvict(value = CacheNames.DEPT_GROUP,
+      key = "#result.departmentId + ':' + #result.universityId"),
+  @CacheEvict(value = CacheNames.DEPT_PUBLIC_LIST, allEntries = true),
+  @CacheEvict(value = CacheNames.UNI_DEPARTMENTS, key = "#result.universityId"),
+  @CacheEvict(value = CacheNames.ADMIN_STATS_OVERVIEW, key = "'overview'")
+  ...
+})</code></pre></div>
+      <ul>
+        <li><code>#result</code> is the value that the method returned. The key is built <b>after</b> the method runs, so you can only use it for evictions that run after the call (the default).</li>
+        <li><code>key = ...</code> deletes 1 entry. <code>allEntries = true</code> deletes every entry in that cache. Use it for list caches, because you cannot know which pages changed.</li>
+        <li>This block is on <code>POST /api/departments</code>. The same pattern is on update (<span class="ref">:816</span>) and approve (<span class="ref">:923</span>). There are 25 <code>@Caching</code> blocks in the service layer.</li>
+      </ul>
+    </div>
+  </details>
+
+  <h2>Scenarios that trigger this code</h2>
+  <details class="searchable">
+    <summary>Scenario A: a student opens a department page</summary>
+    <div class="body">
+      <ol>
+        <li>The public Nuxt app requests the department group, sections and reviews.</li>
+        <li>Each call hits a <code>@Cacheable</code> method: <code>dept-group</code>, <code>dept-sections</code>, <code>dept-reviews</code>.</li>
+        <li>The first visitor in 15 minutes gets MISS. Every visitor after that gets HIT until the TTL ends or an admin edits the department.</li>
+      </ol>
+    </div>
+  </details>
+  <details class="searchable">
+    <summary>Scenario B: an admin approves a department review</summary>
+    <div class="body">
+      <ol>
+        <li>The admin panel sends <code>PATCH /api/departments/{id}/approve</code>.</li>
+        <li>The approve method saves to MongoDB, then the <code>@Caching</code> block at <span class="ref">DepartmentServiceImpl.java:923</span> clears the department caches and the admin stats.</li>
+        <li>The public page shows the new review on its next request.</li>
+      </ol>
+    </div>
+  </details>
+  <details class="searchable">
+    <summary>Scenario C: an admin uses the Cache page (purge or warm up)</summary>
+    <div class="body">
+      <ol>
+        <li><code>admin/pages/cache/index.vue</code> uses <code>useCache.ts</code>, which calls <code>GET</code>, <code>DELETE</code> and <code>POST .../warmup</code> on <code>/api/admin/cache</code>.</li>
+        <li><code>warmup()</code> calls 9 public read methods (<span class="ref">CacheAdminServiceImpl.java:98-111</span>). Each call is a MISS and fills Redis, so the next real visitor gets a HIT.</li>
+        <li>On startup, <code>DepartmentAliasSeeder</code> also clears <code>search-results</code>, <code>dept-public-list</code> and <code>dept-facets</code> if it changed data (<span class="ref">DepartmentAliasSeeder.java:106-111</span>).</li>
+      </ol>
+    </div>
+  </details>
+</section>
+
+<!-- ================= TAB 3 ================= -->
+<section role="tabpanel" id="t3" aria-labelledby="b3">
+  <h2>UI impact and events</h2>
+  <div class="card searchable">
+    <ul>
+      <li><b>Public app:</b> no visible change. Pages load faster on a HIT. Data can be up to 1 TTL old if a write path forgets to evict.</li>
+      <li><b>Admin app:</b> the Cache page lists each cache with key count and TTL, and has Purge, Purge all and Warm up buttons. After each action, <code>useCache.ts</code> invalidates the TanStack Query keys <code>cache</code> and <code>stats</code> <span class="ref">admin/features/cache/composables/useCache.ts:16-39</span>.</li>
+      <li><b>HTTP headers on every API response</b> (from <code>PerformanceFilter</code>): <code>X-Cache: HIT|MISS</code> (only when a cached method ran), <code>X-Response-Time</code>, <code>X-Db-Time</code>, <code>X-Db-Queries</code> <span class="ref">filter/PerformanceFilter.java:52-60</span>.</li>
+      <li><b>HTTP calls to the backend:</b> <code>GET /api/admin/cache</code>, <code>DELETE /api/admin/cache/{name}</code>, <code>DELETE /api/admin/cache</code>, <code>POST /api/admin/cache/warmup</code>. All need the ADMIN role <span class="ref">CacheAdminController.java:27</span>.</li>
+      <li><b>No messages or events:</b> the code has no pub/sub, no scheduled job and no async task for the cache. Not found in codebase.</li>
+    </ul>
+  </div>
+
+  <h2>Existing log statements to watch</h2>
+  <div class="table-wrap searchable">
+  <table>
+    <thead><tr><th>Exact string</th><th>Level</th><th>Location</th><th>Meaning</th></tr></thead>
+    <tbody>
+      <tr><td><code>"{} {} -&gt; {} | {}ms total | {}ms db ({} queries) | cache={}"</code></td><td>INFO, WARN if slow (&ge; 1000 ms)</td><td><span class="ref">filter/PerformanceFilter.java:74</span></td><td>1 line per request. <code>cache=HIT</code>, <code>MISS</code> or <code>-</code></td></tr>
+      <tr><td><code>"Cache GET failed [{}::{}] - serving from source: {}"</code></td><td>WARN</td><td><span class="ref">ResilientCacheErrorHandler.java:19</span></td><td>Redis down, timeout, or JSON that does not match the type</td></tr>
+      <tr><td><code>"Cache PUT failed [{}::{}]"</code></td><td>WARN + stack trace</td><td><span class="ref">ResilientCacheErrorHandler.java:28</span></td><td>Write failed. Often a missing <code>CacheTypeRegistry</code> entry or a value that cannot be turned into JSON</td></tr>
+      <tr><td><code>"Cache EVICT failed [{}::{}]: {}"</code></td><td>WARN</td><td><span class="ref">ResilientCacheErrorHandler.java:33</span></td><td>Delete failed. Stale data can stay until the TTL ends</td></tr>
+      <tr><td><code>"Cache CLEAR failed [{}]: {}"</code></td><td>WARN</td><td><span class="ref">ResilientCacheErrorHandler.java:38</span></td><td><code>allEntries</code> eviction or purge failed</td></tr>
+      <tr><td><code>"Purged cache: {}"</code> / <code>"Purged all caches"</code></td><td>INFO</td><td><span class="ref">CacheAdminServiceImpl.java:77</span>, <span class="ref">:93</span></td><td>Admin purge</td></tr>
+      <tr><td><code>"Starting cache warmup"</code> / <code>"Cache warmup complete"</code></td><td>INFO</td><td><span class="ref">CacheAdminServiceImpl.java:99</span>, <span class="ref">:110</span></td><td>Admin warm up</td></tr>
+      <tr><td><code>"Failed to count keys for cache {}: {}"</code></td><td>WARN</td><td><span class="ref">CacheAdminServiceImpl.java:124</span></td><td>SCAN failed on the admin list page</td></tr>
+      <tr><td><code>"Department alias seeder purged search caches after writing changes"</code></td><td>INFO</td><td><span class="ref">DepartmentAliasSeeder.java:110</span></td><td>Startup seeder cleared caches</td></tr>
+    </tbody>
+  </table>
+  </div>
+  <div class="callout warn searchable">
+    <b>Missing logs.</b> A successful eviction writes no log. A HIT or MISS is visible only in the per-request line, not per cache name. Suggestion: add a DEBUG log in <code>HitMissTrackingCache.get</code> (<span class="ref">CacheConfig.java:128</span>) with cache name, key and result. Keep it at DEBUG, because it runs on every cached call.
+  </div>
+
+  <h2>How to debug</h2>
+  <details class="searchable" open>
+    <summary>"My change does not show on the public site"</summary>
+    <div class="body">
+      <ol>
+        <li>Open DevTools, Network tab. Look at the response header <code>X-Cache</code>. If it is <code>HIT</code>, you see cached data.</li>
+        <li>Find the write method that you called. Check that it has a <code>@CacheEvict</code> for every cache that shows this data.</li>
+        <li>Check that the evict key is built the same way as the <code>@Cacheable</code> key (same order, same <code>':'</code> separators).</li>
+        <li>To confirm, purge that cache on the admin Cache page and reload.</li>
+      </ol>
+    </div>
+  </details>
+  <details class="searchable">
+    <summary>"X-Cache is always MISS"</summary>
+    <div class="body">
+      <ol>
+        <li>Search the logs for <code>Cache PUT failed</code>. A PUT failure means nothing is stored.</li>
+        <li>Check that the cache name has an entry in <code>CacheTypeRegistry</code> and that the method returns exactly that type.</li>
+        <li>Check that the call comes from another bean. A call from the same class (<code>this.method()</code>) skips the proxy, so there is no cache.</li>
+        <li>Run <code>redis-cli --scan --pattern 'vb:v12:&lt;cache-name&gt;:*'</code> to see the stored keys.</li>
+      </ol>
+    </div>
+  </details>
+  <details class="searchable">
+    <summary>"Requests are slow by about 250 ms"</summary>
+    <div class="body">
+      <ol>
+        <li>Search the logs for <code>Cache GET failed</code>. Redis is probably down or far away.</li>
+        <li>Run <code>docker compose ps redis</code> and <code>redis-cli ping</code>. The compose file has a health check at <span class="ref">docker-compose.yml:13-17</span>.</li>
+        <li>Check <code>REDIS_HOST</code>, <code>REDIS_PORT</code>, <code>REDIS_PASSWORD</code> in the environment.</li>
+      </ol>
+    </div>
+  </details>
+  <details class="searchable">
+    <summary>Breakpoints to set</summary>
+    <div class="body">
+      <ul>
+        <li><code>HitMissTrackingCache.get</code> <span class="ref">CacheConfig.java:129</span>: see the cache name, key and result.</li>
+        <li><code>ResilientCacheErrorHandler.handleCache*Error</code>: see the real exception.</li>
+        <li>First line of the cached method body: if the debugger stops there, it was a MISS.</li>
+      </ul>
+    </div>
+  </details>
+</section>
+
+<!-- ================= TAB 4 ================= -->
+<section role="tabpanel" id="t4" aria-labelledby="b4">
+  <h2>Trade-offs of the current design</h2>
+  <div class="table-wrap searchable">
+  <table>
+    <thead><tr><th>Choice</th><th class="pro">Pro</th><th class="con">Con</th></tr></thead>
+    <tbody>
+      <tr><td>Annotations (<code>@Cacheable</code>) instead of manual Redis calls</td><td>Little code; business logic stays clean</td><td>Behavior is hidden; proxy rules (self-call) are easy to forget</td></tr>
+      <tr><td>Typed JSON serializer per cache</td><td>Readable values, no <code>@class</code> data, no unsafe polymorphic reads</td><td>Every new cache needs a <code>CacheTypeRegistry</code> entry; a shape change needs a namespace bump</td></tr>
+      <tr><td>Error handler that never throws</td><td>Redis outage does not break the site</td><td>Failures are silent to users and easy to miss; the site gets slower, not broken</td></tr>
+      <tr><td>Evict on write + TTL</td><td>Fresh data after writes; TTL is a safety net</td><td>Each write path must list every affected cache by hand</td></tr>
+      <tr><td><code>allEntries = true</code> for list caches</td><td>Simple and correct</td><td>One edit clears all pages of the list; next visitors all get MISS</td></tr>
+      <tr><td>250 ms Redis timeouts</td><td>Fails fast when Redis is down</td><td>A slow network to Redis can cause false failures</td></tr>
+      <tr><td>Redis <code>maxmemory 256mb</code>, <code>allkeys-lru</code></td><td>Redis never runs out of memory</td><td>Under memory pressure Redis drops keys before their TTL</td></tr>
+    </tbody>
+  </table>
+  </div>
+
+  <h2>Gotchas for a new developer</h2>
+  <details class="searchable">
+    <summary>New cache without a <code>CacheTypeRegistry</code> entry <span class="tag tag-high">high</span></summary>
+    <div class="body"><p><code>CacheConfig</code> builds typed configs only for names in the registry (<span class="ref">CacheConfig.java:50-56</span>). Any other name gets the default config, which uses the JDK serializer. Most DTOs are not <code>Serializable</code>, so every PUT fails with <code>Cache PUT failed</code> and the cache never works. Follow the 4 steps in <code>.claude/rules/backend-add-cache-in-service.md</code>. The test <code>registry_containsEveryCacheName_whenBuilt</code> checks the registry <span class="ref">vortibhai/src/test/java/com/admission/vortibhai/config/CacheTypeRegistryTest.java:27</span>.</p></div>
+  </details>
+  <details class="searchable">
+    <summary>You change a cached DTO or entity shape <span class="tag tag-high">high</span></summary>
+    <div class="body"><p>Old JSON in Redis no longer matches the new class. Reads then fail with <code>Cache GET failed</code> until the TTL ends. Bump <code>CacheConstants.NAMESPACE</code> (now <code>vb:v12:</code>, <span class="ref">CacheConstants.java:5</span>) so the app uses new keys and ignores the old ones. Note: 4 caches store entities directly (<code>University</code>, <code>Department</code>, <code>DepartmentSummary</code>, <code>DropDownDepartment</code>, <span class="ref">CacheTypeRegistry.java:56,66,67,71</span>). A change to these entity classes counts too.</p></div>
+  </details>
+  <details class="searchable">
+    <summary>Self-call skips the cache <span class="tag tag-high">high</span></summary>
+    <div class="body"><p>Spring caches through a proxy. <code>this.getX()</code> inside the same class does not pass through the proxy. The project solves this for FAQ: <code>FaqServiceImpl</code> calls the cached <code>FaqPageQueryService.fetchQuestionPage</code> on a separate bean (<span class="ref">FaqServiceImpl.java:104</span>), then adds the per-user "liked" flag after the cache. Use the same split when you need a cached base plus per-user data.</p></div>
+  </details>
+  <details class="searchable">
+    <summary>Forgot an eviction on a new write path <span class="tag tag-high">high</span></summary>
+    <div class="body"><p>Nothing fails. Users just see old data for up to 1 TTL (up to 60 minutes for <code>dept-summary</code>, <code>dept-facets</code>, <code>categories</code>). When you add a write method, copy the <code>@Caching</code> block from the closest sibling, for example <span class="ref">DepartmentServiceImpl.java:816-830</span>, and check every cache that shows the changed data.</p></div>
+  </details>
+  <details class="searchable">
+    <summary>Never cache user-specific data in a shared key <span class="tag tag-high">high</span></summary>
+    <div class="body"><p>The key decides who shares an entry. If a result depends on the current user (likes, role, anonymous id) and the key does not include it, user A sees user B's data. The FAQ split above exists for this reason.</p></div>
+  </details>
+  <details class="searchable">
+    <summary><code>Optional</code> returns and <code>unless</code> <span class="tag tag-medium">medium</span></summary>
+    <div class="body"><p>Spring unwraps <code>Optional</code>. Register the inner type and write <code>unless = "#result == null"</code>, as <code>getSummary</code> does (<span class="ref">DepartmentSummaryServiceImpl.java:118-121</span>). <code>#result.isEmpty()</code> does not work, because SpEL sees the unwrapped value.</p></div>
+  </details>
+  <details class="searchable">
+    <summary>Key format must match between read and evict <span class="tag tag-medium">medium</span></summary>
+    <div class="body"><p><code>dept-group</code> uses <code>departmentId:universityId</code>. <code>dept-reviews</code> uses <code>universityId:departmentId:...</code>. The order differs between caches. A wrong order in an exact-key evict deletes nothing and logs nothing.</p></div>
+  </details>
+  <details class="searchable">
+    <summary>Null in a key expression <span class="tag tag-medium">medium</span></summary>
+    <div class="body"><p>Keys use <code>(#query ?: '')</code> and <code>(#approved ?: 'all')</code> to turn null into a fixed string (<span class="ref">UniversityServiceImpl.java:161</span>). Without it, the key contains the text <code>null</code>, which can collide with a real value. <code>search</code> skips the cache for a blank query with <code>condition</code> (<span class="ref">SearchServiceImpl.java:50</span>).</p></div>
+  </details>
+  <details class="searchable">
+    <summary>Do not remove <code>delegate.afterPropertiesSet()</code> <span class="tag tag-medium">medium</span></summary>
+    <div class="body"><p>It looks unused. Without it, the per-cache TTL and serializers are ignored (<span class="ref">CacheConfig.java:63-66</span>).</p></div>
+  </details>
+  <details class="searchable">
+    <summary>Default TTL is written in 2 places <span class="tag tag-low">low</span></summary>
+    <div class="body"><p><code>CacheConfig.DEFAULT_TTL</code> (<span class="ref">CacheConfig.java:31</span>) and the admin list fallback (<span class="ref">CacheAdminServiceImpl.java:64</span>) both say 5 minutes. If you change one, change the other. Also, <code>formatTtl</code> shows minutes only, so a TTL below 60 seconds shows as <code>0m</code> (<span class="ref">CacheAdminServiceImpl.java:130-138</span>).</p></div>
+  </details>
+  <details class="searchable">
+    <summary>Environment differences <span class="tag tag-low">low</span></summary>
+    <div class="body"><p>Local runs expect Redis at <code>localhost:6379</code> (<span class="ref">application.properties:106-107</span>). If it is not running, the app still works but every cached call waits up to 250 ms and logs WARN lines. Start it with <code>docker compose up -d redis</code>. TTLs can differ per environment through <code>cache.ttl.&lt;name&gt;=PT10M</code>.</p></div>
+  </details>
+  <details class="searchable">
+    <summary>X-Cache shows only the first cached call <span class="tag tag-low">low</span></summary>
+    <div class="body"><p>If an endpoint calls 2 cached methods, the header shows the result of the first lookup only (<span class="ref">CacheStatusHolder.java:12-16</span>). A HIT header does not prove that the whole request skipped MongoDB. Check <code>X-Db-Queries</code> too.</p></div>
+  </details>
+</section>
+</main>
+
+<script id="seq1" type="text/plain">
+sequenceDiagram
+  autonumber
+  participant C as Client (Nuxt app)
+  participant F as PerformanceFilter
+  participant P as Spring cache proxy
+  participant H as HitMissTrackingCache
+  participant R as Redis
+  participant S as DepartmentServiceImpl
+  participant M as MongoDB
+  C->>F: GET /api/departments/{d}/university/{u}
+  F->>P: controller calls service
+  P->>H: get("d:u") in cache dept-group
+  H->>R: GET vb:v12:dept-group:d:u
+  alt HIT
+    R-->>H: JSON
+    H-->>P: value, status HIT
+  else MISS
+    R-->>H: nil
+    H-->>P: null, status MISS
+    P->>S: run method body
+    S->>M: aggregation query
+    M-->>S: documents
+    S-->>P: DTO
+    P->>R: SET key JSON with TTL 15m
+  else Redis error
+    R--xH: timeout after 250ms
+    Note over P: ResilientCacheErrorHandler logs WARN, treats as MISS
+    P->>S: run method body
+  end
+  P-->>F: DTO
+  F-->>C: 200 + X-Cache + X-Response-Time
+</script>
+<script id="flow1" type="text/plain">
+flowchart LR
+  A[CacheNames constants] --> B[CacheTypeRegistry: name to Java type]
+  A --> C[CacheProperties: name to TTL]
+  P[application.properties cache.ttl.*] --> C
+  B --> D[CacheConfig.cacheManager]
+  C --> D
+  K[CacheConstants prefix vb:v12:] --> D
+  D --> E[RedisCacheManager with typed JSON serializer per cache]
+  E --> W[HitMissTrackingCacheManager bean]
+  D --> X[ResilientCacheErrorHandler]
+  W --> Y["@Cacheable / @CacheEvict in services"]
+  X --> Y
+</script>
+
+<script>
+(function(){
+  var reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+  function $(id){ return document.getElementById(id); }
+  function sleep(ms){ return new Promise(function(r){ setTimeout(r, reduce ? 0 : ms); }); }
+  function esc(s){ return String(s).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;"); }
+  function pop(el){ el.classList.remove("pop"); void el.offsetWidth; el.classList.add("pop"); }
+
+  document.querySelectorAll("[data-count]").forEach(function(el){
+    var target = +el.getAttribute("data-count"), suf = el.getAttribute("data-suffix") || "";
+    if (reduce) { el.textContent = target + suf; return; }
+    var t0 = null;
+    function step(ts){
+      if (!t0) t0 = ts;
+      var p = Math.min((ts - t0) / 1000, 1), e = 1 - Math.pow(1 - p, 3);
+      el.textContent = Math.round(target * e) + suf;
+      if (p < 1) requestAnimationFrame(step);
+    }
+    requestAnimationFrame(step);
+  });
+
+  var sim = { stored:false, up:true, busy:false };
+  var KEY = "vb:v12:dept-group:d123:u456";
+  var DUR = 520;
+  var dot = $("sim-dot");
+
+  function moveDot(id, reverse){
+    var p = $(id), len = p.getTotalLength();
+    p.classList.add("lit");
+    return new Promise(function(res){
+      function place(d){ var pt = p.getPointAtLength(d); dot.setAttribute("cx", pt.x); dot.setAttribute("cy", pt.y); }
+      if (reduce) { place(reverse ? 0 : len); res(); return; }
+      var t0 = null;
+      function f(ts){
+        if (!t0) t0 = ts;
+        var k = Math.min((ts - t0) / DUR, 1);
+        var e = k < .5 ? 2 * k * k : 1 - Math.pow(-2 * k + 2, 2) / 2;
+        place(reverse ? len * (1 - e) : len * e);
+        if (k < 1) requestAnimationFrame(f); else res();
+      }
+      requestAnimationFrame(f);
+    });
+  }
+
+  var S = {
+    start: [
+      { w:"w-cf", node:"n-f", t:"PerformanceFilter starts the timer.", r:"PerformanceFilter.java:45" },
+      { w:"w-fp", node:"n-p", t:"The controller calls the service through the Spring proxy. Key = d123:u456.", r:"DepartmentServiceImpl.java:175" }
+    ],
+    ask: { w:"w-pr", node:"n-r", t:"HitMissTrackingCache.get asks Redis for " + KEY + ".", r:"CacheConfig.java:127-132" },
+    hit: [
+      { w:"w-pr", rev:true, node:"n-p", t:"Redis returns JSON. Status = HIT. The method body does not run.", r:"CacheConfig.java:130" }
+    ],
+    miss: [
+      { w:"w-pr", rev:true, node:"n-p", t:"Redis returns nothing. Status = MISS.", r:"CacheConfig.java:130" }
+    ],
+    down: [
+      { w:"w-pr", fail:true, node:"n-r", t:"Redis does not answer. The call times out after 250 ms.", r:"application.properties:109" },
+      { w:"w-pr", rev:true, node:"n-p", t:"ResilientCacheErrorHandler logs a WARN and the proxy treats it as a MISS. No status is recorded.", r:"ResilientCacheErrorHandler.java:16-23" }
+    ],
+    body: [
+      { w:"w-ps", node:"n-s", t:"The proxy runs the real method body.", r:"DepartmentServiceImpl.java:177" },
+      { w:"w-sm", node:"n-m", t:"The method queries MongoDB." },
+      { w:"w-sm", rev:true, node:"n-s", t:"MongoDB returns the documents." },
+      { w:"w-ps", rev:true, node:"n-p", t:"The method returns DepartmentGroupSummaryDTO." }
+    ],
+    put: [
+      { w:"w-pr", node:"n-r", store:true, t:"The proxy writes the JSON to Redis with a TTL of 15 minutes.", r:"CacheProperties.java:17" },
+      { w:"w-pr", rev:true, node:"n-p", t:"Back to the proxy." }
+    ],
+    putFail: [
+      { node:"n-p", t:"The PUT also fails. ResilientCacheErrorHandler logs \"Cache PUT failed\".", r:"ResilientCacheErrorHandler.java:28" }
+    ],
+    end: [
+      { w:"w-fp", rev:true, node:"n-f", t:"PerformanceFilter sets X-Cache and X-Response-Time and writes the log line.", r:"PerformanceFilter.java:51-63" },
+      { w:"w-cf", rev:true, node:"n-c", t:"The client receives 200 with the headers." }
+    ]
+  };
+
+  function clearLit(){
+    document.querySelectorAll(".sim .lit").forEach(function(e){ e.classList.remove("lit"); });
+  }
+  function renderSteps(list){
+    $("sim-steps").innerHTML = list.map(function(s, i){
+      return "<li data-i=\"" + i + "\">" + (i + 1) + ". " + esc(s.t) + (s.r ? " <span class=\"ref\">" + esc(s.r) + "</span>" : "") + "</li>";
+    }).join("");
+  }
+  function setKeyChip(){
+    var k = $("sim-key");
+    k.textContent = KEY + (sim.stored ? " (stored, TTL 15m)" : " (not stored)");
+    k.classList.toggle("on", sim.stored);
+  }
+  function lockButtons(on){
+    ["sim-send","sim-edit","sim-redis","sim-reset"].forEach(function(id){ $(id).disabled = on; });
+  }
+
+  async function sendRequest(){
+    if (sim.busy) return;
+    sim.busy = true; lockButtons(true); clearLit();
+    $("sim-result").innerHTML = "";
+    var mode = !sim.up ? "down" : (sim.stored ? "hit" : "miss");
+    var list = S.start.slice();
+    if (mode === "down") list = list.concat(S.down, S.body, S.putFail, S.end);
+    else if (mode === "hit") list = list.concat([S.ask], S.hit, S.end);
+    else list = list.concat([S.ask], S.miss, S.body, S.put, S.end);
+    renderSteps(list);
+    dot.style.fill = mode === "hit" ? "var(--hit)" : mode === "miss" ? "var(--miss)" : "var(--err)";
+    var items = $("sim-steps").children;
+    for (var i = 0; i < list.length; i++) {
+      var s = list[i];
+      if (i > 0) { items[i - 1].classList.remove("now"); items[i - 1].classList.add("done"); }
+      items[i].classList.add("now");
+      if (!reduce) items[i].scrollIntoView({ block:"nearest" });
+      if (s.node) $(s.node).classList.add("lit");
+      if (s.w) {
+        await moveDot(s.w, !!s.rev);
+        if (s.fail) { $("sim-x").style.opacity = 1; await sleep(700); $("sim-x").style.opacity = 0; }
+      } else {
+        await sleep(600);
+      }
+      if (s.store) { sim.stored = true; setKeyChip(); }
+    }
+    items[list.length - 1].classList.remove("now"); items[list.length - 1].classList.add("done");
+    showResult(mode);
+    sim.busy = false; lockButtons(false);
+  }
+
+  function showResult(mode){
+    var r = $("sim-result"), log = $("sim-log");
+    var path = "GET /api/departments/d123/university/u456 -> 200";
+    if (mode === "hit") {
+      r.innerHTML = "<span class=\"pill hit\">X-Cache: HIT</span><span class=\"pill\">X-Response-Time: ~4ms</span>";
+      log.innerHTML = "<span class=\"i\">INFO</span>  " + esc(path + " | 4ms total | 0ms db (0 queries) | cache=HIT");
+    } else if (mode === "miss") {
+      r.innerHTML = "<span class=\"pill miss\">X-Cache: MISS</span><span class=\"pill\">X-Response-Time: ~120ms</span>";
+      log.innerHTML = "<span class=\"i\">INFO</span>  " + esc(path + " | 120ms total | 110ms db (n queries) | cache=MISS");
+    } else {
+      r.innerHTML = "<span class=\"pill err\">X-Cache: (no header)</span><span class=\"pill\">X-Response-Time: ~620ms</span>";
+      log.innerHTML = "<span class=\"w\">WARN</span>  " + esc("Cache GET failed [dept-group::d123:u456] - serving from source: <exception message>") +
+        "\n<span class=\"w\">WARN</span>  " + esc("Cache PUT failed [dept-group::d123:u456]") +
+        "\n<span class=\"i\">INFO</span>  " + esc(path + " | 620ms total | 110ms db (n queries) | cache=-");
+    }
+    pop(r);
+  }
+
+  $("sim-send").addEventListener("click", sendRequest);
+  $("sim-edit").addEventListener("click", function(){
+    if (sim.busy) return;
+    clearLit(); $("sim-result").innerHTML = "";
+    renderSteps([{ t:"PUT /api/departments/{id} saves to MongoDB, then @Caching evicts dept-group key d123:u456 and 8 more caches.", r:"DepartmentServiceImpl.java:816-830" }]);
+    if (!sim.up) {
+      $("sim-log").innerHTML = "<span class=\"w\">WARN</span>  " + esc("Cache EVICT failed [dept-group::d123:u456]: <exception message>") +
+        "\nThe old key stays in Redis. When Redis comes back, readers get stale data until the TTL ends.";
+    } else if (sim.stored) {
+      sim.stored = false; setKeyChip();
+      $("sim-log").textContent = "Evicted " + KEY + ". A successful evict writes no log line. The next GET is a MISS.";
+    } else {
+      $("sim-log").textContent = "Nothing to evict. The key is not in Redis.";
+    }
+  });
+  $("sim-redis").addEventListener("click", function(){
+    sim.up = !sim.up;
+    var b = $("sim-redis");
+    b.textContent = sim.up ? "Redis: up" : "Redis: down";
+    b.setAttribute("aria-pressed", String(!sim.up));
+    b.classList.toggle("btn-on", !sim.up);
+    $("n-r").classList.toggle("down", !sim.up);
+  });
+  $("sim-reset").addEventListener("click", function(){
+    if (sim.busy) return;
+    sim.stored = false;
+    if (!sim.up) $("sim-redis").click();
+    clearLit(); setKeyChip();
+    $("sim-result").innerHTML = ""; $("sim-steps").innerHTML = "";
+    $("sim-log").textContent = "Logs show here.";
+    dot.setAttribute("cx", -20); dot.setAttribute("cy", -20);
+  });
+  setKeyChip();
+
+  var DOMAIN = { dept:["var(--d-dept)","Department"], uni:["var(--d-uni)","University"], faq:["var(--d-faq)","FAQ and alumni"], srch:["var(--d-search)","Search, dropdown, categories"], adm:["var(--d-admin)","Admin"] };
+  var CACHES = [
+    ["dept-group","dept",900,"DepartmentServiceImpl.getDepartmentGroupByDepartmentAndUniversity","DepartmentServiceImpl.java:175","#departmentId + ':' + #universityId",8],
+    ["dept-sections","dept",900,"DepartmentServiceImpl.getCoveredSections","DepartmentServiceImpl.java:959","#departmentId + ':' + #universityId",8],
+    ["dept-public-list","dept",900,"DepartmentServiceImpl.getPublicDepartmentsSummary","DepartmentServiceImpl.java:301","page:limit:query:universityIds:categoryId:sort",8],
+    ["dept-reviews","dept",900,"DepartmentServiceImpl.getPagedPublicReviews","DepartmentServiceImpl.java:715","universityId:departmentId:section:page:size",8],
+    ["dept-facets","dept",3600,"DepartmentServiceImpl.getPublicFacets","DepartmentServiceImpl.java:519","#query == null ? '' : #query.trim()",8],
+    ["dept-by-id","dept",900,"DepartmentServiceImpl.getDepartmentById","DepartmentServiceImpl.java:692","#id",8],
+    ["dept-summary","dept",3600,"DepartmentSummaryServiceImpl.getSummary","DepartmentSummaryServiceImpl.java:118","#departmentId + ':' + #universityId (unless #result == null)",8],
+    ["uni-list","uni",1200,"UniversityServiceImpl.getAllUniversities","UniversityServiceImpl.java:159","page:limit:query:approved",8],
+    ["uni-options","uni",1800,"UniversityServiceImpl.getUniversityOptions","UniversityServiceImpl.java:192","'all'",1],
+    ["uni-totals","uni",1200,"UniversityServiceImpl.getUniversityTotals","UniversityServiceImpl.java:207","'all'",1],
+    ["uni-detail","uni",1200,"UniversityServiceImpl.getUniversityById","UniversityServiceImpl.java:253","#id",8],
+    ["uni-departments","uni",1200,"DepartmentServiceImpl.getGroupedDepartmentsByUniversity","DepartmentServiceImpl.java:128","#universityId",8],
+    ["alumni-public","faq",900,"AlumniServiceImpl.getPublicAlumni","AlumniServiceImpl.java:77","departmentId:universityId:page:limit",8],
+    ["faq-questions-list","faq",300,"FaqPageQueryServiceImpl.fetchQuestionPage","FaqPageQueryServiceImpl.java:45","departmentId:universityId:page:limit",8],
+    ["faq-replies-list","faq",300,"FaqPageQueryServiceImpl.fetchReplyPage","FaqPageQueryServiceImpl.java:69","questionId:page:limit",8],
+    ["search-results","srch",900,"SearchServiceImpl.search","SearchServiceImpl.java:47","#query + ':' + #type (only when query is not blank)",8],
+    ["dropdown","srch",1800,"DropDownDepartmentServiceImpl.getAll","DropDownDepartmentServiceImpl.java:119","(#approved ?: 'all')",3],
+    ["categories","srch",3600,"CategoryServiceImpl.getAll","CategoryServiceImpl.java:30","'all'",1],
+    ["dept-admin-list","adm",300,"DepartmentServiceImpl.getAllDepartments","DepartmentServiceImpl.java:643","page:limit:query:approved:universityId",8],
+    ["admin-stats-overview","adm",60,"AdminStatsServiceImpl.getOverview","AdminStatsServiceImpl.java:257","'overview'",1]
+  ].map(function(a){ return { name:a[0], dom:a[1], ttl:a[2], method:a[3], ref:a[4], key:a[5], space:a[6], entries:{} }; });
+  var BY = {}; CACHES.forEach(function(c){ BY[c.name] = c; });
+
+  var EDIT_KEY = ["dept-group","dept-sections","uni-departments","dept-by-id","admin-stats-overview"];
+  var EDIT_ALL = ["dept-public-list","dept-facets","dept-admin-list","dept-reviews"];
+  var WARM = [["uni-list",2],["uni-options",1],["uni-totals",1],["dropdown",2],["dept-public-list",1],["dept-facets",1],["categories",1]];
+  var PUBLIC = CACHES.filter(function(c){ return c.dom !== "adm" && c.name !== "dept-by-id"; });
+
+  var clock = 0, speed = 60, selected = null;
+  function fmtTtl(s){ return s < 60 ? s + "s" : (s % 3600 === 0 ? (s / 3600) + "h" : Math.round(s / 60) + "m"); }
+  function live(c){ return Object.keys(c.entries).length; }
+  function put(c, k){ c.entries[k] = clock + c.ttl; }
+
+  var board = $("board");
+  board.innerHTML = CACHES.map(function(c){
+    return "<button type=\"button\" class=\"cc empty\" id=\"cc-" + c.name + "\" aria-pressed=\"false\" style=\"--dc:" + DOMAIN[c.dom][0] + "\">" +
+      "<span class=\"nm\">" + c.name + "</span>" +
+      "<span class=\"meta\"><span>TTL " + fmtTtl(c.ttl) + "</span><span class=\"cnt\">0 keys</span></span>" +
+      "<span class=\"bar\"><span></span></span></button>";
+  }).join("");
+
+  function paint(){
+    CACHES.forEach(function(c){
+      var el = $("cc-" + c.name), n = live(c), maxLeft = 0;
+      Object.keys(c.entries).forEach(function(k){ maxLeft = Math.max(maxLeft, c.entries[k] - clock); });
+      el.querySelector(".cnt").textContent = n + (n === 1 ? " key" : " keys");
+      el.querySelector(".bar>span").style.width = (n ? Math.max(0, maxLeft / c.ttl * 100) : 0) + "%";
+      el.classList.toggle("empty", n === 0);
+    });
+    if (selected) showDetail(selected);
+  }
+  function flash(name, cls){
+    var el = $("cc-" + name);
+    el.classList.remove("flash","fill"); void el.offsetWidth; el.classList.add(cls);
+  }
+  function bdLog(t){ var l = $("bd-log"); l.textContent = t; pop(l); }
+
+  function showDetail(name){
+    var c = BY[name], how = EDIT_KEY.indexOf(name) >= 0 ? "Yes, 1 exact key" : EDIT_ALL.indexOf(name) >= 0 ? "Yes, all entries (allEntries = true)" : "No";
+    $("bd-detail").innerHTML = "<dl>" +
+      "<dt>Cache</dt><dd><code>" + c.name + "</code> <span class=\"tag\" style=\"color:" + DOMAIN[c.dom][0] + ";border-color:" + DOMAIN[c.dom][0] + "\">" + DOMAIN[c.dom][1] + "</span></dd>" +
+      "<dt>Method</dt><dd>" + esc(c.method) + " <span class=\"ref\">" + c.ref + "</span></dd>" +
+      "<dt>Key</dt><dd><code>" + esc(c.key) + "</code></dd>" +
+      "<dt>Redis key</dt><dd><code>vb:v12:" + c.name + ":&lt;key&gt;</code></dd>" +
+      "<dt>TTL</dt><dd>" + fmtTtl(c.ttl) + " <span class=\"ref\">CacheProperties.java:14-36</span></dd>" +
+      "<dt>Live keys</dt><dd>" + live(c) + " (demo)</dd>" +
+      "<dt>Cleared by PUT /api/departments/{id}</dt><dd>" + how + " <span class=\"ref\">DepartmentServiceImpl.java:816-830</span></dd>" +
+      "<dt>Other writes</dt><dd>See the <code>@CacheEvict</code> blocks in the service class.</dd></dl>";
+  }
+  board.addEventListener("click", function(ev){
+    var b = ev.target.closest(".cc"); if (!b) return;
+    document.querySelectorAll(".cc").forEach(function(x){ x.setAttribute("aria-pressed","false"); });
+    b.setAttribute("aria-pressed","true");
+    selected = b.id.slice(3); showDetail(selected);
+  });
+
+  $("bd-warm").addEventListener("click", function(){
+    WARM.forEach(function(w){ var c = BY[w[0]]; for (var i = 0; i < w[1]; i++) put(c, "w" + i); flash(c.name, "fill"); });
+    paint(); bdLog("Warm up called 9 read methods and filled 7 caches (CacheAdminServiceImpl.java:98-111).");
+  });
+  $("bd-visit").addEventListener("click", function(){
+    var hit = 0, miss = 0, touched = {};
+    for (var i = 0; i < 50; i++) {
+      var c = PUBLIC[Math.floor(Math.random() * PUBLIC.length)];
+      var k = "k" + Math.floor(Math.random() * c.space);
+      if (c.entries[k] !== undefined) hit++; else { miss++; put(c, k); touched[c.name] = 1; }
+    }
+    Object.keys(touched).forEach(function(n){ flash(n, "fill"); });
+    paint(); bdLog("50 visitors: " + hit + " HIT, " + miss + " MISS. Each MISS stored 1 new key.");
+  });
+  $("bd-edit").addEventListener("click", function(){
+    EDIT_KEY.forEach(function(n){ var c = BY[n], ks = Object.keys(c.entries); if (ks.length) delete c.entries[ks[0]]; flash(n, "flash"); });
+    EDIT_ALL.forEach(function(n){ BY[n].entries = {}; flash(n, "flash"); });
+    paint(); bdLog("PUT /api/departments/{id}: 5 caches lost 1 exact key, 4 caches lost all entries.");
+  });
+  $("bd-purge").addEventListener("click", function(){
+    CACHES.forEach(function(c){ c.entries = {}; flash(c.name, "flash"); });
+    paint(); bdLog("DELETE /api/admin/cache cleared all 20 caches (CacheAdminServiceImpl.java:83-94).");
+  });
+  document.querySelectorAll(".speed button").forEach(function(b){
+    b.addEventListener("click", function(){
+      speed = +b.getAttribute("data-speed");
+      document.querySelectorAll(".speed button").forEach(function(x){ x.setAttribute("aria-pressed", String(x === b)); });
+    });
+  });
+  setInterval(function(){
+    clock += speed / 4;
+    var expired = [];
+    CACHES.forEach(function(c){
+      var had = live(c);
+      Object.keys(c.entries).forEach(function(k){ if (c.entries[k] <= clock) delete c.entries[k]; });
+      if (had && !live(c)) expired.push(c.name);
+    });
+    if (expired.length) bdLog("TTL ended: " + expired.join(", ") + ". The next read is a MISS.");
+    paint();
+  }, 250);
+  paint();
+
+  function n(v){ return v === "" ? null : v; }
+  function sv(v){ return v === null ? "null" : v; }
+  function el(v, d){ return v === null || v === "" ? d : v; }
+  var KB = {
+    "dept-group":{ p:[["departmentId","d123"],["universityId","u456"]], f:function(v){ return sv(v.departmentId) + ":" + sv(v.universityId); } },
+    "dept-sections":{ p:[["departmentId","d123"],["universityId","u456"]], f:function(v){ return sv(v.departmentId) + ":" + sv(v.universityId); } },
+    "dept-reviews":{ p:[["universityId","u456"],["departmentId","d123"],["section",""],["page","1"],["size","10"]], f:function(v){ return sv(v.universityId) + ":" + sv(v.departmentId) + ":" + el(v.section,"") + ":" + sv(v.page) + ":" + sv(v.size); } },
+    "dept-facets":{ p:[["query","  cse "]], f:function(v){ return v.query === null ? "" : v.query.trim(); } },
+    "dept-summary":{ p:[["departmentId","d123"],["universityId","u456"]], f:function(v){ return sv(v.departmentId) + ":" + sv(v.universityId); }, note:"Not stored when the result is empty (unless = \"#result == null\")." },
+    "uni-list":{ p:[["page","1"],["limit","20"],["query",""],["approved","true","bool"]], f:function(v){ return sv(v.page) + ":" + sv(v.limit) + ":" + el(v.query,"") + ":" + el(v.approved,"all"); } },
+    "uni-detail":{ p:[["id","u456"]], f:function(v){ return sv(v.id); } },
+    "uni-departments":{ p:[["universityId","u456"]], f:function(v){ return sv(v.universityId); } },
+    "uni-options":{ p:[], f:function(){ return "all"; } },
+    "alumni-public":{ p:[["departmentId","d123"],["universityId","u456"],["page","1"],["limit","10"]], f:function(v){ return [v.departmentId,v.universityId,v.page,v.limit].map(sv).join(":"); } },
+    "faq-replies-list":{ p:[["questionId","q789"],["page","1"],["limit","10"]], f:function(v){ return [v.questionId,v.page,v.limit].map(sv).join(":"); } },
+    "search-results":{ p:[["query","physics"],["type",""]], f:function(v){ return sv(v.query) + ":" + sv(v.type); }, cond:function(v){ return v.query !== null && v.query.trim() !== ""; } },
+    "dropdown":{ p:[["approved","","bool"]], f:function(v){ return el(v.approved,"all"); } },
+    "categories":{ p:[], f:function(){ return "all"; } },
+    "admin-stats-overview":{ p:[], f:function(){ return "overview"; } }
+  };
+  var sel = $("kb-cache");
+  sel.innerHTML = Object.keys(KB).map(function(k){ return "<option value=\"" + k + "\">" + k + "</option>"; }).join("");
+  function buildFields(){
+    var cfg = KB[sel.value];
+    $("kb-fields").innerHTML = cfg.p.length ? cfg.p.map(function(p){
+      if (p[2] === "bool") {
+        return "<label>" + p[0] + "<select data-k=\"" + p[0] + "\">" +
+          ["","true","false"].map(function(o){ return "<option value=\"" + o + "\"" + (o === p[1] ? " selected" : "") + ">" + (o || "(null)") + "</option>"; }).join("") + "</select></label>";
+      }
+      return "<label>" + p[0] + "<input data-k=\"" + p[0] + "\" value=\"" + esc(p[1]) + "\" placeholder=\"empty = null\"></label>";
+    }).join("") : "<span class=\"kb-note\">This method has no parameters. The key is a fixed text.</span>";
+    renderKey();
+  }
+  function renderKey(){
+    var cfg = KB[sel.value], v = {};
+    $("kb-fields").querySelectorAll("[data-k]").forEach(function(i){ v[i.getAttribute("data-k")] = n(i.value); });
+    var c = BY[sel.value], out = $("kb-out"), note = $("kb-note");
+    out.style.setProperty("--dc", DOMAIN[c.dom][0]);
+    var ref = " Source: " + c.ref + ".";
+    if (cfg.cond && !cfg.cond(v)) {
+      out.innerHTML = "<span class=\"seg ns\">(no key)</span>";
+      note.className = "kb-note bad"; note.textContent = "Not cached: the condition \"#query != null && !#query.isBlank()\" is false." + ref;
+      $("kb-cli").textContent = "";
+      return;
+    }
+    var key = cfg.f(v), full = "vb:v12:" + c.name + ":" + key;
+    out.innerHTML = "<span class=\"seg ns\">vb:v12:</span><span class=\"seg cn\">" + c.name + ":</span><span class=\"seg ky\">" + esc(key) + "</span>";
+    var msgs = [];
+    if (/(^|:)null(:|$)/.test(key)) msgs.push("A null parameter becomes the text \"null\" in the key.");
+    if (cfg.note) msgs.push(cfg.note);
+    note.className = "kb-note"; note.textContent = msgs.join(" ") + ref;
+    $("kb-cli").textContent = "redis-cli GET '" + full + "'\nredis-cli TTL '" + full + "'";
+  }
+  sel.addEventListener("change", buildFields);
+  $("kb-fields").addEventListener("input", renderKey);
+  $("kb-fields").addEventListener("change", renderKey);
+  buildFields();
+})();
+</script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/mermaid/10.9.1/mermaid.min.js"></script>
+<script>
+(function(){
+  var root = document.documentElement;
+  try { var saved = localStorage.getItem("rc-theme"); if (saved) root.setAttribute("data-theme", saved); } catch (e) {}
+
+  function isDark(){
+    var t = root.getAttribute("data-theme");
+    if (t) return t === "dark";
+    return window.matchMedia("(prefers-color-scheme: dark)").matches;
+  }
+
+  function renderMermaid(){
+    if (!window.mermaid) return;
+    mermaid.initialize({ startOnLoad:false, theme: isDark() ? "dark" : "default", securityLevel:"strict" });
+    var nodes = document.querySelectorAll(".mermaid");
+    nodes.forEach(function(n, i){
+      var src = document.getElementById(n.getAttribute("data-src")).textContent.trim();
+      var id = "mmd" + i + "_" + Date.now();
+      mermaid.render(id, src).then(function(r){ n.innerHTML = r.svg; })
+        .catch(function(){ n.innerHTML = "<pre>" + src.replace(/</g,"&lt;") + "</pre>"; });
+    });
+  }
+
+  document.getElementById("theme").addEventListener("click", function(){
+    var next = isDark() ? "light" : "dark";
+    root.setAttribute("data-theme", next);
+    try { localStorage.setItem("rc-theme", next); } catch (e) {}
+    renderMermaid();
+  });
+
+  var tabs = document.querySelectorAll('[role="tab"]');
+  tabs.forEach(function(tab){
+    tab.addEventListener("click", function(){
+      tabs.forEach(function(t){
+        t.setAttribute("aria-selected", "false");
+        document.getElementById(t.getAttribute("aria-controls")).classList.remove("active");
+      });
+      tab.setAttribute("aria-selected", "true");
+      document.getElementById(tab.getAttribute("aria-controls")).classList.add("active");
+      applySearch();
+    });
+  });
+
+  document.querySelectorAll(".pre").forEach(function(box){
+    var btn = document.createElement("button");
+    btn.className = "copy"; btn.type = "button"; btn.textContent = "Copy";
+    btn.addEventListener("click", function(){
+      var text = box.querySelector("pre").innerText;
+      var done = function(){ btn.textContent = "Copied"; setTimeout(function(){ btn.textContent = "Copy"; }, 1200); };
+      if (navigator.clipboard) navigator.clipboard.writeText(text).then(done, function(){ btn.textContent = "Failed"; });
+      else btn.textContent = "Failed";
+    });
+    box.appendChild(btn);
+  });
+
+  var input = document.getElementById("search");
+  function applySearch(){
+    var q = input.value.trim().toLowerCase();
+    var panel = document.querySelector('section[role="tabpanel"].active');
+    var items = panel.querySelectorAll(".searchable");
+    var shown = 0;
+    items.forEach(function(el){
+      if (!q) { el.classList.remove("hidden-by-search"); shown++; return; }
+      var hit = el.textContent.toLowerCase().indexOf(q) !== -1;
+      if (el.tagName === "DIV" && el.classList.contains("table-wrap")) {
+        var rows = el.querySelectorAll("tbody tr"), any = false;
+        rows.forEach(function(r){ var m = r.textContent.toLowerCase().indexOf(q) !== -1; r.classList.toggle("hidden-by-search", !m); any = any || m; });
+        hit = any;
+      }
+      el.classList.toggle("hidden-by-search", !hit);
+      if (hit) { shown++; if (el.tagName === "DETAILS") el.open = true; }
+    });
+    if (!q) panel.querySelectorAll("tr.hidden-by-search").forEach(function(r){ r.classList.remove("hidden-by-search"); });
+    document.getElementById("noresults").style.display = (q && shown === 0) ? "block" : "none";
+  }
+  input.addEventListener("input", applySearch);
+
+  window.matchMedia("(prefers-color-scheme: dark)").addEventListener("change", function(){
+    if (!root.getAttribute("data-theme")) renderMermaid();
+  });
+  window.addEventListener("load", renderMermaid);
+})();
+</script>
+</body>
+</html>
