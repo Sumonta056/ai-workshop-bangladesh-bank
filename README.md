@@ -3,8 +3,6 @@
 ![Workshop Banner](image.png)
 
 **Slides (HTML, 104 slides):** [`Practical AI for ICT Professionals.html`](Practical%20AI%20for%20ICT%20Professionals.html) — open it in a browser.
-**Slides (Google Slides):** [AI Workshop Presentation](https://docs.google.com/presentation/d/1tBhYldQMoB3AF6eL0WOoKfQORcw_NufeMqcWgAwo8Ps/edit?usp=sharing)
-**Live demo site:** [sumonta056.github.io/ai-workshop-bangladesh-bank](https://sumonta056.github.io/ai-workshop-bangladesh-bank/)
 
 ---
 
