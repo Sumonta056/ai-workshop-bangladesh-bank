@@ -1,8 +1,6 @@
 name: Site monitor bot
 
 on:
-  schedule:
-    - cron: "17 * * * *"
   workflow_dispatch:
 
 permissions:
